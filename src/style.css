@@ -1,0 +1,11 @@
+:root {
+  background-color: Canvas;
+  color: CanvasBackground;
+  color-scheme: light dark;
+
+  font-family: sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  
+}
