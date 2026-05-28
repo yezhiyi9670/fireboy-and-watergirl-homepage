@@ -8,8 +8,8 @@ export default defineConfig({
   server: {
     port: 5181,
     proxy: {
-      '/api': 'http://localhost:82/goodlive/fireboy-and-watergirl/level_details',
-      '/../api': 'http://localhost:82/goodlive/fireboy-and-watergirl/level_details',
+      '/api': 'http://localhost:82/goodlive/fireboy-and-watergirl/homepage',
+      '/../api': 'http://localhost:82/goodlive/fireboy-and-watergirl/homepage',
     },
   }
 })
