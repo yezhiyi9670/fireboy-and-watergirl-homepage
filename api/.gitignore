@@ -1,3 +1,3 @@
-/config/edit_allow_ips.json
+/config/edit_allow_ips.json5
 /cache/*
 !/cache/.htaccess

@@ -1,0 +1,17 @@
+{
+  // name(!): User-friendly name of the cheat flag.
+  // description(?): Detailed description of cheat flag.
+  
+  invulnerable: {
+    name: "角色无敌",
+    description: "角色碰到致命液体时不再死亡，但仍会正常播放死亡音效和动画。"
+  },
+  unlock: {
+    name: "关卡全开",
+    description: "暂时允许忽略游戏进程限制，打开任何关卡。\n关闭此作弊标志后，未被正常游戏进程机制解锁的关卡将恢复锁定状态。"
+  },
+  ad_revive: {
+    name: "广告复活",
+    description: "允许在死亡后通过点击“观看广告复活”按钮就近复活，而不重新开始关卡。\n复活总是会立即完成，不会播放任何广告。\n注意一局游戏内的复活次数可能有上限。"
+  },
+}

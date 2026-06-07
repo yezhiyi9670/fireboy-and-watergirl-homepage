@@ -14,22 +14,26 @@ $levels = $temple_data->levels;
 $level_filter = $req->level_filter ?? (object)[];
 $level = find_from_object_array($levels, $level_filter);
 if($level === null) {
-    return_json(404, 'Level satisfying the filter not found.', 'level_not_found');
+    return_failure(
+        404,
+        'level_not_found', [],
+        'Level satisfying the filter not found.'
+    );
 }
 $level_filename = $level->filename;
 if(!is_safe_multipart_filename($level_filename, '.json')) {
-    return_json(
+    return_failure(
         500,
-        "Level filename `$level_filename` is invalid. This is an internal data invalidity and not your fault.",
-        'level_filename_invalid'
+        'level_filename_invalid', [],
+        "Level filename `$level_filename` is invalid."
     );
 }
 $level_path = $game_path . '/data/' . $level_filename;
 if(!file_exists($level_path)) {
-    return_json(
+    return_failure(
         500,
-        "Level file `$level_filename` is missing. This is an internal data invalidity and not your fault.",
-        'level_missing'
+        'level_missing', [],
+        "Level file `$level_filename` is missing."
     );
 }
 $level_mtime = filemtime($level_path);
@@ -43,10 +47,10 @@ if(cache_can_use($cache_name, $cache_mtime)) {
     echo file_get_contents(CACHE_PATH . $cache_name);
     exit();
 } else if(CACHE_ONLY) {
-    return_json(
+    return_failure(
         404,
-        'Cache misses and the configuration disallows new image creation.',
-        'cache_miss'
+        'cache_miss', [],
+        'Cache misses and the configuration disallows new image creation.'
     );
 }
 

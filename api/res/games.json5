@@ -1,0 +1,119 @@
+{
+  // name(!): The name of game displayed on frontend.
+  
+  // url.base(?): Prefix of other URLs.
+  // url.play(?): Destination of the "play game" button.
+  // url.banner(?): URL of the game branding banner.
+  // url.banner_bg(?): URL of game branding banner background.
+  
+  // path(!): Filesystem relative path to game dir, for backend only and hidden from frontend.
+  // storage_namespace(!): localStorage key namespace. It is assumed that {namespace}:progress stores the game progress.
+  // cheat_flags(?): Available localStorage cheat flags stored at {namespace}:{flag_name}.
+  // created(?): Introduction date of the game.
+  // extras.level_desc(?): User-friendly description of newly-added levels.
+  // extras.modified(?): Last modified date of extra levels. Used to display the "new level" badge.
+
+  // accept_legacy_import(?): Allow legacy unspecified single-game data to be imported into the game.
+  //                          Can be safely disabled if the game came out after the legacy exporter got taken down.
+  
+  A: {
+    name: "第一季　森林圣殿",
+    url: {
+      base: "../../A/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameForest.png",
+      banner_bg: "assets/images/TempleHallForest.jpg"
+    },
+    path: "../../A/dist/",
+    storage_namespace: "fb-forest",
+    cheat_flags: [ "invulnerable", "unlock" ],
+    extras: {
+      levels_desc: "有额外关卡：小修改关卡 51—63、原创奖励关 64—66。",
+      modified: "2025-06-09 16:36:00+0800",
+    },
+    accept_legacy_import: true,
+  },
+  B: {
+    name: "第二季　光明圣殿",
+    url: {
+      base: "../../B/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameLight.png",
+      banner_bg: "assets/images/TempleHallLight.jpg"
+    },
+    path: "../../B/dist/",
+    storage_namespace: "fb-light",
+    cheat_flags: [ "invulnerable", "unlock" ],
+    accept_legacy_import: true,
+  },
+  C: {
+    name: "第三季　寒冰圣殿",
+    url: {
+      base: "../../C/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameIce.png",
+      banner_bg: "assets/images/TempleHallIce.jpg"
+    },
+    path: "../../C/dist/",
+    storage_namespace: "fb-ice",
+    cheat_flags: [ "invulnerable", "unlock" ],
+    extras: {
+      levels_desc: "有额外关卡：小修改关卡 51—64、原创奖励关 65—66。",
+      modified: "2025-07-11 10:49:00+0800",
+    },
+    accept_legacy_import: true,
+  },
+  D: {
+    name: "第四季　水晶殿",
+    url: {
+      base: "../../D/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameCrystal.png",
+      banner_bg: "assets/images/TempleHallCrystal.jpg"
+    },
+    path: "../../D/dist/",
+    storage_namespace: "fb-crystal",
+    cheat_flags: [ "invulnerable", "unlock" ],
+    accept_legacy_import: true,
+  },
+  E: {
+    name: "第五季　元素",
+    url: {
+      base: "../../E/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameElements.png",
+      banner_bg: "assets/images/TempleHallFire.jpg"
+    },
+    path: "../../E/dist/",
+    storage_namespace: "fb-elements",
+    cheat_flags: [ "invulnerable", "unlock" ],
+    accept_legacy_import: true,
+  },
+  F: {
+    name: "第六季　童话",
+    url: {
+      base: "../../F/dist/",
+      play: "index.htm",
+      banner: "assets/images/GameNameFairy.png",
+      banner_bg: "assets/images/TempleHallFairy.jpg"
+    },
+    path: "../../F/dist/",
+    storage_namespace: "fb-fairytales",
+    cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
+    accept_legacy_import: true,
+  },
+  G: {
+    name: "第七季　朋友",
+    url: {
+      base: "../../G/dist/",
+      play: "gameIndex.html",
+      banner: "assets/images/GameNameFriends.png",
+      banner_bg: "assets/images/TempleHallFriends.jpg"
+    },
+    path: "../../G/dist/",
+    storage_namespace: "fb-friends",
+    cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
+    created: "2026-06-01 21:36:00+0800",
+    accept_legacy_import: true,
+  },
+}

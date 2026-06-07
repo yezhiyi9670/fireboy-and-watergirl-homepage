@@ -3,7 +3,15 @@
 $req = get_request_json__(false);
 
 if(!is_editing_allowed()) {
-    return_json(403, 'Editing is not allowed.', 'editing_not_allowed');
+    return_failure(
+        403,
+        'editing_not_allowed', [],
+        'Editing is not allowed.'
+    );
 }
 
-return_json(503, 'Not implemented yet.', 'not_implemented');
+return_failure(
+    503,
+    'not_implemented', [],
+    'Not implemented yet.'
+);

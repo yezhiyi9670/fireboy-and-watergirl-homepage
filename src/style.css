@@ -1,11 +1,83 @@
 :root {
-  background-color: Canvas;
-  color: CanvasBackground;
+  overflow: hidden;
+}
+body {
+  overflow: auto;
+}
+:root, body, #app {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+:root {
+  background-color: var(--color-void);
+  color: var(--color-t0);
   color-scheme: light dark;
 
   font-family: sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+:root {
+  --color-void: Canvas;
+  --color-t0: CanvasText;
   
+  --color-t1: #6C6C6C;
+  --color-r0: #FFFFFF;
+  --color-cover: #00000066;
+  --color-separator: #BCBCBC;
+  --color-surface: #F0F0F0;
+  --color-ambient: #DADADA;
+  --color-primary: #1E7D16;
+  --color-emphasize: #D9052D;
+  --color-caution: #EE7200;
+  --color-caution-text: #C75E00;
+  --color-tertiary: #A043BA;
+  --color-outline: #d6b41b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-t1: #BCBCBC;
+    --color-r0: #121212;
+    --color-cover: #00000077;
+    --color-separator: #7C7C7C;
+    --color-surface: #333333;
+    --color-ambient: #595959;
+    --color-primary: #53D54B;
+    --color-emphasize: #F9626D;
+    --color-caution: #F88F4D;
+    --color-caution-text: #F88F4D;
+    --color-tertiary: #CA97DD;
+    --color-outline: #d6b41b;
+  }
+}
+
+.global-themed {
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+.global-themed.theme-ambient {
+  background: var(--color-ambient);
+}
+.global-themed.theme-primary {
+  background: var(--color-primary);
+  color: var(--color-r0);
+}
+.global-themed.theme-caution {
+  background: var(--color-caution);
+  color: var(--color-r0);
+}
+.global-themed.theme-tertiary {
+  background: var(--color-tertiary);
+  color: var(--color-r0);
+}
+
+a {
+  color: var(--color-primary);
+}
+*:focus-visible, button:focus-visible {
+  outline-offset: 2px;
+  outline: 3px solid var(--color-outline);
 }

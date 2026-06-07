@@ -3,10 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>关卡明细</title>
   </head>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
+
+  <!--TRAKING CODE PLEASE REMOVE-->
+  <script
+    async
+    src="https://analytics.sparkslab.art/script.js"
+    data-website-id="fd5006ab-46ee-4ba0-9cca-143ef870d1bd"
+    data-domains="apps.ak-ioi.com"
+  ></script>
+
+  <!--DO NOT REMOVE THIS-->
+  <script>
+    /**
+     * Tracked:
+     * play-[a-f] - Open game
+     * details - Open level details page
+     */
+    /**
+     * The tracking function
+     */
+    window.sendAnalyticsEvent = (name) => {
+      if(window.umami) {
+        window.umami.track(name)
+      }
+    }
+  </script>
 </html>

@@ -1,7 +1,0 @@
-[
-  "Caution: DO NOT add anything other than localhost IPs. It is not considered strictly safe.",
-  "Localhost IPs are also dangerous if you have some sort of public proxy to your local webserver",
-  "without real origin IP tracing set up properly.",
-  "127.0.0.1",
-  "::1"
-]

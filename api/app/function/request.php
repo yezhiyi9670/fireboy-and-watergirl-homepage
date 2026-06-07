@@ -1,20 +1,37 @@
 <?php
 
-function return_json(int $response_code, $data, string $error_id = ''): void {
-    http_response_code($response_code);
+function return_success($data): void {
+    http_response_code(200);
     header('Content-Type: application/json');
-    $success = $response_code < 300;
     echo json_network_encode((object)[
-        'success' => $success,
-        'code' => $response_code,
-        'error_id' => $error_id,
+        'success' => true,
+        'code' => 200,
         'data' => $data
     ]);
     exit();
 }
 
+function return_failure(int $response_code, string $error_id, array $args, string $message): void {
+    http_response_code($response_code);
+    header('Content-Type: application/json');
+    echo json_network_encode((object)[
+        'success' => false,
+        'code' => $response_code,
+        'data' => (object)[
+            'error_id' => $error_id,
+            'args' => $args,
+            'message' => $message
+        ]
+    ]);
+    exit();
+}
+
 function return_action_not_found(string $path) {
-    return_json(404, 'Action ' . $path . ' is not found.', 'not_found');
+    return_failure(
+        404,
+        'action_not_found', [$path],
+        'Action ' . $path . ' is not found.'
+    );
 }
 
 /**
@@ -49,25 +66,37 @@ function get_request_json__(bool $use_data_from_get_param = false) {
         $headers = get_request_headers_normalized();
         $content_type = $headers['content-type'] ?? '';
         if($content_type != 'application/json') {
-            return_json(
+            return_failure(
                 422,
-                'POST request validation failed: Content-Type must be application/json.',
-                'unprocessable_entity'
+                'unprocessable_entity', [],
+                'POST request validation failed: Content-Type must be application/json.'
             );
         }
         $json = file_get_contents('php://input');
     }
     if($json === null) {
-        return_json(422, 'JSON request body is required.', 'unprocessable_entity');
+        return_failure(
+            422,
+            'unprocessable_entity', [],
+            'JSON request body is required.'
+        );
     }
 
     $data = null;
     try {
         $data = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
     } catch(JsonException $e) {
-        return_json(422, 'Failed to parse JSON request body.', 'unprocessable_entity');
+        return_failure(
+            422,
+            'unprocessable_entity', [],
+            'Failed to parse JSON request body.'
+        );
     } catch(ValueError $e) {
-        return_json(422, 'JSON request body is too deep.', 'unprocessable_entity');
+        return_failure(
+            422,
+            'unprocessable_entity', [],
+            'JSON request body is too deep.'
+        );
     }
     return $data;
 }

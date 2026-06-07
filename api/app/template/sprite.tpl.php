@@ -8,33 +8,45 @@ $game_path = BASE_PATH . $game_info->path;
 
 $atlas_id = $req->atlas ?? '';
 if(!is_safe_identifier($atlas_id)) {
-    return_json(404, "Atlas ID `$atlas_id` is not valid.", 'atlas_not_found');
+    return_failure(
+        404,
+        'atlas_not_found', [$atlas_id],
+        "Atlas ID `$atlas_id` is not valid."
+    );
 }
 $atlas_json_path = $game_path . '/assets/atlasses/' . $atlas_id . '.json';
 if(!file_exists($atlas_json_path)) {
-    return_json(404, "Atlas `$atlas_id` is not found.", 'atlas_not_found');
+    return_failure(
+        404,
+        'atlas_not_found', [$atlas_id],
+        "Atlas `$atlas_id` is not found."
+    );
 }
 $atlas_data = json_decode(file_get_contents($atlas_json_path), false);
 $atlas_image_name = ($atlas_data->meta ?? (object)[])->image ?? '';
 if(is_safe_filename($atlas_image_name, '.png')) {
-    return_json(
+    return_failure(
         500,
-        "Atlas image name `$atlas_image_name` is not valid. This is an internal data invalidity and not your fault.",
-        'atlas_data_invalid'
+        'atlas_data_invalid', [],
+        "Atlas image name `$atlas_image_name` is not valid."
     );
 }
 $atlas_image_path = dirname($atlas_json_path) . '/' . $atlas_image_name;
 
 if(!file_exists($atlas_image_path)) {
-    return_json(
+    return_failure(
         500,
-        "Atlas image name `$atlas_image_name` is not found. This is an internal data invalidity and not your fault.",
-        'atlas_data_invalid'
+        'atlas_data_invalid', [],
+        "Atlas image name `$atlas_image_name` is not found."
     );
 }
 $sprite_id = $req->sprite ?? '';
 if(!is_safe_identifier($sprite_id)) {
-    return_json(404, "Sprite ID `$sprite_id` is not valid.", 'sprite_not_found');
+    return_failure(
+        404,
+        'sprite_not_found', [$sprite_id],
+        "Sprite ID `$sprite_id` is not valid."
+    );
 }
 $cache_mtime = max(
     get_games_mtime(),
@@ -47,10 +59,10 @@ if(cache_can_use($cache_name, $cache_mtime)) {
     echo file_get_contents(CACHE_PATH . $cache_name);
     exit();
 } else if(CACHE_ONLY) {
-    return_json(
+    return_failure(
         404,
-        'Cache misses and the configuration disallows new image creation.',
-        'cache_miss'
+        'cache_miss', [],
+        'Cache misses and the configuration disallows new image creation.'
     );
 }
 
@@ -62,10 +74,10 @@ foreach(($atlas_data->frames ?? []) as &$v) {
     }
 }
 if($sprite_data === null) {
-    return_json(
+    return_failure(
         404,
-        "Sprite `$sprite_id` is not found.",
-        'sprite_not_found'
+        'sprite_not_found', [$sprite_id],
+        "Sprite `$sprite_id` is not found."
     );
 }
 

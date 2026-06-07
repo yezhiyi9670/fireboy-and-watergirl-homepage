@@ -1,10 +1,13 @@
 <?php
 
+function get_cheat_flag_defs() {
+    return json5_decode_file(RES_PATH . 'cheat_flag_defs.json5', false);
+}
 function get_games() {
-    return json_decode(file_get_contents(CONFIG_PATH . 'games.json'), false);
+    return json5_decode_file(RES_PATH . 'games.json5', false);
 }
 function get_games_mtime() {
-    return filemtime(CONFIG_PATH . 'games.json');
+    return filemtime(RES_PATH . 'games.json5');
 }
 
 function is_safe_identifier(string $id) {
@@ -46,30 +49,38 @@ function is_safe_filename(string $fn, string $desired_suffix='') {
  */
 function get_validated_game_info_of__(string $game_id) {
     if(!is_safe_identifier($game_id)) {
-        return_json(404, "Game ID `$game_id` is not valid.", 'game_not_found');
+        return_failure(
+            404,
+            'game_not_found', [$game_id],
+            "Game ID `$game_id` is not valid."
+        );
     }
     $games = get_games();
     if(!isset($games->{$game_id})) {
-        return_json(404, "Game `$game_id` is not found.", 'game_not_found');
+        return_failure(
+            404,
+            'game_not_found', [$game_id],
+            "Game `$game_id` is not found."
+        );
     }
     $game = $games->{$game_id};
     $game_path = BASE_PATH . $game->path;
 
     $game_json_path = $game_path . '/' . 'game.json';
     if(!file_exists($game_json_path)) {
-        return_json(
+        return_failure(
             500,
-            "The game.json file cannot be found. This is an internal data invalidity and not your fault.",
-            'game_data_missing'
+            'game_data_missing', [],
+            "The game.json file cannot be found."
         );
     }
     $game_data = json_decode(file_get_contents($game_json_path), false);
     
     if(!is_string($game_data->type ?? null)) {
-        return_json(
+        return_failure(
             500,
-            "String value `type` missing in game.json. This is an internal data invalidity and not your fault.",
-            'game_data_invalid'
+            'game_data_invalid', [],
+            "String value `type` missing in game.json."
         );
     }
     $is_multi = $game_data->type == 'multi';
@@ -80,26 +91,25 @@ function get_validated_game_info_of__(string $game_id) {
         $temples = [ $game_data->temples ];
     }
     if(!is_array($temples)) {
-        return_json(
+        return_failure(
             500,
-            "Array value `temples` not found in game.json for multi-temple game. " .
-            "This is an internal data invalidity and not your fault.",
-            'game_data_invalid'
+            'game_data_invalid', [],
+            "Array value `temples` not found in game.json for multi-temple game."
         );
     }
     foreach($temples as &$v) {
         if(!is_string($v)) {
-            return_json(
+            return_failure(
                 500,
-                "Non-string temple ID found in game.json. This is an internal data invalidity and not your fault.",
-                'game_data_invalid'
+                'game_data_invalid', [],
+                "Non-string temple ID found in game.json."
             );
         }
         if(!is_safe_multipart_identifier($v)) {
-            return_json(
+            return_failure(
                 500,
-                "Invalid temple ID `$v` found in game.json. This is an internal data invalidity and not your fault.",
-                'game_data_invalid'
+                'game_data_invalid', [],
+                "Invalid temple ID `$v` found in game.json."
             );
         }
     }
@@ -136,22 +146,26 @@ function validate_temple_data(&$temple_data) {
  */
 function get_validated_temple_data_of__(object &$game_info, string $temple_id) {
     if(!in_array($temple_id, $game_info->temples)) {
-        return_json(404, "Temple `$temple_id` is not found.", 'temple_not_found');
+        return_faillure(
+            404,
+            'temple_not_found', [$temple_id],
+            "Temple `$temple_id` is not found."
+        );
     }
     $temple_json_path = BASE_PATH . $game_info->path . '/data/' . $temple_id . '/temple.json';
     if(!file_exists($temple_json_path)) {
-        return_json(
+        return_failure(
             500,
-            "The temple.json file is not found. This is an internal data invalidity and not your fault.",
-            'temple_json_missing'
+            'temple_json_missing', [],
+            "The temple.json file is not found."
         );
     }
     $temple_data = json_decode(file_get_contents($temple_json_path), false);
     if(!validate_temple_data($temple_data)) {
-        return_json(
+        return_failure(
             500,
-            "The temple.json data failed validation. This is an internal data invalidity and not your fault.",
-            'temple_data_invalid'
+            'temple_data_invalid', [],
+            "The temple.json data failed validation."
         );
     }
     return $temple_data;
@@ -161,17 +175,17 @@ function get_level_metadata_of__(object &$game_info, string $level_filename) {
     $game_path = BASE_PATH . $game_info->path;
     $level_path = $game_path . '/data/' . $level_filename;
     if(!is_safe_multipart_filename($level_filename, '.json')) {
-        return_json(
+        return_failure(
             500,
-            "Level filename `$level_filename` is invalid. This is an internal data invalidity and not your fault.",
-            "level_filename_invalid"
+            'level_filename_invalid', [],
+            "Level filename `$level_filename` is invalid."
         );
     }
     if(!file_exists($level_path)) {
-        return_json(
+        return_failure(
             500,
-            "Level file `$level_filename` is missing. This is an internal data invalidity and not your fault.",
-            "level_missing"
+            'level_missing', [],
+            "Level file `$level_filename` is missing."
         );
     }
     $level_data = json_decode(file_get_contents($level_path), false);
