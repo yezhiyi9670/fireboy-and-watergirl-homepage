@@ -64,7 +64,21 @@ function handleToggleSelectAll() {
 
 <template>
   <div class="settings-table">
-    <div class="settings-row select-all" v-if="!props.single">
+    <div class="settings-row select-all" v-if="props.options.length == 0">
+      <div class="setting-btn-container">
+        <FancyButton
+          theme="ambient"
+          disabled
+          smaller
+        >
+          <v-icon name="la-ban-solid" />
+        </FancyButton>
+      </div>
+      <div class="setting-text-container">
+        <div class="setting-name"><i>无数据</i></div>
+      </div>
+    </div>
+    <div class="settings-row select-all" v-if="!props.single && props.options.length != 0">
       <div class="setting-btn-container">
         <FancyButton
           :theme="selectedAll ? props.theme : 'ambient'"

@@ -10,7 +10,7 @@ const homeData = inject(DataModel.apiHomeKey)
 
 <template>
   <ArticleContainer>
-    <h1>修改说明 — {{ Branding.systemTitle }}</h1>
+    <h1>修改说明 – {{ Branding.systemTitle }}</h1>
     <FancyButton theme="ambient" href="#/">&lt; 返回主页</FancyButton>
 
     <div v-html="homeData && homeData.texts.modification_notes"></div>

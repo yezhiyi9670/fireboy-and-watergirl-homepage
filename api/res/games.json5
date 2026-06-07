@@ -28,7 +28,7 @@
     storage_namespace: "fb-forest",
     cheat_flags: [ "invulnerable", "unlock" ],
     extras: {
-      levels_desc: "有额外关卡：小修改关卡 51—63、原创奖励关 64—66。",
+      levels_desc: "有额外关卡：小修改关卡 51–63、原创奖励关 64–66。",
       modified: "2025-06-09 16:36:00+0800",
     },
     accept_legacy_import: true,
@@ -58,7 +58,7 @@
     storage_namespace: "fb-ice",
     cheat_flags: [ "invulnerable", "unlock" ],
     extras: {
-      levels_desc: "有额外关卡：小修改关卡 51—64、原创奖励关 65—66。",
+      levels_desc: "有额外关卡：小修改关卡 51–64、原创奖励关 65–66。",
       modified: "2025-07-11 10:49:00+0800",
     },
     accept_legacy_import: true,

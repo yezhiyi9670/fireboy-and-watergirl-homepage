@@ -8,9 +8,9 @@ import AppModificationNotes from '../app-home/AppModificationNotes.vue'
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/home' },
   { path: '/home', meta: { title: branding.systemTitle }, component: AppHome },
-  { path: '/modification_notes', meta: { title: '修改说明 — ' + branding.systemTitle }, component: AppModificationNotes },
-  { path: '/level_details/:game', meta: { title: '关卡明细 — ' + branding.systemTitle }, component: AppLevelDetails },
-  { path: '/:pathMatch(.*)*', meta: { title: '找不到页面 — ' + branding.systemTitle }, component: AppNotFound },
+  { path: '/modification_notes', meta: { title: '修改说明 – ' + branding.systemTitle }, component: AppModificationNotes },
+  { path: '/level_details/:game', meta: { title: '关卡明细 – ' + branding.systemTitle }, component: AppLevelDetails },
+  { path: '/:pathMatch(.*)*', meta: { title: '找不到页面 – ' + branding.systemTitle }, component: AppNotFound },
 ]
 
 const router = createRouter({

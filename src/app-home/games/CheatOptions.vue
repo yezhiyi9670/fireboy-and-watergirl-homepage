@@ -54,7 +54,7 @@ function cheatEditDone() {
     >
       <v-icon name="la-bug-solid" /> 作弊旗标
     </FancyButton>
-    <Dialog :open="isDialogOpen" :title="'作弊旗标 — ' + props.gameName" dismissable has-neutral @close="cheatEditDone">
+    <Dialog :open="isDialogOpen" :title="'作弊旗标 – ' + props.gameName" dismissable has-neutral @close="cheatEditDone">
       <div class="settings-table">
         <template v-for="cheatFlagDef, cheatFlagKey in cheatFlagDefs" :key="cheatFlagKey">
           <div class="settings-row" v-if="props.supportedFlags.indexOf(cheatFlagKey) != -1">
