@@ -146,7 +146,7 @@ function validate_temple_data(&$temple_data) {
  */
 function get_validated_temple_data_of__(object &$game_info, string $temple_id) {
     if(!in_array($temple_id, $game_info->temples)) {
-        return_faillure(
+        return_failure(
             404,
             'temple_not_found', [$temple_id],
             "Temple `$temple_id` is not found."
