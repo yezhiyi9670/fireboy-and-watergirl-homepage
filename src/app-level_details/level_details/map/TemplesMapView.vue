@@ -1,0 +1,3 @@
+<template>
+  Temples map
+</template>

@@ -141,10 +141,7 @@ function validate_temple_data(&$temple_data) {
     return $valid;
 }
 
-/**
- * Validated keys: levels.[].filename (string)
- */
-function get_validated_temple_data_of__(object &$game_info, string $temple_id) {
+function get_temple_data_path__(object &$game_info, string $temple_id) {
     if(!in_array($temple_id, $game_info->temples)) {
         return_failure(
             404,
@@ -153,6 +150,14 @@ function get_validated_temple_data_of__(object &$game_info, string $temple_id) {
         );
     }
     $temple_json_path = BASE_PATH . $game_info->path . '/data/' . $temple_id . '/temple.json';
+    return $temple_json_path;
+}
+
+/**
+ * Validated keys: levels.[].filename (string)
+ */
+function get_validated_temple_data_of__(object &$game_info, string $temple_id) {
+    $temple_json_path = get_temple_data_path__($game_info, $temple_id);
     if(!file_exists($temple_json_path)) {
         return_failure(
             500,

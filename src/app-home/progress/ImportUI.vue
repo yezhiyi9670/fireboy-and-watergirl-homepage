@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { DataModel } from '../../common/api/DataModel';
 import FancyInput from '../../common/components/FancyInput.vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import Dialog from '../../common/components/Dialog.vue';
@@ -9,10 +8,11 @@ import md5 from 'md5';
 import Base64 from 'base64-js'
 import GZip from 'gzip-js'
 import MultiSelectList, { type Option } from '../../common/components/MultiSelectList.vue';
+import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
 
 const progressStore = ':progress'
 const props = defineProps<{
-  games: DataModel.GamesData
+  games: Record<string, GameItemData>
 }>()
 
 const stage = ref<'paste' | 'error' | 'confirm_checksum' | 'select_games' | 'confirm_overwrite' | 'done'>('paste')
@@ -28,7 +28,7 @@ const parsedDataBodyType = ref<'single' | 'multi'>('single')
 const parsedData = ref<any>(null)
 
 const selectedGames = ref<string[]>([])
-const willOverwriteGames = ref<DataModel.GameItemData[]>([])
+const willOverwriteGames = ref<GameItemData[]>([])
 const importSuccessCount = ref(0)
 const importFailureCount = ref(0)
 
@@ -138,9 +138,8 @@ function handleValidate() {
 }
 
 const importableGames = computed(() => {
-  const ret: DataModel.GameItemData[] = []
-  for(const gameKey in props.games) {
-    const game = props.games[gameKey]
+  const ret: GameItemData[] = []
+  for(const game of Object.values(props.games)) {
     if(parsedDataBodyType.value == 'multi') {
       // Multi-game data format specifies which games it contains
       if((game.storage_namespace + progressStore) in parsedData.value) {
@@ -155,7 +154,7 @@ const importableGames = computed(() => {
   }
   return ret
 })
-const suggestedImportGames = computed<DataModel.GameItemData[]>(() => {
+const suggestedImportGames = computed<GameItemData[]>(() => {
   if(parsedDataBodyType.value == 'multi') {
     return []
   }
@@ -163,7 +162,7 @@ const suggestedImportGames = computed<DataModel.GameItemData[]>(() => {
   if(!('temples' in data && Array.isArray(data['temples']))) {
     return []
   }
-  const ret: DataModel.GameItemData[] = []
+  const ret: GameItemData[] = []
   for(const game of importableGames.value) {
     if(!Array.isArray(game.info?.temples)) {
       continue
@@ -387,7 +386,7 @@ function executeImport() {
     <div style="display: flex; flex-direction: column; gap: 0.5em">
       <div>以下游戏已有进程数据：</div>
       <ul style="margin: 0 0; line-height: normal;">
-        <li v-for="game in willOverwriteGames">{{ game.name }}</li>
+        <li v-for="game of willOverwriteGames" :key="game.storage_namespace">{{ game.name }}</li>
       </ul>
       <div>继续导入将覆盖它们。仍要继续？</div>
       <ExtraInfo caution>

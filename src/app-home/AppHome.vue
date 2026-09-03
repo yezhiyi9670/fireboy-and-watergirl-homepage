@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import branding from '../branding/Branding.js';
+import Branding from '../branding/Branding.js';
 import ArticleContainer from '../common/components/ArticleContainer.vue';
-import { DataModel } from '../common/api/DataModel.ts';
 import GameEntry from './games/GameEntry.vue';
 import ProgressManager from './progress/ProgressManager.vue';
+import { useTitle } from '@vueuse/core';
+import { ApiHomeData } from '../common/data_model/home/ApiHomeData.ts';
 
-const homeData = inject(DataModel.apiHomeKey)
+const homeData = inject(ApiHomeData.injectionKey)
+
+useTitle(Branding.systemTitle)
 </script>
 
 <template>
   <ArticleContainer v-if="homeData">
-    <h1>{{ branding.systemTitle }}</h1>
+    <h1>{{ Branding.systemTitle }}</h1>
 
     <div v-html="homeData.texts.homepage_pre"></div>
 

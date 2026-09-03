@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { useTitle } from '@vueuse/core';
 import Centering from '../common/components/Centering.vue';
 import FancyButton from '../common/components/FancyButton.vue';
+import Branding from '../branding/Branding.ts';
 
+useTitle('找不到页面 – ' + Branding.systemTitle)
 </script>
 
 <template>

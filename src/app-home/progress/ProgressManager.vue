@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { DataModel } from '../../common/api/DataModel';
 import SurfaceCard from '../../common/components/SurfaceCard.vue';
 import ManageUI from './ManageUI.vue';
 import ImportUI from './ImportUI.vue';
 import FancyButton from '../../common/components/FancyButton.vue';
+import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
 
 const props = defineProps<{
-  games: DataModel.GamesData
+  games: Record<string, GameItemData>
 }>()
 
 const currentTab = ref<'manage' | 'import'>('manage')

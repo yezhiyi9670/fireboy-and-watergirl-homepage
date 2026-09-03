@@ -40,8 +40,10 @@ $level_mtime = filemtime($level_path);
 $level_fn = str_replace('/', '--', $level_filename);
 $level_fn = substr($level_fn, 0, strlen($level_fn) - 5);  // strip suffix
 
-$cache_name = $game_id . '/level_preview/' . $level_fn . '.png';
-$cache_mtime = $level_mtime;
+$is_dark = ($level->type ?? 'general') == 'dark';
+
+$cache_name = $game_id . '/level_preview/' . $level_fn . ($is_dark ? '--dark' : '') . '.png';
+$cache_mtime = max($level_mtime, filemtime(__FILE__));
 if(cache_can_use($cache_name, $cache_mtime)) {
     header('Content-Type: image/png');
     echo file_get_contents(CACHE_PATH . $cache_name);
@@ -54,7 +56,6 @@ if(cache_can_use($cache_name, $cache_mtime)) {
     );
 }
 
-$is_dark = ($level->type ?? 'general') == 'dark';
 $tile_size = 8;
 $level_data = json_decode(file_get_contents($level_path), false);
 $width = $level_data->width ?? 1;
@@ -112,14 +113,13 @@ imagecopyresampled(
 );
 
 $pad = $tile_size / 2;
-$img = image_create_filled($pad * 2 + $width * $tile_size, $pad * 2 + $height * $tile_size, 0 * ((1<<16) + (1<<8) + 1));
+$img = image_create_filled($pad * 2 + $width * $tile_size, $pad * 2 + $height * $tile_size, 0x1C1C1D);
 imagealphablending($img, false);
 imagefilledrectangle(
     $img,
     /*p1*/ $pad, $pad,
     /*p2*/ imagesx($img)-1-$pad, imagesy($img)-1-$pad,
-    // 0x1C1C1D
-    127 << 24
+    0x0C0C0D
 );
 imagealphablending($img, true);
 for($y = 0; $y < $height; $y++) {
@@ -161,7 +161,7 @@ for($y = 0; $y < $height; $y++) {
             $img,
             /*p1*/ $pad + $x*$tile_size, $pad + $y*$tile_size,
             /*p2*/ $pad + $x*$tile_size + $tile_size-1, $pad + $y*$tile_size + $tile_size-1,
-            /*color*/ (intval(round(127 * (1 - $tile_obscurity))) << 24) | (0 * ((1<<16) + (1<<8) + 1))
+            /*color*/ (intval(round(127 * (1 - $tile_obscurity))) << 24) | (0x08 * 0x010101)
         );
     }
 }

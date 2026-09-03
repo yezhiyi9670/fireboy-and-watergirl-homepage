@@ -93,7 +93,7 @@ function handleToggleSelectAll() {
         <div class="setting-name"><i>全选</i></div>
       </div>
     </div>
-    <template v-for="option in props.options" :key="option.key">
+    <template v-for="option of props.options" :key="option.key">
       <div class="settings-row">
         <div class="setting-btn-container">
           <FancyButton

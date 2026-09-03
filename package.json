@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prepare": "ts-patch install",
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
@@ -13,6 +14,7 @@
     "@types/md5": "^2.3.6",
     "@vueuse/core": "^14.3.0",
     "base64-js": "^1.5.1",
+    "class-transformer": "^0.5.1",
     "focus-trap": "^7.8.0",
     "focus-trap-vue": "^4.1.0",
     "gzip-js": "^0.3.2",
@@ -20,14 +22,18 @@
     "normalize.css": "^8.0.1",
     "oh-vue-icons": "1.0.0-rc3",
     "portal-vue": "^3.0.0",
+    "reflect-metadata": "^0.2.2",
+    "typia": "^12.2.0",
     "vue": "^3.5.34",
     "vue-router": "^5.0.7"
   },
   "devDependencies": {
     "@types/node": "^24.12.3",
+    "@typia/unplugin": "^12.1.1",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
     "less": "^4.6.4",
+    "ts-patch": "^4.0.1",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vue-tsc": "^3.2.8"

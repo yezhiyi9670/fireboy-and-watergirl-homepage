@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { provide } from 'vue';
-import { DataModel } from './common/api/DataModel';
 import ErrorScreen from './common/components/ErrorScreen.vue';
 import { useLoadData } from './common/hooks/DataLoading';
+import { ApiHomeData } from './common/data_model/home/ApiHomeData.ts';
 
-const [homeLastState, homeLastValue, homeLastError, homeReload] = useLoadData(DataModel.apiHomeLoader, true)
+const [homeLastState, homeLastValue, homeLastError, homeReload] = useLoadData(ApiHomeData.loader, true)
 
-provide(DataModel.apiHomeKey, homeLastValue)
+provide(ApiHomeData.injectionKey, homeLastValue)
 </script>
 
 <template>

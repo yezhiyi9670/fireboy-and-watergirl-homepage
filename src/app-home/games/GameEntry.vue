@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { DataModel } from '../../common/api/DataModel';
 import FancyButton from '../../common/components/FancyButton.vue';
 import CheatOptions from './CheatOptions.vue';
 import NewTag from './NewTag.vue';
 import SurfaceCard from '../../common/components/SurfaceCard.vue';
+import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
 
 const props = defineProps<{
   gameKey: string,
-  game: DataModel.GameItemData
+  game: GameItemData
 }>()
 
 function isConsideredNew(dateStr: string | null | undefined, days: number) {
@@ -16,12 +16,12 @@ function isConsideredNew(dateStr: string | null | undefined, days: number) {
     return false
   }
   const theDate = new Date(dateStr)
-  const thresholdMillis = 10000 * 86400 * days
+  const thresholdMillis = 1000 * 86400 * days
   return (+new Date()) - (+theDate) < thresholdMillis
 }
 
 const urls = computed(() => {
-  return DataModel.getUrls(props.game.url)
+  return props.game.url?.getUrls()
 })
 
 </script>
@@ -31,13 +31,13 @@ const urls = computed(() => {
     <div class="game-banner">
       <img
         class="game-banner-bg"
-        v-if="urls.banner_bg != null"
-        :src="urls.banner_bg"
+        v-if="urls?.banner_bg != null"
+        :src="urls?.banner_bg"
       />
       <img
         class="game-banner-fg"
-        v-if="urls.banner != null"
-        :src="urls.banner"
+        v-if="urls?.banner != null"
+        :src="urls?.banner"
       />
     </div>
     <p class="game-name">{{ game.name }} <NewTag v-if="isConsideredNew(game.created, 30)">NEW</NewTag></p>
@@ -46,8 +46,8 @@ const urls = computed(() => {
     </p>
     <div class="game-buttons">
       <FancyButton
-        v-if="urls.play != null"
-        :href="urls.play"
+        v-if="urls?.play != null"
+        :href="urls?.play"
         target="_blank"
         theme="primary"
       >

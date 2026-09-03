@@ -4,7 +4,7 @@ export namespace Api {
     success: true,
     data: any
   }
-  export interface ApiError {
+  export interface ApiErrorBody {
     error_id: string,
     args: any[],
     message: string
@@ -12,13 +12,19 @@ export namespace Api {
   export interface ApiErrorResult {
     code: number,
     success: false,
-    data: ApiError
+    data: ApiErrorBody
+  }
+
+  export function getUrl(path: string, dataViaUrlParam: Object | null = null) {
+    return '../api/' + path + (
+      dataViaUrlParam != null ? ('?data=' + encodeURIComponent(JSON.stringify(dataViaUrlParam))) : ''
+    )
   }
 
   async function call(method: 'get' | 'post', path: string, data: Object = {}): Promise<ApiSuccessResult | ApiErrorResult> {
     let response = null
     try {
-      response = await fetch('../api/' + path, {
+      response = await fetch(getUrl(path), {
         method: method,
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(data)

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, inject, ref, watchEffect } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
-import { DataModel } from '../../common/api/DataModel.ts';
 import Dialog from '../../common/components/Dialog.vue';
 import CheatToggleButton from './CheatToggleButton.vue';
 import { useIntervalFn } from '@vueuse/core';
 import ExtraInfo from '../../common/components/ExtraInfo.vue';
+import { ApiHomeData } from '../../common/data_model/home/ApiHomeData.ts';
 
 const props = defineProps<{
   gameName: string
@@ -13,7 +13,7 @@ const props = defineProps<{
   supportedFlags: string[]
 }>()
 
-const homeData = inject(DataModel.apiHomeKey)
+const homeData = inject(ApiHomeData.injectionKey)
 const cheatFlagDefs = computed(() => {
   return homeData?.value?.cheat_flag_defs
 })

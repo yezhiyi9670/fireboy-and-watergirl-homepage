@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import UnpluginTypia from "@typia/unplugin/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    UnpluginTypia({'tsconfig': 'tsconfig.app.json'}),
+  ],
   base: '',
   server: {
     port: 5181,

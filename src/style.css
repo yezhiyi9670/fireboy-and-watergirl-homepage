@@ -20,8 +20,8 @@ body {
 }
 
 :root {
-  --color-void: Canvas;
-  --color-t0: CanvasText;
+  --color-void: #FFFFFF;
+  --color-t0: #000000;
   
   --color-t1: #6C6C6C;
   --color-r0: #FFFFFF;
@@ -38,12 +38,15 @@ body {
 }
 @media (prefers-color-scheme: dark) {
   :root {
+    --color-void: #121212;
+    --color-t0: #FBFBFB;
+
     --color-t1: #BCBCBC;
     --color-r0: #121212;
     --color-cover: #00000077;
     --color-separator: #7C7C7C;
-    --color-surface: #333333;
-    --color-ambient: #595959;
+    --color-surface: #272727;
+    --color-ambient: #474747;
     --color-primary: #53D54B;
     --color-emphasize: #F9626D;
     --color-caution: #F88F4D;

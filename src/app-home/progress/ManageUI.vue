@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watchEffect } from 'vue';
-import type { DataModel } from '../../common/api/DataModel';
 import { useIntervalFn } from '@vueuse/core';
 import MultiSelectList, { type Option } from '../../common/components/MultiSelectList.vue';
 import FancyButton from '../../common/components/FancyButton.vue';
@@ -10,17 +9,17 @@ import md5 from 'md5';
 import Base64 from 'base64-js'
 import GZip from 'gzip-js'
 import ExtraInfo from '../../common/components/ExtraInfo.vue';
+import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
 
 const progressStore = ':progress'
 const props = defineProps<{
-  games: DataModel.GamesData
+  games: Record<string, GameItemData>
 }>()
 
 const gameDataSize = ref<{[storageNamespace: string]: number | null}>({})
 function updateGameDataSize() {
   const ret: {[storageNamespace: string]: number | null} = {}
-  for(let gameKey in props.games) {
-    const game = props.games[gameKey]
+  for(const game of Object.values(props.games)) {
     const size = localStorage.getItem(game.storage_namespace + progressStore)?.length
     ret[game.storage_namespace] = (size == undefined) ? null : size
   }
@@ -31,8 +30,7 @@ useIntervalFn(updateGameDataSize, 3000)
 
 const selectionListOptions = computed(() => {
   const ret: Option[] = []
-  for(let gameKey in props.games) {
-    const game = props.games[gameKey]
+  for(const game of Object.values(props.games)) {
     const dataSize = gameDataSize.value[game.storage_namespace]
     ret.push({
       key: game.storage_namespace,
@@ -91,7 +89,7 @@ function handleExport() {
   }, 50)
 }
 
-const pendingClearGames = ref<DataModel.GameItemData[]>([])
+const pendingClearGames = ref<GameItemData[]>([])
 const confirmClearText = ref('')
 const isConfirmClearTextCorrect = computed(() => {
   return confirmClearText.value.toLowerCase() == 'yes'
@@ -99,8 +97,7 @@ const isConfirmClearTextCorrect = computed(() => {
 function handleRequestClear() {
   pendingClearGames.value = []
   confirmClearText.value = ''
-  for(let gameKey in props.games) {
-    const game = props.games[gameKey]
+  for(const game of Object.values(props.games)) {
     if(validSelectedKeys.value.indexOf(game.storage_namespace) != -1) {
       pendingClearGames.value.push(game)
     }
@@ -166,7 +163,7 @@ function handleConfirmClear() {
     <div style="display: flex; flex-direction: column; gap: 0.5em">
       <div>将要清除以下游戏的进程数据：</div>
       <ul style="margin: 0 0; line-height: normal;">
-        <li v-for="game in pendingClearGames">{{ game.name }}</li>
+        <li v-for="game of pendingClearGames" :key="game.storage_namespace">{{ game.name }}</li>
       </ul>
       <div>输入 <code>yes</code> 以确认：</div>
       <div>

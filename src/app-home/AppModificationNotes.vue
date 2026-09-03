@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import ArticleContainer from '../common/components/ArticleContainer.vue';
-import { DataModel } from '../common/api/DataModel.ts';
 import Branding from '../branding/Branding.ts';
 import FancyButton from '../common/components/FancyButton.vue';
+import { useTitle } from '@vueuse/core';
+import { ApiHomeData } from '../common/data_model/home/ApiHomeData.ts';
 
-const homeData = inject(DataModel.apiHomeKey)
+const homeData = inject(ApiHomeData.injectionKey)
+useTitle('修改说明 – ' + Branding.systemTitle)
 </script>
 
 <template>
