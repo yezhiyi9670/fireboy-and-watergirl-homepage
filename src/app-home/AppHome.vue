@@ -5,7 +5,7 @@ import ArticleContainer from '../common/components/ArticleContainer.vue';
 import GameEntry from './games/GameEntry.vue';
 import ProgressManager from './progress/ProgressManager.vue';
 import { useTitle } from '@vueuse/core';
-import { ApiHomeData } from '../common/data_model/home/ApiHomeData.ts';
+import ApiHomeData from '../common/data_model/home/ApiHomeData.ts';
 
 const homeData = inject(ApiHomeData.injectionKey)
 

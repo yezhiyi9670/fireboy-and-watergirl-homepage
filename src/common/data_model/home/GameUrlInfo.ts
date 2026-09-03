@@ -1,4 +1,4 @@
-export class GameUrlInfo {
+export default class GameUrlInfo {
   base?: string
   play?: string
   banner?: string

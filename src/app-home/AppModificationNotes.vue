@@ -4,7 +4,7 @@ import ArticleContainer from '../common/components/ArticleContainer.vue';
 import Branding from '../branding/Branding.ts';
 import FancyButton from '../common/components/FancyButton.vue';
 import { useTitle } from '@vueuse/core';
-import { ApiHomeData } from '../common/data_model/home/ApiHomeData.ts';
+import ApiHomeData from '../common/data_model/home/ApiHomeData.ts';
 
 const homeData = inject(ApiHomeData.injectionKey)
 useTitle('修改说明 – ' + Branding.systemTitle)

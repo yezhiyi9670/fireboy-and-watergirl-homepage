@@ -8,7 +8,7 @@ import md5 from 'md5';
 import Base64 from 'base64-js'
 import GZip from 'gzip-js'
 import MultiSelectList, { type Option } from '../../common/components/MultiSelectList.vue';
-import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
+import type GameItemData from '../../common/data_model/home/GameItemData.ts';
 
 const progressStore = ':progress'
 const props = defineProps<{

@@ -1,9 +1,9 @@
 import { Type } from "class-transformer"
-import { EdgeItemData } from "./EdgeItemData"
-import { LevelItemData } from "./LevelItemData"
+import EdgeItemData from "./EdgeItemData"
+import LevelItemData from "./LevelItemData"
 import type { InjectionKey, Ref } from "vue"
 
-export class TempleItemData {
+export default class TempleItemData {
   index!: number
   id!: string
   label!: string

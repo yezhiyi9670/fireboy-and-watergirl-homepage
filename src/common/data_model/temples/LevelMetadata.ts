@@ -1,4 +1,4 @@
-export class LevelMetadata {
+export default class LevelMetadata {
   width!: number
   height!: number
   title!: string | null

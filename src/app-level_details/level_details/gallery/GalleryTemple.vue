@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, provide, ref, toRef } from 'vue';
 import GalleryLevel from './GalleryLevel.vue';
-import { TempleItemData } from '../../../common/data_model/temples/TempleItemData.ts';
+import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 
 const props = defineProps<{
   templeKey: string
   temple: TempleItemData
+  progress: TempleProgress | null | undefined
 }>()
 
 provide(TempleItemData.kInjectionKey, toRef(props, 'templeKey'))
@@ -41,7 +43,13 @@ const sortedLevels = computed(() => {
       <span class="temple-badge" :style="{backgroundColor: temple.color}"></span>
     </h2>
     <div class="gallery-grid" :style="{display: expanded ? 'grid' : 'none'}">
-      <GalleryLevel v-for="level of sortedLevels" :key="level.id" :temple="temple" :level="level" />
+      <GalleryLevel
+        v-for="level of sortedLevels"
+        :key="level._id"
+        :temple="temple"
+        :level="level"
+        :progress="progress?.getLevel(level._id)"
+      />
     </div>
   </div>
 </template>

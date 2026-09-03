@@ -1,4 +1,4 @@
-export class EdgeItemData {
+export default class EdgeItemData {
   id!: number | string
   source!: number | string
   target!: number | string

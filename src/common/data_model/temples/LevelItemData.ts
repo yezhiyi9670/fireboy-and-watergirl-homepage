@@ -1,8 +1,8 @@
 import { Type } from "class-transformer"
 import type { FieldSpecifiers } from "../field_specifier"
-import { LevelMetadata } from "./LevelMetadata"
+import LevelMetadata from "./LevelMetadata"
 
-export class LevelItemData {
+export default class LevelItemData {
   id!: number | string
   x!: number
   y!: number
@@ -44,9 +44,6 @@ export class LevelItemData {
   locked?: boolean
   unlock_key?: string
   
-  // Progress data
-  opened?: boolean
-
   // Other unknown stuff
   [key: string]: unknown
 
@@ -66,7 +63,7 @@ export class LevelItemData {
     elements: 'object'
   }
   static progressKnownKeys: FieldSpecifiers = {
-    opened: 'boolean',
+    played: 'boolean',
     'best.diamonds': 'number',
     'best.time': 'number',
     'best.silverDiamond': 'number',

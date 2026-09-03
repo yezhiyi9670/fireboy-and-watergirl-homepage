@@ -1,11 +1,11 @@
-export type FieldTypeChoice = { [choice: string]: string }
+export type FieldTypeChoice = Record<string, string>
 export type FieldTypeSingular = 'number' | 'string' | 'boolean' | 'object' | FieldTypeChoice
 export type FieldType = FieldTypeSingular | FieldTypeSingular[]
 export type FieldSpecifiers = {
   [key: string]: FieldType
 }
 
-export function choiceLabel(value: string | undefined, mapping: {[key: string]: string}) {
+export function choiceLabel(value: string | undefined, mapping: Record<string, string>) {
   if(value != null && value in mapping) {
     return mapping[value]
   }

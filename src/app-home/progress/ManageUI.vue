@@ -9,16 +9,16 @@ import md5 from 'md5';
 import Base64 from 'base64-js'
 import GZip from 'gzip-js'
 import ExtraInfo from '../../common/components/ExtraInfo.vue';
-import type { GameItemData } from '../../common/data_model/home/GameItemData.ts';
+import type GameItemData from '../../common/data_model/home/GameItemData.ts';
 
 const progressStore = ':progress'
 const props = defineProps<{
   games: Record<string, GameItemData>
 }>()
 
-const gameDataSize = ref<{[storageNamespace: string]: number | null}>({})
+const gameDataSize = ref<Record<string, number | null>>({})
 function updateGameDataSize() {
-  const ret: {[storageNamespace: string]: number | null} = {}
+  const ret: Record<string, number | null> = Object.create(null)
   for(const game of Object.values(props.games)) {
     const size = localStorage.getItem(game.storage_namespace + progressStore)?.length
     ret[game.storage_namespace] = (size == undefined) ? null : size

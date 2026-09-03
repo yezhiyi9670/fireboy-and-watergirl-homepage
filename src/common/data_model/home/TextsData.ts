@@ -1,4 +1,4 @@
-export class TextsData {
+export default class TextsData {
   homepage_pre?: string
   gamelist_post?: string
   progress_post?: string

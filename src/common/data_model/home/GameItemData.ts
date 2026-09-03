@@ -1,10 +1,10 @@
 import type { InjectionKey, Ref } from "vue"
-import { ExtraLevelsInfoData } from "./ExtraLevelsInfoData"
-import { GameInfoData } from "./GameInfoData"
-import { GameUrlInfo } from "./GameUrlInfo"
+import ExtraLevelsInfoData from "./ExtraLevelsInfoData"
+import GameInfoData from "./GameInfoData"
+import GameUrlInfo from "./GameUrlInfo"
 import { Type } from "class-transformer"
 
-export class GameItemData {
+export default class GameItemData {
   name!: string
   @Type(() => GameUrlInfo) url?: GameUrlInfo
   storage_namespace!: string

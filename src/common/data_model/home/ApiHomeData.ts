@@ -1,14 +1,14 @@
 import type { InjectionKey, Ref } from "vue"
-import { CheatFlagDef } from "./CheatFlagDef"
-import { TextsData } from "./TextsData"
+import CheatFlagDef from "./CheatFlagDef"
+import TextsData from "./TextsData"
 import { Api } from "../../api/Api"
-import { ApiError } from "../ApiError"
+import ApiError from "../ApiError"
 import typia from "typia"
 import { plainToInstance, Type } from "class-transformer"
-import { GameItemData } from "./GameItemData"
+import GameItemData from "./GameItemData"
 import { TransformNPDict } from "../../utils/class_transform"
 
-export class ApiHomeData {
+export default class ApiHomeData {
   @TransformNPDict(GameItemData)
   games!: Record<string, GameItemData>
 

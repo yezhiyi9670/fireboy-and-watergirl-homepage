@@ -1,4 +1,4 @@
-export class ExtraLevelsInfoData {
+export default class ExtraLevelsInfoData {
   levels_desc?: string
   modified?: string
 

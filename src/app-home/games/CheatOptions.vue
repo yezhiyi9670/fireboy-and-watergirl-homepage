@@ -5,7 +5,7 @@ import Dialog from '../../common/components/Dialog.vue';
 import CheatToggleButton from './CheatToggleButton.vue';
 import { useIntervalFn } from '@vueuse/core';
 import ExtraInfo from '../../common/components/ExtraInfo.vue';
-import { ApiHomeData } from '../../common/data_model/home/ApiHomeData.ts';
+import ApiHomeData from '../../common/data_model/home/ApiHomeData.ts';
 
 const props = defineProps<{
   gameName: string
@@ -17,9 +17,9 @@ const homeData = inject(ApiHomeData.injectionKey)
 const cheatFlagDefs = computed(() => {
   return homeData?.value?.cheat_flag_defs
 })
-const cheatFlagValues = ref<{[key: string]: boolean}>({})
+const cheatFlagValues = ref<Record<string, boolean>>({})
 function updateCheatFlagValues() {
-  const values: {[key: string]: boolean} = {}
+  const values: Record<string, boolean> = Object.create(null)
   for(const flag of props.supportedFlags) {
     values[flag] = !!localStorage.getItem(props.storageNamespace + ':' + flag)
   }

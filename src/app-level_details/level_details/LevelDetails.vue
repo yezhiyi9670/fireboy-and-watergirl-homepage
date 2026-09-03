@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
-import type { ApiTemplesData } from '../../common/data_model/temples/ApiTemplesData.ts';
+import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
+import ProgressError from './progress_manip/ProgressError.vue';
+import GameItemData from '../../common/data_model/home/GameItemData.ts';
 
 const props = defineProps<{
   gameName: string,
-  templesData: ApiTemplesData
+  templesData: ApiTemplesData,
+  progressError: Error | null,
 }>()
 
 const currentTab = ref<'gallery' | 'map'>('gallery')
 const history = window.history
+const game = inject(GameItemData.injectionKey)
 </script>
 
 <template>
@@ -26,11 +30,32 @@ const history = window.history
       </FancyButton>
       <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="currentTab = 'gallery'">画廊</FancyButton>
       <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="currentTab = 'map'">地图</FancyButton>
-      <FancyButton class="title-line" theme="none" not-button>{{ props.gameName }}</FancyButton>
+      
+      <FancyButton
+        v-if="game?.url"
+        class="title-line"
+        theme="none"
+        :href="game.url.getUrls().play"
+        target="_blank"
+      >
+        <v-icon name="la-play-solid" />
+        {{ props.gameName }}
+      </FancyButton>
+      <FancyButton
+        v-else
+        class="title-line"
+        theme="none"
+        not-button
+      >
+        {{ props.gameName }}
+      </FancyButton>
     </div>
     <div class="container">
       <TemplesGalleryView v-if="currentTab == 'gallery'" :temples="templesData.temples" />
       <TemplesMapView v-if="currentTab == 'map'" :temples="templesData.temples" />
+    </div>
+    <div v-if="progressError" class="error">
+      <ProgressError :error="progressError" />
     </div>
   </div>
 </template>
@@ -45,10 +70,15 @@ const history = window.history
   border-bottom: 4px solid var(--color-primary);
   display: flex;
   overflow-x: auto;
+  white-space: nowrap;
+}
+.error {
+  border-top: 4px solid var(--color-caution);
+  padding: 8px;
 }
 .title-line {
-  width: 0;
-  flex: 1;
+  flex-shrink: 1;
+  flex-grow: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

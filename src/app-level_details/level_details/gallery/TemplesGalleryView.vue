@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import type { TempleItemData } from '../../../common/data_model/temples/TempleItemData.ts';
+import { inject } from 'vue';
+import type TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import GalleryTemple from './GalleryTemple.vue';
+import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
 
 const props = defineProps<{
   temples: Record<string, TempleItemData>
 }>()
+
+const progress = inject(LsGameProgressData.injectionKey)
 </script>
 
 <template>
   <div class="gallery-view">
-    <GalleryTemple v-for="temple, templeKey in temples" :key="templeKey" :temple="temple" :temple-key="templeKey" />
+    <GalleryTemple
+      v-for="temple, templeKey in temples"
+      :key="templeKey"
+      :temple="temple"
+      :temple-key="templeKey"
+      :progress="progress?.getTemple(temple.id)"
+    />
   </div>
 </template>
 

@@ -2,14 +2,19 @@
 import { computed, inject, toRef } from 'vue';
 import { Api } from '../../../common/api/Api';
 import LevelTypeIcon from '../../components/LevelTypeIcon.vue';
-import { TempleItemData } from '../../../common/data_model/temples/TempleItemData.ts';
-import { LevelItemData } from '../../../common/data_model/temples/LevelItemData.ts';
-import { GameItemData } from '../../../common/data_model/home/GameItemData.ts';
-import { ApiTemplesData } from '../../../common/data_model/temples/ApiTemplesData.ts';
+import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
+import GameItemData from '../../../common/data_model/home/GameItemData.ts';
+import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
+import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
+import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
 
 const props = defineProps<{
   level: LevelItemData
+  progress: LevelProgress | null | undefined
 }>()
+
+const progressData = inject(LsGameProgressData.injectionKey)
 
 const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
@@ -38,46 +43,64 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
 <template>
   <section class="gallery-level">
     <img class="level-preview" :srcset="levelPreviewUrl" />
-    <h3 class="level-title">
-      <div class="level-label">{{ shownTitle }}</div>
-      <div class="level-type"><LevelTypeIcon :type="level.type" height="1em" width="1em" /></div>
-    </h3>
-    <p class="level-info">
-      <v-icon title="关卡号" name="md-numbers-twotone" />
-      {{ disambiguousNumbering }}
-      <span class="spacer" />
-      <v-icon
-        title="放映时间（多人/单人）"
-        :name="level.type != 'puzzle' ? 'md-hourglasstop-twotone' : 'md-hourglassdisabled-twotone'"
-      />
-      {{ LevelItemData.formatWalkthroughDuration(level.time) }}
-      /
-      {{ LevelItemData.formatWalkthroughDuration(level.mobileTime) }}
-    </p>
-    <p class="level-info">
-      <template v-if="temple?.type == 'rows'">
-        <v-icon title="解锁方式" name="bi-patch-question" />
-        未知进度控制方式
-      </template>
-      <template v-else-if="temple?.type == 'tree'">
-        <template v-if="level.initial">
-          <v-icon title="解锁方式" name="md-lockopen-twotone" />
-          {{ level.skippable ? '新手教程' : '初始关卡' }}
+    <div class="level-info-lines">
+      <h3 class="level-title">
+        <div class="level-label">{{ shownTitle }}</div>
+        <div class="level-type"><LevelTypeIcon :type="level.type" height="1em" width="1em" /></div>
+      </h3>
+      <p class="level-info">
+        <v-icon title="关卡号" name="md-numbers-twotone" />
+        {{ disambiguousNumbering }}
+        <span class="spacer" />
+        <v-icon
+          title="放映时间（多人/单人）"
+          :name="level.type != 'puzzle' ? 'md-hourglasstop-twotone' : 'md-hourglassdisabled-twotone'"
+        />
+        {{ LevelItemData.formatWalkthroughDuration(level.time) }}
+        /
+        {{ LevelItemData.formatWalkthroughDuration(level.mobileTime) }}
+      </p>
+      <p class="level-info">
+        <template v-if="temple?.type == 'rows'">
+          <v-icon title="解锁方式" name="bi-patch-question" />
+          未知进度控制方式
         </template>
-        <template v-else-if="level.requirePerfects">
-          <v-icon title="解锁方式" name="md-lock-twotone" />
-          需要周围所有关卡等级 A
+        <template v-else-if="temple?.type == 'tree'">
+          <template v-if="level.initial">
+            <v-icon title="解锁方式" name="md-lockopen-twotone" />
+            {{ level.skippable ? '新手教程' : '初始关卡' }}
+          </template>
+          <template v-else-if="level.requirePerfects">
+            <v-icon title="解锁方式" name="md-lock-twotone" />
+            需要周围所有关卡等级 A
+          </template>
+          <template v-else>
+            <v-icon title="解锁方式" name="md-lock-twotone" />
+            通关一个相邻关卡以解锁
+          </template>
         </template>
         <template v-else>
-          <v-icon title="解锁方式" name="md-lock-twotone" />
-          通关一个相邻关卡以解锁
+          <v-icon title="解锁方式" name="bi-patch-question" />
+          未知进度控制方式
         </template>
-      </template>
-      <template v-else>
-        <v-icon title="解锁方式" name="bi-patch-question" />
-        未知进度控制方式
-      </template>
-    </p>
+      </p>
+      <p v-if="progressData != null" class="level-info">
+        <template v-if="!progress || !progress.hasPlayed()">
+          <v-icon title="游戏进程" name="md-horizontalrule-twotone" /> 未玩过
+        </template>
+        <template v-else-if="!progress.hasFinished()">
+          <v-icon title="游戏进程" name="md-add-twotone" /> 已尝试
+        </template>
+        <template v-else>
+          <v-icon title="游戏进程" :name="
+            progress.isFail() ? 'md-close-twotone' :
+            progress.isPerfect() ? 'md-thumbup-outlined' :
+            'md-check-twotone'
+          " />
+          等级 {{ progress.starsGradeNotation() }}（{{ LevelItemData.formatWalkthroughDuration(progress.bestTime()) }}）
+        </template>
+      </p>
+    </div>
   </section>
 </template>
 
@@ -88,6 +111,11 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+.level-info-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .level-preview {
   display: block;

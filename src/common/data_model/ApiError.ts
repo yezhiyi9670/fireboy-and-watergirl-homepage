@@ -1,6 +1,6 @@
 import type { Api } from "../api/Api"
 
-export class ApiError extends Error {
+export default class ApiError extends Error {
   constructor(
     public errorBody: Api.ApiErrorBody,
     message?: string,
