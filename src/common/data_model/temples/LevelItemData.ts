@@ -8,7 +8,7 @@ export class LevelItemData {
   y!: number
   filename!: string
   time!: number
-  mobileTime!: number
+  mobileTime?: number
   required!: number
   _id!: number | string
 
@@ -89,7 +89,7 @@ export class LevelItemData {
   }
   static formatWalkthroughDuration(seconds?: number) {
     if(seconds == null) {
-      return '--'
+      return '缺失'
     }
     const remainSeconds = seconds % 60
     const minutes = Math.round((seconds - remainSeconds) / 60)

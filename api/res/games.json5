@@ -8,7 +8,7 @@
   
   // path(!): Filesystem relative path to game dir, for backend only and hidden from frontend.
   // storage_namespace(!): localStorage key namespace. It is assumed that {namespace}:progress stores the game progress.
-  // level_namespasce(?): If present, level IDs in this game will be displayed as {namespace}-{id}.
+  // level_namespace(?): If present, level IDs in this game will be displayed as {namespace}-{id}.
   // cheat_flags(?): Available localStorage cheat flags stored at {namespace}:{flag_name}.
   // created(?): Introduction date of the game.
   // extras.level_desc(?): User-friendly description of newly-added levels.
@@ -29,7 +29,7 @@
     },
     path: "../../A/dist/",
     storage_namespace: "fb-forest",
-    level_namespasce: "1",
+    level_namespace: "1",
     cheat_flags: [ "invulnerable", "unlock" ],
     extras: {
       levels_desc: "有额外关卡：小修改关卡 51–63、原创奖励关 64–66。",
@@ -47,7 +47,7 @@
     },
     path: "../../B/dist/",
     storage_namespace: "fb-light",
-    level_namespasce: "2",
+    level_namespace: "2",
     cheat_flags: [ "invulnerable", "unlock" ],
     accept_legacy_import: true,
   },
@@ -61,7 +61,7 @@
     },
     path: "../../C/dist/",
     storage_namespace: "fb-ice",
-    level_namespasce: "3",
+    level_namespace: "3",
     cheat_flags: [ "invulnerable", "unlock" ],
     extras: {
       levels_desc: "有额外关卡：小修改关卡 51–64、原创奖励关 65–66。",
@@ -79,7 +79,7 @@
     },
     path: "../../D/dist/",
     storage_namespace: "fb-crystal",
-    level_namespasce: "4",
+    level_namespace: "4",
     cheat_flags: [ "invulnerable", "unlock" ],
     accept_legacy_import: true,
   },
@@ -93,7 +93,7 @@
     },
     path: "../../E/dist/",
     storage_namespace: "fb-elements",
-    level_namespasce: "5",
+    level_namespace: "5",
     cheat_flags: [ "invulnerable", "unlock" ],
     accept_legacy_import: true,
   },
@@ -107,7 +107,7 @@
     },
     path: "../../F/dist/",
     storage_namespace: "fb-fairytales",
-    level_namespasce: "6",
+    level_namespace: "6",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
     level_extra_fields: {
       wing: "number",
@@ -125,7 +125,7 @@
     },
     path: "../../G/dist/",
     storage_namespace: "fb-friends",
-    level_namespasce: "7",
+    level_namespace: "7",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
     level_extra_fields: {
       skippable: "boolean",

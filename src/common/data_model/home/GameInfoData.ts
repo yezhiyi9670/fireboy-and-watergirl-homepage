@@ -1,4 +1,4 @@
 export class GameInfoData {
-  type: 'legacy' | 'multi' = 'legacy'
-  temples: string[] = []
+  type!: 'legacy' | 'multi'
+  temples!: string[]
 }

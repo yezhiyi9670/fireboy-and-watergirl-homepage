@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, toRef } from 'vue';
 import { Api } from '../../../common/api/Api';
 import LevelTypeIcon from '../../components/LevelTypeIcon.vue';
 import { TempleItemData } from '../../../common/data_model/temples/TempleItemData.ts';
 import { LevelItemData } from '../../../common/data_model/temples/LevelItemData.ts';
 import { GameItemData } from '../../../common/data_model/home/GameItemData.ts';
+import { ApiTemplesData } from '../../../common/data_model/temples/ApiTemplesData.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -14,7 +15,6 @@ const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
 
 const gameKey = inject(GameItemData.kInjectionKey)
-// const game = inject(GameItemData.injectionKey)
 
 const levelPreviewUrl = computed(() => {
   return Api.getUrl('level_preview', {
@@ -31,10 +31,7 @@ const levelPreviewUrl = computed(() => {
 const shownTitle = computed(() => {
   return props.level.getShownTitle()
 })
-
-const shownNumbering = computed(() => {
-  return props.level.getShownNumbering()
-})
+const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(props, 'level'))
 
 </script>
 
@@ -47,7 +44,7 @@ const shownNumbering = computed(() => {
     </h3>
     <p class="level-info">
       <v-icon title="关卡号" name="md-numbers-twotone" />
-      {{ shownNumbering }}
+      {{ disambiguousNumbering }}
       <span class="spacer" />
       <v-icon
         title="放映时间（多人/单人）"

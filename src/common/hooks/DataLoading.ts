@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue";
+import { provide, ref, type InjectionKey, type Ref } from "vue";
 
 export type LoadingState = 'loading' | 'success' | 'error'
 

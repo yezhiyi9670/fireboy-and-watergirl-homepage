@@ -5,10 +5,10 @@ import { GameUrlInfo } from "./GameUrlInfo"
 import { Type } from "class-transformer"
 
 export class GameItemData {
-  name: string = ''
+  name!: string
   @Type(() => GameUrlInfo) url?: GameUrlInfo
-  storage_namespace: string = ''
-  level_namespace?: string = ''
+  storage_namespace!: string
+  level_namespace?: string
   cheat_flags?: string[]
   @Type(() => ExtraLevelsInfoData) extras?: ExtraLevelsInfoData
   created?: string

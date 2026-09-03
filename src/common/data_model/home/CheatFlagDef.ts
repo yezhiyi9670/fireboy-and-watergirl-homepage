@@ -1,4 +1,4 @@
 export class CheatFlagDef {
-  name: string = ''
+  name!: string
   description?: string
 }
