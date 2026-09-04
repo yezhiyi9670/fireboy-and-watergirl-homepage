@@ -13,7 +13,7 @@ const dialogOpen = ref(false)
 
 <template>
   <div class="outer">
-    <div class="text">游戏进程数据读取失败。</div>
+    <div class="text">游戏进程数据读取失败，可能已损坏。</div>
     <div class="action">
       <FancyButton theme="ambient" smaller @click="dialogOpen=true">详情</FancyButton>
     </div>
@@ -22,7 +22,7 @@ const dialogOpen = ref(false)
     :open="dialogOpen"
     title="错误详情"
     dismissable
-    hasConfirm
+    hasNeutral
     @close="dialogOpen=false"
   >
     <div style="display: flex; flex-direction: column; gap: 0.5em">

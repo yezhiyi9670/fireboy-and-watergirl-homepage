@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
+import LsGameProgressData from '../../common/data_model/progress/LsGameProgressData.ts';
+import ProgressRepair from './progress_manip/ProgressRepair.vue';
 
 const props = defineProps<{
   gameName: string,
@@ -14,8 +16,18 @@ const props = defineProps<{
 }>()
 
 const currentTab = ref<'gallery' | 'map'>('map')
-const history = window.history
 const game = inject(GameItemData.injectionKey)
+const progress = inject(LsGameProgressData.injectionKey)
+
+const repairTreatment = computed(() => {
+  if(props.progressError) {
+    return null
+  }
+  if(progress?.value == null) {
+    return null
+  }
+  return progress.value.calculateRepairTreatment(props.templesData)
+})
 </script>
 
 <template>
@@ -58,6 +70,9 @@ const game = inject(GameItemData.injectionKey)
     <div v-if="progressError" class="error">
       <ProgressError :error="progressError" />
     </div>
+    <div v-if="repairTreatment" class="repair">
+      <ProgressRepair :treatment="repairTreatment" :templesData="templesData" />
+    </div>
   </div>
 </template>
 
@@ -75,6 +90,12 @@ const game = inject(GameItemData.injectionKey)
 }
 .error {
   border-top: 4px solid var(--color-caution);
+  background: var(--color-surface);
+  padding: 8px;
+}
+.repair {
+  border-top: 4px solid var(--color-tertiary);
+  background: var(--color-surface);
   padding: 8px;
 }
 .title-line {

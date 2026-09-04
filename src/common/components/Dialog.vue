@@ -6,9 +6,9 @@ const props = defineProps<{
   open?: boolean,
   title?: string,
   dismissable?: boolean,
-  hasCancel?: boolean,
-  hasNeutral?: boolean,
-  hasConfirm?: boolean,
+  hasCancel?: boolean | string,
+  hasNeutral?: boolean | string,
+  hasConfirm?: boolean | string,
   theme?: 'primary' | 'caution' | 'tertiary'
 }>()
 const emit = defineEmits<{
@@ -41,9 +41,15 @@ function tryDismiss() {
               <slot />
             </div>
             <div class="dialog-footer" v-if="props.hasCancel || props.hasNeutral || props.hasConfirm">
-              <FancyButton :theme="props.theme ?? 'primary'" v-if="props.hasConfirm" @click="emitClose(true)">确定</FancyButton>
-              <FancyButton :theme="props.theme ?? 'primary'" v-if="props.hasNeutral" @click="emitClose(null)">完成</FancyButton>
-              <FancyButton theme="ambient" v-if="props.hasCancel" @click="emitClose(false)">取消</FancyButton>
+              <FancyButton :theme="props.theme ?? 'primary'" v-if="props.hasConfirm" @click="emitClose(true)">
+                {{ typeof hasConfirm == 'string' ? hasConfirm : '确定' }}
+              </FancyButton>
+              <FancyButton :theme="props.theme ?? 'primary'" v-if="props.hasNeutral" @click="emitClose(null)">
+                {{ typeof hasNeutral == 'string' ? hasNeutral : '关闭' }}
+              </FancyButton>
+              <FancyButton theme="ambient" v-if="props.hasCancel" @click="emitClose(false)">
+                {{ typeof hasCancel == 'string' ? hasCancel : '取消' }}
+              </FancyButton>
             </div>
           </div>
         </div>

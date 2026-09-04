@@ -47,6 +47,7 @@ provide(GameItemData.kInjectionKey, gameId)
 provide(GameItemData.injectionKey, game)
 provide(ApiTemplesData.injectionKey, templesLastValue)
 provide(LsGameProgressData.injectionKey, progressLastValue)
+provide(LsGameProgressData.reloadInjectionKey, progressReload)
 
 const currentGameName = computed(() => homeData?.value?.games[gameId.value]?.name)
 const newPageTitle = computed(() => {

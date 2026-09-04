@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import FancyButton from '../../common/components/FancyButton.vue';
-
-const history = window.history
 </script>
 
 <template>

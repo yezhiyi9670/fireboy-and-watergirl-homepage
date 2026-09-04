@@ -392,6 +392,7 @@ function executeImport() {
       <ExtraInfo caution>
         <div>原有游戏成绩将永久丢失！无法撤销！</div>
         <div>如有必要，请先导出原有数据的备份。</div>
+        <div>覆盖时游戏本身应处于关闭状态。</div>
       </ExtraInfo>
     </div>
   </Dialog>
