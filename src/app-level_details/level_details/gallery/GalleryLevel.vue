@@ -119,7 +119,7 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
 }
 .level-preview {
   display: block;
-  aspect-ratio: 1.3448275862068966; /* 39/29 */
+  aspect-ratio: 39 / 29;
   object-fit: contain;
   width: 100%;
   max-width: 280px;

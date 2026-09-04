@@ -21,6 +21,24 @@ export default class ApiTemplesData {
     this.recalculateTemplePrefixes()
   }
 
+  /**
+   * Expensive. Shall be memoized when rendering.
+   */
+  calculateSortedTemples() {
+    const ret = Object.entries(this.temples)
+    ret.sort((a, b) => {
+      function absEvenOdd(val: number) {
+        if(val < 0) {
+          return 2 * (-val) - 1
+        } else {
+          return 2 * val
+        }
+      }
+      return absEvenOdd(a[1].index) - absEvenOdd(b[1].index)
+    })
+    return ret
+  }
+
   recalculateTemplePrefixes() {
     const names = Object.values(this.temples).map(temple => {
       return temple.label

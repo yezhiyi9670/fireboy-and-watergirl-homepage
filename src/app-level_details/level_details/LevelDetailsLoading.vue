@@ -9,7 +9,6 @@ const history = window.history
     <div class="tabs">
       <FancyButton
         theme="none"
-        @click="evt => (history.go(-1), evt.preventDefault())"
         href="#/home"
       >
         <v-icon style="transform:scale(1.15)" name="la-map" />

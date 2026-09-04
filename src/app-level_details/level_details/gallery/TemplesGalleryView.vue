@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import type TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import { computed, inject } from 'vue';
 import GalleryTemple from './GalleryTemple.vue';
 import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
+import type ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 
 const props = defineProps<{
-  temples: Record<string, TempleItemData>
+  data: ApiTemplesData
 }>()
+
+const sortedTemples = computed(() => {
+  return props.data.calculateSortedTemples()
+})
 
 const progress = inject(LsGameProgressData.injectionKey)
 </script>
@@ -14,7 +18,7 @@ const progress = inject(LsGameProgressData.injectionKey)
 <template>
   <div class="gallery-view">
     <GalleryTemple
-      v-for="temple, templeKey in temples"
+      v-for="[templeKey, temple] of sortedTemples"
       :key="templeKey"
       :temple="temple"
       :temple-key="templeKey"

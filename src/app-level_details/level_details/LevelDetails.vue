@@ -13,7 +13,7 @@ const props = defineProps<{
   progressError: Error | null,
 }>()
 
-const currentTab = ref<'gallery' | 'map'>('gallery')
+const currentTab = ref<'gallery' | 'map'>('map')
 const history = window.history
 const game = inject(GameItemData.injectionKey)
 </script>
@@ -23,7 +23,6 @@ const game = inject(GameItemData.injectionKey)
     <div class="tabs">
       <FancyButton
         theme="none"
-        @click="evt => (history.go(-1), evt.preventDefault())"
         href="#/home"
       >
         <v-icon style="transform:scale(1.15)" name="la-map" />
@@ -50,9 +49,11 @@ const game = inject(GameItemData.injectionKey)
         {{ props.gameName }}
       </FancyButton>
     </div>
-    <div class="container">
-      <TemplesGalleryView v-if="currentTab == 'gallery'" :temples="templesData.temples" />
-      <TemplesMapView v-if="currentTab == 'map'" :temples="templesData.temples" />
+    <div class="container" :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}">
+      <TemplesGalleryView :data="templesData" />
+    </div>
+    <div class="container" :style="{display: currentTab == 'map' ? 'flex' : 'none'}">
+      <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
     </div>
     <div v-if="progressError" class="error">
       <ProgressError :error="progressError" />
@@ -84,8 +85,16 @@ const game = inject(GameItemData.injectionKey)
   text-overflow: ellipsis;
 }
 .container {
+  container-type: size;
+  container-name: level-details-view;
   height: 0;
   flex: 1;
   display: flex;
+}
+@container level-details-view (min-width: 0px) {
+  .container>* {
+    --container-width: 100cqw;
+    --container-height: 100cqh;
+  }
 }
 </style>

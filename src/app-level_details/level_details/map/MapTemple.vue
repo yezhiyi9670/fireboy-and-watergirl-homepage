@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, provide, ref, toRef } from 'vue';
-import GalleryLevel from './GalleryLevel.vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 
@@ -27,14 +26,9 @@ const sortedLevels = computed(() => {
       <span class="temple-label">{{ temple.label }}</span>
       <span class="temple-badge" :style="{backgroundColor: temple.color}"></span>
     </h2>
-    <div class="gallery-grid" :style="{display: expanded ? 'grid' : 'none'}">
-      <GalleryLevel
-        v-for="level of sortedLevels"
-        :key="level._id"
-        :temple="temple"
-        :level="level"
-        :progress="progress?.getLevel(level._id)"
-      />
+    <div class="temple-map-outer" :style="{display: expanded ? 'block' : 'none'}">
+      <div class="temple-map">
+      </div>
     </div>
   </div>
 </template>
@@ -58,5 +52,24 @@ const sortedLevels = computed(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
+}
+.temple-map-outer {
+  margin: 0;
+}
+.temple-map {
+  aspect-ratio: 39 / 29;
+  max-width: calc(var(--container-width) - 48px);
+  max-height: max(100px, calc(var(--container-height) - 100px));
+  background: #FA00FA;
+  margin: 0 auto;
+  position: relative;
+}
+@media (max-width: 499px) {
+  .temple-map-outer {
+    margin: 0 -24px;
+  }
+  .temple-map {
+    max-width: calc(var(--container-width));
+  }
 }
 </style>
