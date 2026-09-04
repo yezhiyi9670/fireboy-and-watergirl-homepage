@@ -13,9 +13,9 @@ provide(TempleItemData.kInjectionKey, toRef(props, 'templeKey'))
 provide(TempleItemData.injectionKey, toRef(props, 'temple'))
 const expanded = ref(true)
 
-const sortedLevels = computed(() => {
-  return props.temple.calculateSortedLevels()
-})
+// const sortedLevels = computed(() => {
+//   return props.temple.calculateSortedLevels()
+// })
 
 </script>
 
