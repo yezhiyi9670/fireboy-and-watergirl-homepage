@@ -1,11 +1,23 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted } from 'vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
+import { useEventListener } from '@vueuse/core';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
+
+function dismissProperties() {
+  selectionState?.closeProperties()
+}
+function onWindowKeydown(evt: KeyboardEvent) {
+  if(evt.key !== 'Escape' || evt.isComposing || evt.keyCode === 229) {
+    return
+  }
+  dismissProperties()
+}
+useEventListener('keydown', onWindowKeydown)
 
 const propertiesActive = computed(() => {
   return selectionState?.propertiesActive.value ?? false
@@ -26,9 +38,6 @@ const globalStats = computed(() => {
   }
   return { temples: Object.keys(data.temples).length, levels, edges }
 })
-function dismissProperties() {
-  selectionState?.closeProperties()
-}
 </script>
 
 <template>
