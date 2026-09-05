@@ -10,6 +10,7 @@ import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
 import LsGameProgressData from '../../common/data_model/progress/LsGameProgressData.ts';
 import ProgressRepair from './progress_manip/ProgressRepair.vue';
+import HomeBackButton from '../components/HomeBackButton.vue';
 
 const props = defineProps<{
   gameName: string,
@@ -47,12 +48,7 @@ const repairTreatment = computed(() => {
 <template>
   <div class="toplevel">
     <div class="tabs">
-      <FancyButton
-        theme="none"
-        href="#/home"
-      >
-        <v-icon style="transform:scale(1.15)" name="la-map" />
-      </FancyButton>
+      <HomeBackButton />
       <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="switchTab('gallery')">画廊</FancyButton>
       <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="switchTab('map')">地图</FancyButton>
       

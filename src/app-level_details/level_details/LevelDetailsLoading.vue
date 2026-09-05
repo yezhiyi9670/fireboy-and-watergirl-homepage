@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import FancyButton from '../../common/components/FancyButton.vue';
+import HomeBackButton from '../components/HomeBackButton.vue';
 </script>
 
 <template>
   <div class="toplevel">
     <div class="tabs">
-      <FancyButton
-        theme="none"
-        href="#/home"
-      >
-        <v-icon style="transform:scale(1.15)" name="la-map" />
-      </FancyButton>
+      <HomeBackButton />
       <FancyButton theme="none" not-button>加载中……</FancyButton>
     </div>
     <div class="container"></div>
