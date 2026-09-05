@@ -24,10 +24,10 @@ const positioning = computed<CSSProperties>(() => {
   const level = props.level
   return {
     position: 'absolute',
-    left: `calc(${level.x} * var(--container-width))`,
-    top: `calc(${level.y} * var(--container-height))`,
+    left: `calc(${level.x.toFixed(6)} * var(--container-width))`,
+    top: `calc(${level.y.toFixed(6)} * var(--container-height))`,
     aspectRatio: 1,
-    width: `calc(${iconSize} * var(--container-width))`,
+    width: `calc(${iconSize.toFixed(6)} * var(--container-width))`,
     transform: 'translateX(-50%) translateY(-50%)',
   }
 })
@@ -53,13 +53,27 @@ const iconUrl = computed(() => {
   })
 })
 
+const textShadow = computed<CSSProperties>(() => {
+  const em = 0.1
+  const portions = 4
+  let val = ''
+  for(let i = 0; i < portions; i++) {
+    const angle = 2 * Math.PI * (i / portions)
+    val += `${(em * Math.cos(angle)).toFixed(6)}em ${(em * Math.sin(angle)).toFixed(6)}em 0.2em var(--color-mapnum-border)`
+    if(i < portions - 1) {
+      val += ','
+    }
+  }
+  return { textShadow: val }
+})
+
 </script>
 
 <template>
   <div class="map-level" :style="positioning">
     <img class="icon" :srcset="iconUrl" @dragstart.prevent />
     <div class="numbering-outer">
-      <div class="numbering-inner">
+      <div class="numbering-inner" :style="textShadow">
         {{ props.level.getShownNumbering() }}
       </div>
     </div>
@@ -91,7 +105,7 @@ const iconUrl = computed(() => {
   white-space: nowrap;
   overflow: visible;
   color: var(--color-mapnum-inner);
-  text-shadow: 0 0 .2em var(--color-mapnum-border);
+  text-shadow: 0 0 0 var(--color-mapnum-border);
   font-size: calc(0.024 * var(--container-width));
   user-select: none;
 }

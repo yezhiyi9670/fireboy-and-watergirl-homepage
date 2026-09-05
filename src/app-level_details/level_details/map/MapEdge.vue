@@ -39,13 +39,13 @@ const positioning = computed<CSSProperties | null>(() => {
   return {
     boxSizing: 'content-box',
     position: 'absolute',
-    left: `calc(${center[0]} * var(--canvas-width))`,
-    top: `calc(${center[1]} * var(--canvas-width))`,
-    width: `calc(${len} * var(--canvas-width))`,
-    height: `calc(${lineWidth} * var(--canvas-width))`,
-    borderTopWidth: `calc(${borderWidth} * var(--canvas-width))`,
-    borderBottomWidth: `calc(${borderWidth} * var(--canvas-width))`,
-    transform: `translateX(-50%) translateY(-50%) rotate(${degs}deg)`,
+    left: `calc(${center[0].toFixed(6)} * var(--canvas-width))`,
+    top: `calc(${center[1].toFixed(6)} * var(--canvas-width))`,
+    width: `calc(${len.toFixed(6)} * var(--canvas-width))`,
+    height: `calc(${lineWidth.toFixed(6)} * var(--canvas-width))`,
+    borderTopWidth: `calc(${borderWidth.toFixed(6)} * var(--canvas-width))`,
+    borderBottomWidth: `calc(${borderWidth.toFixed(6)} * var(--canvas-width))`,
+    transform: `translateX(-50%) translateY(-50%) rotate(${degs.toFixed(6)}deg)`,
     transformOrigin: 'center',
   }
 })
