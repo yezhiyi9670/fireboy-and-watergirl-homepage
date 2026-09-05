@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted } from 'vue';
+import { computed, inject } from 'vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
