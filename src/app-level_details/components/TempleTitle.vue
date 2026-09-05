@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type TempleItemData from '../../../common/data_model/temples/TempleItemData';
+import type TempleItemData from '../../common/data_model/temples/TempleItemData';
 
 const props = defineProps<{
   temple: TempleItemData
