@@ -104,7 +104,7 @@ const repairTreatment = computed(() => {
         @click="onContentBlankClick"
         @keydown.esc="onEsc"
       >
-        <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
+        <TemplesMapView :data="templesData" />
       </div>
       <div v-if="progressError" class="error">
         <ProgressError :error="progressError" />
