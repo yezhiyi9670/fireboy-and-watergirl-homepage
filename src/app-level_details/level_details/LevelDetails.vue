@@ -13,6 +13,7 @@ import LsGameProgressData from '../../common/data_model/progress/LsGameProgressD
 import ProgressRepair from './progress_manip/ProgressRepair.vue';
 import HomeBackButton from '../components/HomeBackButton.vue';
 import PropertiesSidebar from './properties/PropertiesSidebar.vue';
+import GlobalPropertiesButton from './properties/GlobalPropertiesButton.vue';
 
 const props = defineProps<{
   gameName: string,
@@ -83,6 +84,7 @@ const repairTreatment = computed(() => {
         >
           {{ props.gameName }}
         </FancyButton>
+        <GlobalPropertiesButton />
       </div>
       <div
         class="container"

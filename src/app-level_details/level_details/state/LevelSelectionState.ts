@@ -37,6 +37,9 @@ export default class LevelSelectionState {
   closeProperties() {
     this.propertiesActive.value = false
   }
+  showProperties() {
+    this.propertiesActive.value = true
+  }
 
   isLevelSelected(templeKey: string, levelIid: string | number) {
     const s = this.selection.value
