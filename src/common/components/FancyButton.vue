@@ -66,6 +66,7 @@ defineExpose({ domElement })
   padding: 8px 10px;
   display: inline-block;
   text-decoration: none;
+  font: inherit;
   line-height: 1.4;
   box-sizing: border-box;
 }

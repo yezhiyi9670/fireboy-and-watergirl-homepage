@@ -6,6 +6,7 @@ const props = defineProps<{
   textarea?: boolean,
   rows?: number,
   type?: string,
+  placeholder?: string,
   readonly?: boolean,
   disabled?: boolean,
   smaller?: boolean,
@@ -37,6 +38,7 @@ defineExpose({ domElement })
       :disabled="props.disabled"
       :aria-disabled="props.disabled"
       :type="props.type"
+      :placeholder="props.placeholder"
       @keydown.enter.prevent="emit('submit')"
     />
   </template>
@@ -49,6 +51,7 @@ defineExpose({ domElement })
       :readonly="props.readonly"
       :disabled="props.disabled"
       :aria-disabled="props.disabled"
+      :placeholder="props.placeholder"
       @keydown.enter.ctrl.prevent="emit('submit')"
     />
   </template>
@@ -59,6 +62,8 @@ defineExpose({ domElement })
   padding: 8px 10px;
   display: inline-block;
   box-sizing: border-box;
+  font: inherit;
+  line-height: 1.4;
 }
 .FancyInput.smaller {
   padding: 6px 8px;

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, watch } from 'vue';
 import type { FieldSpecifier } from '../../data_model/field_specifier.ts';
-import FancyButton from '../../../common/components/FancyButton.vue';
-import FancyInput from '../../../common/components/FancyInput.vue';
+import FancyButton from '../FancyButton.vue';
+import FancyInput from '../FancyInput.vue';
+import FancySelect from '../FancySelect.vue';
 import {
   describeValueForForm,
   firstConformingForm,
@@ -15,11 +16,16 @@ import {
   type EditorForm,
 } from './omniForm.ts';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   spec: FieldSpecifier
   modelValue?: unknown
+  theme?: 'ambient' | 'primary' | 'caution' | 'tertiary'
   readonly?: boolean
-}>()
+  disabled?: boolean
+  smaller?: boolean
+}>(), {
+  theme: 'ambient',
+})
 const emit = defineEmits<{
   'update:modelValue': [value: unknown]
 }>()
@@ -28,7 +34,7 @@ const value = computed(() => normalizeValue(props.modelValue))
 const forms = computed(() => typeToForms(props.spec.type))
 const radios = computed(() => unionLetters(props.spec.type))
 const conforming = computed(() => valueConforms(value.value, props.spec.type))
-const canEdit = computed(() => !props.readonly && conforming.value)
+const canEdit = computed(() => !props.readonly && !props.disabled && conforming.value)
 
 const editing = ref(false)
 const commitFailed = ref(false)
@@ -38,8 +44,7 @@ const draftBool = ref(false)
 const draftChoice = ref<string | null>(null)
 
 const textControl = ref<{ domElement: HTMLElement | null } | null>(null)
-const selectEl = ref<HTMLSelectElement | null>(null)
-const boolEl = ref<HTMLInputElement | null>(null)
+const selectControl = ref<{ domElement: HTMLSelectElement | null } | null>(null)
 
 const displayForm = computed<EditorForm>(() => {
   if(conforming.value) {
@@ -54,6 +59,22 @@ const choiceMapping = computed<Record<string, string>>(() => {
   const form = editorForm.value
   return form?.form == 'choice' ? form.mapping : {}
 })
+const choiceOptions = computed(() => {
+  return Object.entries(choiceMapping.value).map(([ value, label ]) => ({ value, label }))
+})
+const booleanOptions = [
+  { value: true, label: '是' },
+  { value: false, label: '否' },
+] as const
+const booleanSelectValue = computed<boolean | null>({
+  get: () => draftBool.value,
+  set: (value) => {
+    if(value != null) {
+      draftBool.value = value
+    }
+  },
+})
+const nullText = ref('')
 
 watch([ draftText, draftBool, draftChoice ], () => {
   commitFailed.value = false
@@ -92,17 +113,41 @@ async function focusEditor(form: EditorForm) {
     case 'number':
     case 'string':
     case 'unknown':
+    case 'null':
       textControl.value?.domElement?.focus()
       break
-    case 'choice':
-      selectEl.value?.focus()
-      break
     case 'boolean':
-      boolEl.value?.focus()
+      selectControl.value?.domElement?.focus()
       break
-    case 'null':
+    case 'choice':
+      const select = selectControl.value?.domElement
+      select?.focus()
+      tryOpenSelect(select)
       break
   }
+}
+
+/** Best-effort: natively open the <select> dropdown on supporting browsers. */
+function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
+  if(select == null) {
+    return
+  }
+  const pickable = select as HTMLSelectElement & { showPicker?: () => void }
+  if(typeof pickable.showPicker === 'function') {
+    try {
+      pickable.showPicker()
+    } catch {
+      // Not user-activated or unsupported; fall back to focused (closed) select.
+    }
+  }
+}
+
+function beginEditingWith(form: EditorForm) {
+  editing.value = true
+  commitFailed.value = false
+  editorForm.value = form
+  initDraftFor(form, value.value)
+  void focusEditor(form)
 }
 
 function startEditing() {
@@ -113,11 +158,27 @@ function startEditing() {
   if(initial == null) {
     return
   }
-  editing.value = true
-  commitFailed.value = false
-  editorForm.value = initial
-  initDraftFor(initial, value.value)
-  void focusEditor(initial)
+  beginEditingWith(initial)
+}
+
+function isTypeActive(form: EditorForm) {
+  if(editing.value && editorForm.value != null) {
+    return editorForm.value.form === form.form
+  }
+  return displayForm.value.form === form.form
+}
+
+function handleTypeClick(form: EditorForm) {
+  if(!canEdit.value) {
+    return
+  }
+  if(editing.value) {
+    if(editorForm.value != null) {
+      switchEditorForm(form)
+    }
+  } else {
+    beginEditingWith(form)
+  }
 }
 
 function discardEditing() {
@@ -263,11 +324,54 @@ function switchEditorForm(target: EditorForm) {
   editorForm.value = target
   void focusEditor(target)
 }
+
+const rootEl = ref<HTMLElement | null>(null)
+
+function isFocusInsideRoot(node: Node | null) {
+  return node != null && rootEl.value != null && rootEl.value.contains(node)
+}
+function scheduleCommitOnIdleFocus() {
+  requestAnimationFrame(() => {
+    if(!editing.value || isFocusInsideRoot(document.activeElement)) {
+      return
+    }
+    attemptCommit()
+  })
+}
+function onFocusOut(evt: FocusEvent) {
+  if(!editing.value || editorForm.value == null) {
+    return
+  }
+  const related = evt.relatedTarget
+  if(related == null) {
+    // Caused either by removing the focused element (e.g. just entered edit mode)
+    // or by tabbing/clicking to a non-focusable spot; wait a frame to see where
+    // focus actually settled before deciding to commit.
+    scheduleCommitOnIdleFocus()
+  } else if(!isFocusInsideRoot(related as Node)) {
+    attemptCommit()
+  }
+}
 </script>
 
 <template>
-  <div class="omni-input" @keydown.esc.prevent="discardEditing">
+  <div class="omni-input" ref="rootEl" @keydown.esc.prevent="discardEditing" @focusout="onFocusOut">
     <div class="omni-head">
+      <div class="omni-types" role="radiogroup" :aria-label="'类型：' + spec.label">
+        <button
+          v-for="radio in radios"
+          :key="radio.letter"
+          type="button"
+          role="radio"
+          :disabled="!canEdit"
+          :aria-checked="isTypeActive(radio.form)"
+          :class="[ 'omni-radio', { active: isTypeActive(radio.form) } ]"
+          :title="radio.form.form"
+          @click="handleTypeClick(radio.form)"
+        >
+          {{ radio.letter }}
+        </button>
+      </div>
       <span class="omni-label">{{ spec.label }}</span>
       <span
         v-if="!conforming"
@@ -280,65 +384,61 @@ function switchEditorForm(target: EditorForm) {
 
     <template v-if="editing && editorForm != null">
       <div class="omni-edit">
-        <div v-if="radios.length > 1" class="omni-union-radios" role="radiogroup">
-          <button
-            v-for="radio in radios"
-            :key="radio.letter"
-            type="button"
-            role="radio"
-            :aria-checked="editorForm?.form == radio.form.form"
-            :class="[ 'omni-radio', { active: editorForm?.form == radio.form.form } ]"
-            :title="radio.form.form"
-            @click="switchEditorForm(radio.form)"
-          >
-            {{ radio.letter }}
-          </button>
-        </div>
-
         <div class="omni-control" :class="{ 'omni-invalid': commitFailed }">
           <FancyInput
             v-if="isTextForm(editorForm)"
             ref="textControl"
             v-model="draftText"
-            theme="ambient"
+            :theme="props.theme"
+            :disabled="props.disabled"
+            :smaller="props.smaller"
             :textarea="editorForm?.form == 'unknown'"
             :rows="6"
             @submit="attemptCommit"
           />
-          <label v-else-if="editorForm?.form == 'boolean'" class="omni-bool">
-            <input
-              ref="boolEl"
-              v-model="draftBool"
-              type="checkbox"
-              @keydown.enter.prevent="attemptCommit"
-            />
-            {{ draftBool ? '是' : '否' }}
-          </label>
-          <select
+          <FancySelect
+            v-else-if="editorForm?.form == 'boolean'"
+            ref="selectControl"
+            v-model="booleanSelectValue"
+            :theme="props.theme"
+            :disabled="props.disabled"
+            :smaller="props.smaller"
+            placeholder="—"
+            :options="booleanOptions"
+            @submit="attemptCommit"
+          />
+          <FancySelect
             v-else-if="editorForm?.form == 'choice'"
-            ref="selectEl"
+            ref="selectControl"
             v-model="draftChoice"
-            class="omni-select"
-            @keydown.enter.prevent="attemptCommit"
+            :theme="props.theme"
+            :disabled="props.disabled"
+            :smaller="props.smaller"
+            placeholder="—"
+            :options="choiceOptions"
+            @submit="attemptCommit"
+            @pick="attemptCommit"
+          />
+          <FancyInput
+            v-else-if="editorForm?.form == 'null'"
+            ref="textControl"
+            v-model="nullText"
+            :theme="props.theme"
+            :disabled="props.disabled"
+            :smaller="props.smaller"
+            readonly
+            placeholder="空"
+            @submit="attemptCommit"
+          />
+          <FancyButton
+            class="omni-discard"
+            :theme="props.theme"
+            :smaller="props.smaller"
+            aria-label="放弃编辑"
+            title="放弃编辑"
+            @click="discardEditing"
           >
-            <option :value="null" disabled>—</option>
-            <option
-              v-for="(label, key) in choiceMapping"
-              :key="key"
-              :value="key"
-            >
-              {{ label }}
-            </option>
-          </select>
-          <span v-else-if="editorForm?.form == 'null'" class="omni-null">空</span>
-        </div>
-
-        <div class="omni-actions">
-          <FancyButton theme="primary" smaller aria-label="提交" @click="attemptCommit">
-            <v-icon name="md-check-twotone" />
-          </FancyButton>
-          <FancyButton theme="none" smaller aria-label="放弃" @click="discardEditing">
-            <v-icon name="la-times-solid" />
+            <v-icon name="la-undo-alt-solid" />
           </FancyButton>
         </div>
       </div>
@@ -346,10 +446,13 @@ function switchEditorForm(target: EditorForm) {
 
     <div
       v-else
-      class="omni-display"
+      class="omni-display global-themed"
+      :class="[
+        'theme-' + props.theme,
+        { editable: canEdit, mismatched: !conforming, smaller: props.smaller, disabled: props.disabled }
+      ]"
       role="button"
       tabindex="0"
-      :class="{ editable: canEdit, mismatched: !conforming }"
       :aria-disabled="!canEdit"
       @click="startEditing"
       @keydown.enter.prevent="startEditing"
@@ -370,109 +473,108 @@ function switchEditorForm(target: EditorForm) {
 .omni-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  min-width: 0;
+}
+.omni-types {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 .omni-label {
   opacity: .75;
+  white-space: nowrap;
 }
 .omni-warn {
   color: var(--color-caution);
   display: inline-flex;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 .omni-edit {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.omni-union-radios {
-  display: flex;
-  gap: 4px;
-}
 .omni-radio {
   border: none;
-  padding: 2px 8px;
+  padding: 2px 6px;
   cursor: pointer;
   background: var(--color-ambient);
   color: inherit;
   font-weight: bold;
+  line-height: 1.2;
+}
+.omni-radio:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 .omni-radio.active {
-  background: var(--color-primary);
+  background: var(--color-t0);
   color: var(--color-r0);
 }
 .omni-control {
   display: flex;
-  align-items: flex-start;
+  align-items: start;
+  gap: 6px;
 }
-.omni-control :deep(.FancyInput) {
-  width: 100%;
+.omni-control :deep(.FancyInput),
+.omni-control :deep(.FancySelect) {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: vertical;
 }
-.omni-select {
-  width: 100%;
+.omni-discard {
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 .omni-control.omni-invalid {
   outline: 2px solid var(--color-caution);
   outline-offset: 2px;
   animation: omni-shake .12s ease-in-out 2;
 }
-.omni-bool {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 6px 8px;
-  background: var(--color-ambient);
-  user-select: none;
-}
-.omni-select {
-  background: var(--color-ambient);
-  border: none;
-  padding: 6px 8px;
-  color: inherit;
-}
-.omni-null {
-  padding: 6px 8px;
-  background: var(--color-ambient);
-  opacity: .6;
-}
-.omni-actions {
-  display: flex;
-  gap: 6px;
-}
 .omni-display {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-separator);
+  padding: 8px 10px;
   min-height: 1.4em;
   cursor: default;
   user-select: text;
+  box-sizing: border-box;
+  font: inherit;
+  line-height: 1.4;
+}
+.omni-display.smaller {
+  padding: 6px 8px;
 }
 .omni-display.editable {
   cursor: pointer;
 }
-.omni-display.editable:hover {
-  border-color: var(--color-primary);
+.omni-display.disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 .omni-display.mismatched {
-  border-color: var(--color-caution);
-  opacity: .8;
+  outline: 2px solid var(--color-caution);
+  outline-offset: -2px;
 }
 .omni-display-inner {
+  width: 0;
   flex: 1;
-  min-width: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  /* min-width: 0; */
+  min-height: 1.4em;
+  white-space: pre;
+  /* white-space: pre-wrap; */
+  /* word-break: break-word; */
   max-height: 12em;
   overflow: auto;
-  font-family: ui-monospace, monospace;
-  font-size: .85em;
+  scrollbar-width: none;
 }
 .omni-actual-kind {
   align-self: flex-start;
+  flex-shrink: 0;
   font-size: .7em;
   padding: 1px 6px;
   background: var(--color-caution);

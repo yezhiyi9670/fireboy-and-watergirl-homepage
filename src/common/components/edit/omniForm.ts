@@ -104,11 +104,11 @@ export function unionLetters(type: FieldType): { letter: string, form: EditorFor
 export function letterForForm(form: EditorForm): string {
   switch(form.form) {
     case 'number': return 'N'
-    case 'string':
-    case 'choice': return 'S'
+    case 'string': return 'S'
     case 'boolean': return 'B'
     case 'unknown': return 'U'
     case 'null': return 'V'
+    case 'choice': return 'C'
   }
 }
 
@@ -121,7 +121,7 @@ export function describeValue(value: unknown): string {
   return JSON.stringify(v)
 }
 
-export function describeValueForForm(value: unknown, form: EditorForm, specLabel?: string): string {
+export function describeValueForForm(value: unknown, form: EditorForm, _specLabel?: string): string {
   const v = normalizeValue(value)
   switch(form.form) {
     case 'choice':
