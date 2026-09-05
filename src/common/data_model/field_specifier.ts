@@ -1,8 +1,14 @@
 export type FieldTypeChoice = Record<string, string>
-export type FieldTypeSingular = 'number' | 'string' | 'boolean' | 'object' | FieldTypeChoice
-export type FieldType = FieldTypeSingular | FieldTypeSingular[]
+export type FieldTypeSingular = 'number' | 'string' | 'boolean' | 'object' | 'null' | FieldTypeChoice
+export type FieldTypeUnion = FieldTypeSingular[]
+export type FieldType = FieldTypeSingular | FieldTypeUnion
+
+export type FieldSpecifier = {
+  label: string
+  type: FieldType
+}
 export type FieldSpecifiers = {
-  [key: string]: FieldType
+  [key: string]: FieldSpecifier
 }
 
 export function choiceLabel(value: string | undefined, mapping: Record<string, string>) {
@@ -12,5 +18,5 @@ export function choiceLabel(value: string | undefined, mapping: Record<string, s
   for(let key in mapping) {
     return mapping[key]
   }
-  throw new Error('Enum mapping must have at least one item.')
+  throw new Error('Choice mapping must have at least one item.')
 }

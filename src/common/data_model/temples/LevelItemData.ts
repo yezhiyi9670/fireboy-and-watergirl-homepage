@@ -1,6 +1,9 @@
 import { Type } from "class-transformer"
 import type { FieldSpecifiers } from "../field_specifier"
 import LevelMetadata from "./LevelMetadata"
+import { computed, inject, type ComputedRef } from "vue"
+import TempleItemData from "./TempleItemData"
+import GameItemData from "../home/GameItemData"
 
 export default class LevelItemData {
   id!: number | string
@@ -48,26 +51,44 @@ export default class LevelItemData {
   [key: string]: unknown
 
   static globalKnownKeys: FieldSpecifiers = {
-    id: ['number', 'string'],
-    x: 'number',
-    y: 'number',
-    filename: 'string',
-    time: 'number',
-    mobileTime: 'number',
-    type: { 'general': '常规', 'speed': '竞速', 'puzzle': '解密', 'dark': '黑暗' },
+    id: { label: 'ID', type: ['number', 'string'] },
+    x: { label: 'X', type: 'number' },
+    y: { label: 'Y', type: 'number' },
+    filename: { label: '文件名', type: 'string' },
+    time: { label: '多人限时', type: 'number' },
+    mobileTime: { label: '单人限时', type: ['number', 'null'] },
+    type: { label: '类型', type: [{
+      'general': '常规', 'speed': '竞速', 'puzzle': '解密', 'dark': '黑暗'
+    }, 'null'] },
   }
   static treeTypeKnownKeys: FieldSpecifiers = {
-    initial: 'boolean'
+    initial: { label: '初始关卡', type: 'boolean' }
   }
-  static rowsTypeKnownKeys: FieldSpecifiers = {
-    elements: 'object'
-  }
-  static progressKnownKeys: FieldSpecifiers = {
-    played: 'boolean',
-    'best.diamonds': 'number',
-    'best.time': 'number',
-    'best.silverDiamond': 'number',
-    'best.stars': 'number'
+  static rowsTypeKnownKeys: FieldSpecifiers = { }
+
+  /**
+   * Required injections:
+   * - TempleItemData.injectionKey
+   * - GameItemData.injectionKey
+   */
+  static useKnownKeys(): ComputedRef<FieldSpecifiers> {
+    const temple = inject(TempleItemData.injectionKey)
+    const game = inject(GameItemData.injectionKey)
+    
+    return computed(() => {
+      const knownKeyDicts: FieldSpecifiers[] = []
+      knownKeyDicts.push(this.globalKnownKeys)
+      if(temple?.value.type == 'rows') {
+        knownKeyDicts.push(this.rowsTypeKnownKeys)
+      }
+      if(temple?.value.type == 'tree') {
+        knownKeyDicts.push(this.treeTypeKnownKeys)
+      }
+      if(game?.value.level_extra_fields) {
+        knownKeyDicts.push(game?.value.level_extra_fields)
+      }
+      return Object.assign({}, ...knownKeyDicts)
+    })
   }
 
   isOffscreen() {

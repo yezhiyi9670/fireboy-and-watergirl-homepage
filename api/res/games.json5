@@ -110,8 +110,8 @@
     level_namespace: "6",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
     level_extra_fields: {
-      wing: "number",
-      requirePerfects: "boolean",
+      wing: { label: "分支编号", type: "number" },
+      requirePerfects: { label: "特殊关卡", type: "boolean" },
     },
     accept_legacy_import: true,
   },
@@ -128,8 +128,8 @@
     level_namespace: "7",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
     level_extra_fields: {
-      skippable: "boolean",
-      shownId: [ "number", "string" ],
+      skippable: { label: "可跳过", type: "boolean"},
+      shownId: { label: "显示编号", type: [ "number", "string" ]},
     },
     created: "2026-06-01 21:36:00+0800",
     accept_legacy_import: true,

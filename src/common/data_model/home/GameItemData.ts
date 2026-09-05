@@ -3,6 +3,7 @@ import ExtraLevelsInfoData from "./ExtraLevelsInfoData"
 import GameInfoData from "./GameInfoData"
 import GameUrlInfo from "./GameUrlInfo"
 import { Type } from "class-transformer"
+import type { FieldSpecifiers } from "../field_specifier"
 
 export default class GameItemData {
   name!: string
@@ -14,6 +15,8 @@ export default class GameItemData {
   created?: string
   @Type(() => GameInfoData) info?: GameInfoData
   accept_legacy_import?: boolean
+  
+  level_extra_fields?: FieldSpecifiers
 
   canBeConsideredNew(date?: Date) {
     if(this.created == null) {
