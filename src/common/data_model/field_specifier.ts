@@ -1,5 +1,5 @@
 export type FieldTypeChoice = Record<string, string>
-export type FieldTypeSingular = 'number' | 'string' | 'boolean' | 'object' | 'null' | FieldTypeChoice
+export type FieldTypeSingular = 'number' | 'string' | 'boolean' | 'unknown' | 'null' | FieldTypeChoice
 export type FieldTypeUnion = FieldTypeSingular[]
 export type FieldType = FieldTypeSingular | FieldTypeUnion
 

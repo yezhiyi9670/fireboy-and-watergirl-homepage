@@ -3,6 +3,7 @@ import { computed, inject } from 'vue';
 import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
 import MapTemple from './MapTemple.vue';
 import type ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
+import OmniInputStorybook from '../../../common/components/edit/OmniInputStorybook.vue';
 
 const props = defineProps<{
   data: ApiTemplesData
@@ -24,6 +25,7 @@ const progress = inject(LsGameProgressData.injectionKey)
       :temple-key="templeKey"
       :progress="progress?.getTempleById(temple.id)"
     />
+    <OmniInputStorybook />
   </div>
 </template>
 
