@@ -4,7 +4,8 @@ import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts
 import LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
-import LevelCardContent from '../../components/LevelCardContent.vue';
+import LevelSummaryLines from '../../components/LevelSummaryLines.vue';
+import LevelPreviewImage from '../../components/LevelPreviewImage.vue';
 
 const props = defineProps<{
   level: LevelItemData
@@ -36,7 +37,8 @@ function select() {
     @keydown.enter="select"
     @keydown.space.prevent="select"
   >
-    <LevelCardContent :level="level" :progress="progress" />
+    <LevelPreviewImage :level="level" />
+    <LevelSummaryLines :level="level" :progress="progress" />
   </section>
 </template>
 

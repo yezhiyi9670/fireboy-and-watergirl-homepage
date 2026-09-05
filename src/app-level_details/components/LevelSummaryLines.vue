@@ -2,34 +2,25 @@
 import { computed, inject, toRef } from 'vue';
 import LsGameProgressData from '../../common/data_model/progress/LsGameProgressData';
 import TempleItemData from '../../common/data_model/temples/TempleItemData';
-import { Api } from '../../common/api/Api';
 import type LevelProgress from '../../common/data_model/progress/LevelProgress';
 import LevelItemData from '../../common/data_model/temples/LevelItemData';
-import GameItemData from '../../common/data_model/home/GameItemData';
 import ApiTemplesData from '../../common/data_model/temples/ApiTemplesData';
 import LevelTypeIcon from './LevelTypeIcon.vue';
+import FancyButton from '../../common/components/FancyButton.vue';
 
 const props = defineProps<{
   level: LevelItemData
   progress: LevelProgress | null | undefined
+  noProgress?: boolean
+  showIid?: boolean
+  locatable?: boolean
+}>()
+const emit = defineEmits<{
+  locate: [kind: 'gallery' | 'map']
 }>()
 
 const progressData = inject(LsGameProgressData.injectionKey)
 const temple = inject(TempleItemData.injectionKey)
-const templeKey = inject(TempleItemData.kInjectionKey)
-const gameKey = inject(GameItemData.kInjectionKey)
-
-const levelPreviewUrl = computed(() => {
-  return Api.getUrl('level_preview', {
-    game: gameKey?.value,
-    temple: templeKey?.value,
-    level_filter: {
-      ...(('id' in props.level) ? { id: props.level.id } : { }),
-      ...(('_id' in props.level) ? { _id: props.level._id } : { }),
-      ...(('filename' in props.level) ? { filename: props.level.filename } : { }),
-    }
-  })
-})
 
 const shownTitle = computed(() => {
   return props.level.getShownTitle()
@@ -39,7 +30,6 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
 </script>
 
 <template>
-  <img class="level-preview" :srcset="levelPreviewUrl" />
   <div class="level-info-lines">
     <h3 class="level-title">
       <div class="level-label">{{ shownTitle }}</div>
@@ -47,7 +37,7 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
     </h3>
     <p class="level-info">
       <v-icon title="关卡号" name="md-numbers-twotone" />
-      {{ disambiguousNumbering }}
+      {{ disambiguousNumbering }}{{ showIid ? (` [${level._id}]`) : '' }}
       <span class="spacer" />
       <v-icon
         title="放映时间（多人/单人）"
@@ -85,7 +75,7 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
         未知进度控制方式
       </template>
     </p>
-    <p v-if="progressData != null" class="level-info">
+    <p v-if="progressData != null && !noProgress" class="level-info">
       <template v-if="!progress || !progress.hasPlayed()">
         <v-icon title="游戏进程" name="md-horizontalrule-twotone" /> 未玩过
       </template>
@@ -101,6 +91,22 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
         等级 {{ progress.starsGradeNotation() }}（{{ LevelItemData.formatWalkthroughDuration(progress.bestTime()) }}）
       </template>
     </p>
+    <div v-if="locatable" class="locate">
+      <FancyButton
+        theme="ambient"
+        smaller
+        @click="emit('locate', 'gallery')"
+      >
+        在画廊中定位
+      </FancyButton>
+      <FancyButton
+        theme="ambient"
+        smaller
+        @click="emit('locate', 'map')"
+      >
+        在地图中定位
+      </FancyButton>
+    </div>
   </div>
 </template>
 
@@ -109,14 +115,6 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.level-preview {
-  display: block;
-  aspect-ratio: 39 / 29;
-  object-fit: contain;
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
 }
 .level-title {
   margin: 0;
@@ -131,14 +129,12 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
   display: inline-block;
   width: 1em;
 }
-@media (prefers-color-scheme: light) {
-  .level-preview {
-    filter: sepia() invert() hue-rotate(180deg) brightness(0.9) contrast(1.3);
-  }
+.locate {
+  display: flex;
+  gap: 12px;
 }
-@media (prefers-color-scheme: dark) {
-  .level-preview {
-    filter: sepia() contrast(0.88) brightness(1.05);
-  }
+.locate>* {
+  width: 0;
+  flex: 1;
 }
 </style>

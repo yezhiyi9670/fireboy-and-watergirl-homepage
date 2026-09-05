@@ -5,19 +5,13 @@ import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 
 const props = defineProps<{
-  temple: TempleItemData
   edge: EdgeItemData
 }>()
 
 const templeKey = inject(TempleItemData.kInjectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
 
-const sourceLevel = computed(() => {
-  return props.temple.getLevelByIid(props.edge.source)
-})
-const targetLevel = computed(() => {
-  return props.temple.getLevelByIid(props.edge.target)
-})
+const [ sourceLevel, targetLevel ] = props.edge.useEndpointLevels()
 
 const selected = computed(() => {
   return selectionState?.isEdgeSelected(templeKey?.value ?? '', props.edge) ?? false

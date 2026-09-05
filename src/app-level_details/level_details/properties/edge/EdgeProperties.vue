@@ -1,39 +1,56 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed } from 'vue';
 import type EdgeItemData from '../../../../common/data_model/temples/EdgeItemData.ts';
-import TempleItemData from '../../../../common/data_model/temples/TempleItemData.ts';
+import EdgeSummaryLines from '../../../components/EdgeSummaryLines.vue';
+import LevelSummaryLines from '../../../components/LevelSummaryLines.vue';
+import Separator from '../../../components/Separator.vue';
 
 const props = defineProps<{
   edge: EdgeItemData
 }>()
 
-const templeKey = inject(TempleItemData.kInjectionKey)
-const temple = inject(TempleItemData.injectionKey)
-
-const sourceLevel = computed(() => {
-  return temple?.value.getLevelByIid(props.edge.source) ?? null
-})
-const targetLevel = computed(() => {
-  return temple?.value.getLevelByIid(props.edge.target) ?? null
-})
+const [ sourceLevel, targetLevel ] = props.edge.useEndpointLevels()
 
 const json = computed(() => JSON.stringify(props.edge, null, 2))
 </script>
 
 <template>
   <div class="edge-properties">
-    <p class="props-placeholder">
-      连接线属性（占位）· 圣殿 {{ temple?.label }} ({{ templeKey }})
-      · {{ sourceLevel?.getShownNumbering() }} – {{ targetLevel?.getShownNumbering() }}
-    </p>
+    <EdgeSummaryLines
+      show-iid
+      locatable
+      :edge="edge"
+      @locate="kind => console.log('TODO locate', edge, kind)"
+    />
+    <Separator />
     <pre class="props-json">{{ json }}</pre>
+    <Separator />
+    <LevelSummaryLines
+      v-if="sourceLevel != null"
+      show-iid
+      no-progress
+      locatable
+      :level="sourceLevel"
+      :progress="null"
+      @locate="kind => console.log('TODO locate', sourceLevel, kind)"
+    />
+    <LevelSummaryLines
+      v-if="targetLevel != null"
+      show-iid
+      no-progress
+      locatable
+      :level="targetLevel"
+      :progress="null"
+      @locate="kind => console.log('TODO locate', targetLevel, kind)"
+    />
   </div>
 </template>
 
 <style lang="css" scoped>
-.props-placeholder {
-  margin: 0 0 8px;
-  opacity: .7;
+.edge-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }
 .props-json {
   margin: 0;

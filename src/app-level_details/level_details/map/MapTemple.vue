@@ -41,7 +41,7 @@ const sortedLevels = computed(() => {
     <div class="temple-map-outer" :style="{display: expanded ? 'block' : 'none'}">
       <div class="temple-map">
         <img alt="" class="temple-background" :srcset="backgroundUrl" @dragstart.prevent />
-        <MapEdge v-for="edge in temple.edges" :key="edge.getUniqueId()" :temple="temple" :edge="edge" />
+        <MapEdge v-for="edge in temple.edges" :key="edge.getUniqueId()" :edge="edge" />
         <MapLevel
           v-for="level of sortedLevels"
           :key="level._id"
