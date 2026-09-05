@@ -4,7 +4,7 @@ import GalleryLevel from './GalleryLevel.vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
-import { useTempleExpanded } from '../TempleExpandState.ts';
+import { useTempleExpanded } from '../state/TempleExpandState.ts';
 
 const props = defineProps<{
   templeKey: string

@@ -4,15 +4,15 @@ import { useRoute, useRouter } from 'vue-router';
 import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
-import TempleExpandState from './TempleExpandState.ts';
-import LevelSelectionState from './LevelSelectionState.ts';
+import TempleExpandState from './state/TempleExpandState.ts';
+import LevelSelectionState from './state/LevelSelectionState.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
 import LsGameProgressData from '../../common/data_model/progress/LsGameProgressData.ts';
 import ProgressRepair from './progress_manip/ProgressRepair.vue';
 import HomeBackButton from '../components/HomeBackButton.vue';
-import PropertiesSidebar from './PropertiesSidebar.vue';
+import PropertiesSidebar from './properties/PropertiesSidebar.vue';
 
 const props = defineProps<{
   gameName: string,

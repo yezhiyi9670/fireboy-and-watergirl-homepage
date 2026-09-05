@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
-import FancyButton from '../../common/components/FancyButton.vue';
-import LevelSelectionState from './LevelSelectionState.ts';
+import FancyButton from '../../../common/components/FancyButton.vue';
+import LevelSelectionState from '../state/LevelSelectionState.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 

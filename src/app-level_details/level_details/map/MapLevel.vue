@@ -5,7 +5,7 @@ import type LevelItemData from '../../../common/data_model/temples/LevelItemData
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
-import LevelSelectionState from '../LevelSelectionState.ts';
+import LevelSelectionState from '../state/LevelSelectionState.ts';
 
 const props = defineProps<{
   level: LevelItemData

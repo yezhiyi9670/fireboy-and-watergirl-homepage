@@ -2,7 +2,7 @@
 import { computed, inject, type CSSProperties } from 'vue';
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
-import LevelSelectionState from '../LevelSelectionState.ts';
+import LevelSelectionState from '../state/LevelSelectionState.ts';
 
 const props = defineProps<{
   temple: TempleItemData

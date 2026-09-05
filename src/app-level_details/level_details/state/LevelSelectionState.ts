@@ -1,5 +1,5 @@
 import { ref, type InjectionKey, type Ref } from 'vue'
-import type EdgeItemData from '../../common/data_model/temples/EdgeItemData.ts'
+import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts'
 
 export type LevelSelection =
   | { kind: 'level', templeKey: string, levelIid: string | number }

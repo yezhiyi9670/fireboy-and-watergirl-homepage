@@ -8,7 +8,7 @@ import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
-import LevelSelectionState from '../LevelSelectionState.ts';
+import LevelSelectionState from '../state/LevelSelectionState.ts';
 
 const props = defineProps<{
   level: LevelItemData

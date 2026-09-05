@@ -7,7 +7,7 @@ import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
 import MapEdge from './MapEdge.vue';
 import MapLevel from './MapLevel.vue';
-import { useTempleExpanded } from '../TempleExpandState.ts';
+import { useTempleExpanded } from '../state/TempleExpandState.ts';
 
 const props = defineProps<{
   templeKey: string
