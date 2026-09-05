@@ -22,7 +22,7 @@ const progress = inject(LsGameProgressData.injectionKey)
       :key="templeKey"
       :temple="temple"
       :temple-key="templeKey"
-      :progress="progress?.getTemple(temple.id)"
+      :progress="progress?.getTempleById(temple.id)"
     />
   </div>
 </template>
@@ -35,6 +35,6 @@ const progress = inject(LsGameProgressData.injectionKey)
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1.5em;
 }
 </style>

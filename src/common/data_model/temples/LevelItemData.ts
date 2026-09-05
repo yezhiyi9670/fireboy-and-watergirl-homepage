@@ -70,6 +70,9 @@ export default class LevelItemData {
     'best.stars': 'number'
   }
 
+  isOffscreen() {
+    return this.x <= -0.005 || this.y <= -0.005 || this.x >= 1.005 || this.y >= 1.005
+  }
   getShownNumbering() {
     const str = this.shownId ?? this.id
     const num = +str

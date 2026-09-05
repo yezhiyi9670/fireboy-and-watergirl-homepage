@@ -35,6 +35,11 @@ body {
   --color-caution-text: #C75E00;
   --color-tertiary: #A043BA;
   --color-outline: #d6b41b;
+  
+  --color-mapedge-inner: #fcc900;
+  --color-mapedge-border: #000;
+  --color-mapnum-inner: #FBFBFB;
+  --color-mapnum-border: #000;
 }
 @media (prefers-color-scheme: dark) {
   :root {

@@ -14,8 +14,11 @@ export default class TempleProgress {
 
   mutation() {
     this.init = true
-    const mapping = Object.create(null)
+    const mapping: Record<string | number, LevelProgress> = Object.create(null)
     for(const level of this.levels) {
+      if(level._id in mapping) {
+        console.warn('Duplicate level iid', level._id)
+      }
       mapping[level._id] = level
     }
     this.levelIidToLevel = mapping
@@ -26,7 +29,7 @@ export default class TempleProgress {
     }
   }
 
-  getLevel(levelIid: string | number) {
+  getLevelByIid(levelIid: string | number) {
     this.ensureInit()
     if(!(levelIid in this.levelIidToLevel)) {
       return null

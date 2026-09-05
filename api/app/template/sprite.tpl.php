@@ -7,7 +7,7 @@ $game_info = get_validated_game_info_of__($game_id);
 $game_path = BASE_PATH . $game_info->path;
 
 $atlas_id = $req->atlas ?? '';
-if(!is_safe_identifier($atlas_id)) {
+if(!is_safe_multipart_identifier($atlas_id)) {
     return_failure(
         404,
         'atlas_not_found', [$atlas_id],
@@ -22,9 +22,16 @@ if(!file_exists($atlas_json_path)) {
         "Atlas `$atlas_id` is not found."
     );
 }
-$atlas_data = json_decode(file_get_contents($atlas_json_path), false);
+$atlas_data_text = file_get_contents($atlas_json_path);
+$atlas_data = json_decode($atlas_data_text, false);
+if($atlas_data == null) {
+	$atlas_data = json_decode(@iconv('UTF-16', 'UTF-8', $atlas_data_text), false); // UTF-16LE ?
+}
+if($atlas_data == null) {
+	$atlas_data = json_decode(substr($atlas_data_text, 3), false); // UTF-8 BOM ?
+}
 $atlas_image_name = ($atlas_data->meta ?? (object)[])->image ?? '';
-if(is_safe_filename($atlas_image_name, '.png')) {
+if(!is_safe_filename($atlas_image_name, '.png')) {
     return_failure(
         500,
         'atlas_data_invalid', [],

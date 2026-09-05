@@ -61,7 +61,11 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
         {{ LevelItemData.formatWalkthroughDuration(level.mobileTime) }}
       </p>
       <p class="level-info">
-        <template v-if="temple?.type == 'rows'">
+        <template v-if="level.isOffscreen()">
+          <v-icon title="解锁方式" name="md-visibilityoff-twotone" />
+          不可见
+        </template>
+        <template v-else-if="temple?.type == 'rows'">
           <v-icon title="解锁方式" name="bi-patch-question" />
           未知进度控制方式
         </template>

@@ -6,6 +6,7 @@ import typia from "typia";
 import type ApiTemplesData from "../temples/ApiTemplesData";
 import ProgressRepairTreatment from "./repair/ProgressRepairTreatment";
 import ProgressRepairLevelList from "./repair/ProgressRepairLevelList";
+import type TempleItemData from "../temples/TempleItemData";
 
 export default class LsGameProgressData {
   @Type(() => TempleProgress)
@@ -17,8 +18,11 @@ export default class LsGameProgressData {
   private templeIdToTemple: Record<string, TempleProgress> = Object.create(null)
   mutation() {
     this.init = true
-    const mapping = Object.create(null)
+    const mapping: Record<string, TempleProgress> = Object.create(null)
     for(const temple of this.temples) {
+      if(temple.id in mapping) {
+        console.warn('Duplicate temple id', temple.id)
+      }
       mapping[temple.id] = temple
     }
     this.templeIdToTemple = mapping
@@ -29,7 +33,7 @@ export default class LsGameProgressData {
     }
   }
 
-  getTemple(templeId: string) {
+  getTempleById(templeId: string) {
     this.ensureInit()
     if(!(templeId in this.templeIdToTemple)) {
       return null
@@ -46,10 +50,15 @@ export default class LsGameProgressData {
     treatment.unexpectedTempleIds = thisTempleIds.difference(thatTempleIds).values().toArray()
     needsRepair ||= treatment.unexpectedTempleIds.length > 0
 
+    const templeIdToThatTemple: Record<string, TempleItemData> = {}
+    for(const temple of Object.values(that.temples)) {
+      templeIdToThatTemple[temple.id] = temple
+    }
+
     const commonTemples = thisTempleIds.intersection(thatTempleIds)
     for(const templeId of commonTemples) {
-      const thisLevelList = this.getTemple(templeId)!.levels
-      const thatLevelList = that.temples[templeId]!.levels
+      const thisLevelList = this.getTempleById(templeId)!.levels
+      const thatLevelList = templeIdToThatTemple[templeId]!.levels
       const thisLevelIids = new Set(thisLevelList.map(level => level._id))
       const thatLevelIids = new Set(thatLevelList.map(level => level._id))
       const levelList = new ProgressRepairLevelList()

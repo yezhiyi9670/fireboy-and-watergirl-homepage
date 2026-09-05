@@ -112,7 +112,7 @@ const repairTreatment = computed(() => {
   flex: 1;
   display: flex;
 }
-@container level-details-view (min-width: 0px) {
+@container level-details-view (min-width: 0) {
   .container>* {
     --container-width: 100cqw;
     --container-height: 100cqh;
