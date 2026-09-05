@@ -1,7 +1,9 @@
-import { Exclude, Type } from "class-transformer"
+import { Exclude, plainToInstance, Type } from "class-transformer"
 import EdgeItemData from "./EdgeItemData"
 import LevelItemData from "./LevelItemData"
 import type { InjectionKey, Ref } from "vue"
+import { asFiniteNumber, idsEqual } from "./idUtil"
+import typia from "typia"
 
 export default class TempleItemData {
   index!: number
@@ -46,6 +48,185 @@ export default class TempleItemData {
       return null
     }
     return this.levelIidToLevel[levelIid]
+  }
+
+  // --- Read-only queries ---------------------------------------------------
+
+  private maxNumeric(values: Iterable<unknown>): number | null {
+    let max: number | null = null
+    for(const value of values) {
+      const num = asFiniteNumber(value)
+      if(num != null && (max == null || num > max)) {
+        max = num
+      }
+    }
+    return max
+  }
+
+  isLevelIdOccupied(id: string | number) {
+    return this.levels.some(level => idsEqual(level.id, id))
+  }
+  isLevelIidOccupied(iid: string | number) {
+    return this.levels.some(level => idsEqual(level._id, iid))
+  }
+
+  /**
+   * Suggested numeric id: largest numeric `id` in this temple (ignoring ids
+   * that are not convertible to numbers) plus one.
+   */
+  nextFreeLevelId(): number {
+    const max = this.maxNumeric(this.levels.map(level => level.id))
+    return (max == null ? 0 : max) + 1
+  }
+  nextFreeLevelIid(): number {
+    const max = this.maxNumeric(this.levels.map(level => level._id))
+    return (max == null ? 0 : max) + 1
+  }
+
+  hasEdgeBetween(aIid: string | number, bIid: string | number) {
+    return this.edges.some(edge =>
+      (idsEqual(edge.source, aIid) && idsEqual(edge.target, bIid)) ||
+      (idsEqual(edge.source, bIid) && idsEqual(edge.target, aIid))
+    )
+  }
+  nextFreeEdgeId(): number {
+    const max = this.maxNumeric(this.edges.map(edge => edge.id))
+    return (max == null ? 0 : max) + 1
+  }
+  nextFreeEdgeIid(): number {
+    const max = this.maxNumeric(this.edges.map(edge => edge._id))
+    return (max == null ? 0 : max) + 1
+  }
+
+  // --- Mutations (trailing underscore: these alter real data) --------------
+
+  /**
+   * Append a brand-new level with the standard default fields.
+   */
+  createLevel_(id: string | number, iid: string | number): LevelItemData {
+    if(this.isLevelIdOccupied(id)) {
+      throw new Error('id ' + id + ' 已被占用')
+    }
+    if(this.isLevelIidOccupied(iid)) {
+      throw new Error('_id ' + iid + ' 已被占用')
+    }
+    const raw: Record<string, unknown> = {
+      id,
+      _id: iid,
+      x: 0.5,
+      y: 0.5,
+      time: 1,
+      mobileTime: 1,
+      required: 0,
+      filename: this.defaultLevelFilename(id),
+      type: 'general',
+      initial: false,
+    }
+    typia.assert<LevelItemData>(raw)
+    const level = plainToInstance(LevelItemData, raw)
+    this.levels.push(level)
+    this.mutation()
+    return level
+  }
+
+  defaultLevelFilename(levelId: string | number) {
+    return this.id + '/levels/' + this.id + '_' + levelId + '.json'
+  }
+
+  /**
+   * Rename `id` and/or `_id` of one level, updating edges and other levels'
+   * `__cloned_from` pointers that referenced the old iid.
+   */
+  renameLevelIds_(oldIid: string | number, newId: string | number, newIid: string | number): LevelItemData {
+    const level = this.getLevelByIid(oldIid)
+    if(level == null) {
+      throw new Error('未找到要修改的关卡')
+    }
+    if(!idsEqual(newId, level.id) && this.isLevelIdOccupied(newId)) {
+      throw new Error('id ' + newId + ' 已被占用')
+    }
+    if(!idsEqual(newIid, oldIid) && this.isLevelIidOccupied(newIid)) {
+      throw new Error('_id ' + newIid + ' 已被占用')
+    }
+    if(!idsEqual(newIid, oldIid)) {
+      for(const edge of this.edges) {
+        if(idsEqual(edge.source, oldIid)) {
+          edge.source = newIid
+        }
+        if(idsEqual(edge.target, oldIid)) {
+          edge.target = newIid
+        }
+      }
+      for(const other of this.levels) {
+        if(idsEqual((other as unknown as Record<string, unknown>).__cloned_from, oldIid)) {
+          (other as unknown as Record<string, unknown>).__cloned_from = newIid
+        }
+      }
+      level._id = newIid
+    }
+    level.id = newId
+    if(!idsEqual(newIid, oldIid)) {
+      this.mutation()
+    }
+    return level
+  }
+
+  /**
+   * Delete one level and everything that referenced it inside this temple.
+   */
+  deleteLevel_(iid: string | number): LevelItemData {
+    const index = this.levels.findIndex(level => idsEqual(level._id, iid))
+    if(index < 0) {
+      throw new Error('未找到要删除的关卡')
+    }
+    const removed = this.levels[index]
+    this.edges = this.edges.filter(edge =>
+      !idsEqual(edge.source, iid) && !idsEqual(edge.target, iid)
+    )
+    for(const other of this.levels) {
+      const record = other as unknown as Record<string, unknown>
+      if(idsEqual(record.__cloned_from, iid)) {
+        delete record.__cloned_from
+      }
+    }
+    this.levels.splice(index, 1)
+    this.mutation()
+    return removed
+  }
+
+  /**
+   * Create a connection between two existing levels of this temple.
+   */
+  createEdge_(aIid: string | number, bIid: string | number): EdgeItemData {
+    if(this.getLevelByIid(aIid) == null || this.getLevelByIid(bIid) == null) {
+      throw new Error('连接的关卡不存在')
+    }
+    if(idsEqual(aIid, bIid)) {
+      throw new Error('不能连接关卡自身')
+    }
+    if(this.hasEdgeBetween(aIid, bIid)) {
+      throw new Error('这两个关卡之间已有连接')
+    }
+    const raw: Record<string, unknown> = {
+      id: this.nextFreeEdgeId(),
+      _id: this.nextFreeEdgeIid(),
+      source: aIid,
+      target: bIid,
+    }
+    typia.assert<EdgeItemData>(raw)
+    const edge = plainToInstance(EdgeItemData, raw)
+    this.edges.push(edge)
+    return edge
+  }
+
+  /**
+   * Remove a specific edge from this temple.
+   */
+  deleteEdge_(edge: EdgeItemData) {
+    const index = this.edges.findIndex(candidate => candidate === edge)
+    if(index >= 0) {
+      this.edges.splice(index, 1)
+    }
   }
 
   /**

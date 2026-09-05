@@ -1,11 +1,11 @@
-import { Exclude, plainToInstance } from "class-transformer"
+import { Exclude, instanceToPlain, plainToInstance } from "class-transformer"
 import TempleItemData from "./TempleItemData"
 import { computed, inject, type InjectionKey, type Ref } from "vue"
 import { Api } from "../../api/Api"
 import ApiError from "../ApiError"
 import typia from "typia"
 import { TransformNPDict } from "../../utils/class_transform"
-import type LevelItemData from "./LevelItemData"
+import LevelItemData from "./LevelItemData"
 import GameItemData from "../home/GameItemData"
 
 export default class ApiTemplesData {
@@ -78,6 +78,61 @@ export default class ApiTemplesData {
   }
   getTemplePrefixes() {
     return this.templePrefixes ?? (this.templePrefixes = this.recalculateTemplePrefixes())
+  }
+
+  hasLevelFilename(filename: string) {
+    for(const temple of Object.values(this.temples)) {
+      if(temple.levels.some(level => level.filename === filename)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
+   * Pick `<stem>_<n>.json` where `n` is the smallest positive integer whose
+   * filename is not yet used by any level in the whole game.
+   */
+  nextCloneFilename(origFilename: string) {
+    const stem = origFilename.endsWith('.json')
+      ? origFilename.slice(0, -'.json'.length)
+      : origFilename
+    let n = 1
+    while(this.hasLevelFilename(stem + '_' + n + '.json')) {
+      n++
+    }
+    return stem + '_' + n + '.json'
+  }
+
+  /**
+   * Append a deep clone of `sourceIid`, with new ids and a game-wide-unique
+   * clone filename, to the given temple.
+   */
+  cloneLevel_(templeKey: string, sourceIid: string | number, newId: string | number, newIid: string | number): LevelItemData {
+    const temple = this.temples[templeKey]
+    if(temple == null) {
+      throw new Error('未找到圣殿')
+    }
+    if(temple.isLevelIdOccupied(newId)) {
+      throw new Error('id ' + newId + ' 已被占用')
+    }
+    if(temple.isLevelIidOccupied(newIid)) {
+      throw new Error('_id ' + newIid + ' 已被占用')
+    }
+    const source = temple.getLevelByIid(sourceIid)
+    if(source == null) {
+      throw new Error('未找到要克隆的关卡')
+    }
+    const plain: Record<string, unknown> = instanceToPlain(source)
+    plain.id = newId
+    plain._id = newIid
+    plain.filename = this.nextCloneFilename(source.filename)
+    plain.__cloned_from = sourceIid
+    typia.assert<LevelItemData>(plain)
+    const clone = plainToInstance(LevelItemData, plain)
+    temple.levels.push(clone)
+    temple.mutation()
+    return clone
   }
   /**
    * Get unambiguous global numbering of the level.
