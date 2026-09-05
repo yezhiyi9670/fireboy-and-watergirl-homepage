@@ -40,6 +40,16 @@ const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
       @locate="handleLocate"
     />
     <Separator />
+    <div v-if="isEditingAllowed" class="edit-actions">
+      <FancyButton
+        theme="tertiary"
+        smaller
+      >更改 ID</FancyButton>
+      <FancyButton
+        theme="tertiary"
+        smaller
+      >添加连接</FancyButton>
+    </div>
     <pre class="props-json">{{ json }}</pre>
     <div v-if="isEditingAllowed" class="edit-actions">
       <FancyButton

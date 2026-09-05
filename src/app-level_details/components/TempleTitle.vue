@@ -33,12 +33,13 @@ const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
       >
         新关卡
       </FancyButton>
+    </div>
+    <div v-if="false" class="actions">
       <FancyButton
-        v-if="isEditingAllowed"
-        theme="tertiary"
-        @click.stop="console.log('TODO new edge')"
+        theme="caution"
+        not-button
       >
-        新连接线
+        点选另一关卡进行连接
       </FancyButton>
     </div>
   </h2>

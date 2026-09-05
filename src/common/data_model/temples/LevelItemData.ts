@@ -17,6 +17,8 @@ export default class LevelItemData {
 
   @Type(() => LevelMetadata)
   __metadata?: LevelMetadata
+
+  __cloned_from_iid?: number
   
   // Level type
   type?: 'general' | 'speed' | 'puzzle' | 'dark'
