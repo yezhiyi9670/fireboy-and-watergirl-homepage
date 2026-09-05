@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, nextTick, ref, watch } from 'vue';
+import { FocusTrap } from 'focus-trap-vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 import GlobalStats from './global/GlobalStats.vue';
@@ -11,14 +12,51 @@ import type TempleItemData from '../../../common/data_model/temples/TempleItemDa
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
-import { useEventListener } from '@vueuse/core';
+import { useEventListener, useMediaQuery } from '@vueuse/core';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
 const progressData = inject(LsGameProgressData.injectionKey)
 
+const propertiesActive = computed(() => {
+  return selectionState?.propertiesActive.value ?? false
+})
+
+// The sidebar is an overlay only below this width (keep in sync with the CSS).
+const isCompact = useMediaQuery('(max-width: 1049px)')
+const trapActive = computed(() => {
+  return propertiesActive.value && isCompact.value
+})
+
+const bodyEl = ref<HTMLElement | null>(null)
+const lastFocus = ref<HTMLElement | null>(null)
+
+function sidebarInitialFocus() {
+  return bodyEl.value
+}
+function focusSidebarBody() {
+  bodyEl.value?.focus({ preventScroll: true })
+}
+watch(propertiesActive, active => {
+  if(active) {
+    lastFocus.value = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    void nextTick(focusSidebarBody)
+  }
+})
+
+function restoreLastFocus() {
+  const target = lastFocus.value
+  lastFocus.value = null
+  if(target != null && target.isConnected) {
+    target.focus({ preventScroll: true })
+  }
+}
 function dismissProperties() {
   selectionState?.closeProperties()
+  // Wait for the focus trap to deactivate (it unmanages on a post-flush after
+  // `propertiesActive` becomes false); otherwise the still-active trap would
+  // immediately yank focus back into the sidebar.
+  void nextTick(restoreLastFocus)
 }
 function onWindowKeydown(evt: KeyboardEvent) {
   if(evt.key !== 'Escape' || evt.isComposing || evt.keyCode === 229) {
@@ -28,9 +66,6 @@ function onWindowKeydown(evt: KeyboardEvent) {
 }
 useEventListener('keydown', onWindowKeydown)
 
-const propertiesActive = computed(() => {
-  return selectionState?.propertiesActive.value ?? false
-})
 const hasSelection = computed(() => {
   return selectionState?.selection.value != null
 })
@@ -83,39 +118,46 @@ const selectedEdge = computed<{
     :class="{ active: propertiesActive }"
     @click="dismissProperties"
   ></div>
-  <aside class="props-sidebar" :class="{ active: propertiesActive }">
-    <header class="props-header">
-      <FancyButton theme="tertiary" not-button class="props-title">属性</FancyButton>
-      <FancyButton
-        class="props-close"
-        theme="none"
-        smaller
-        aria-label="关闭属性栏"
-        @click="dismissProperties"
-      >
-        <v-icon name="la-times-solid" />
-      </FancyButton>
-    </header>
-    <div class="props-body">
-      <GlobalStats v-if="!hasSelection" />
-      <LevelPropertiesWrap
-        v-else-if="selectedLevel != null"
-        :temple-key="selectedLevel.templeKey"
-        :temple="selectedLevel.temple"
-        :level="selectedLevel.level"
-        :progress="selectedLevel.progress"
-      />
-      <EdgePropertiesWrap
-        v-else-if="selectedEdge != null"
-        :temple-key="selectedEdge.templeKey"
-        :temple="selectedEdge.temple"
-        :edge="selectedEdge.edge"
-      />
-      <p v-else class="props-hint">
-        选中一个关卡或连接线后，这里会显示它的属性。
-      </p>
-    </div>
-  </aside>
+  <FocusTrap
+    :active="trapActive"
+    :initial-focus="sidebarInitialFocus"
+    :return-focus-on-deactivate="false"
+    :escape-deactivates="false"
+  >
+    <aside class="props-sidebar" :class="{ active: propertiesActive }">
+      <header class="props-header">
+        <FancyButton theme="tertiary" not-button class="props-title">属性</FancyButton>
+        <FancyButton
+          class="props-close"
+          theme="none"
+          smaller
+          aria-label="关闭属性栏"
+          @click="dismissProperties"
+        >
+          <v-icon name="la-times-solid" />
+        </FancyButton>
+      </header>
+      <div class="props-body" ref="bodyEl" tabindex="-1">
+        <GlobalStats v-if="!hasSelection" />
+        <LevelPropertiesWrap
+          v-else-if="selectedLevel != null"
+          :temple-key="selectedLevel.templeKey"
+          :temple="selectedLevel.temple"
+          :level="selectedLevel.level"
+          :progress="selectedLevel.progress"
+        />
+        <EdgePropertiesWrap
+          v-else-if="selectedEdge != null"
+          :temple-key="selectedEdge.templeKey"
+          :temple="selectedEdge.temple"
+          :edge="selectedEdge.edge"
+        />
+        <p v-else class="props-hint">
+          选中一个关卡或连接线后，这里会显示它的属性。
+        </p>
+      </div>
+    </aside>
+  </FocusTrap>
 </template>
 
 <style lang="css" scoped>
@@ -149,6 +191,9 @@ const selectedEdge = computed<{
   min-height: 0;
   overflow-y: auto;
   padding: 14px;
+}
+.props-body:focus {
+  outline: none;
 }
 .props-hint {
   margin: 0;
