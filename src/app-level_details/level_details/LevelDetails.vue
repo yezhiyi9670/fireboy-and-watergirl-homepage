@@ -46,6 +46,10 @@ function onContentBlankClick(evt: MouseEvent) {
   }
   selectionState.clearSelection()
 }
+function onEsc(evt: KeyboardEvent) {
+  evt.preventDefault()
+  selectionState.clearSelection()
+}
 
 const repairTreatment = computed(() => {
   if(props.progressError) {
@@ -90,6 +94,7 @@ const repairTreatment = computed(() => {
         class="container"
         :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}"
         @click="onContentBlankClick"
+        @keydown.esc="onEsc"
       >
         <TemplesGalleryView :data="templesData" />
       </div>
@@ -97,6 +102,7 @@ const repairTreatment = computed(() => {
         class="container"
         :style="{display: currentTab == 'map' ? 'flex' : 'none'}"
         @click="onContentBlankClick"
+        @keydown.esc="onEsc"
       >
         <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
       </div>
