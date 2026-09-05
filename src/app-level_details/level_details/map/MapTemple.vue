@@ -67,6 +67,7 @@ const sortedLevels = computed(() => {
   container-type: size;
   container-name: temple-map;
   overflow: hidden;
+  margin: 0 auto;
 }
 .temple-background {
   position: absolute;
