@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { toRef } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
-import type EdgeItemData from '../../common/data_model/temples/EdgeItemData';
+import EdgeItemData from '../../common/data_model/temples/EdgeItemData';
 
 const props = defineProps<{
   edge: EdgeItemData
@@ -11,7 +12,7 @@ const emit = defineEmits<{
   locate: [kind: 'gallery' | 'map']
 }>()
 
-const [ sourceLevel, targetLevel ] = props.edge.useEndpointLevels()
+const [ sourceLevel, targetLevel ] = EdgeItemData.useEndpointLevels(toRef(props, 'edge'))
 </script>
 
 <template>

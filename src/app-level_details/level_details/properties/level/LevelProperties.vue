@@ -4,6 +4,7 @@ import type LevelItemData from '../../../../common/data_model/temples/LevelItemD
 import type LevelProgress from '../../../../common/data_model/progress/LevelProgress.ts';
 import LevelSummaryLines from '../../../components/LevelSummaryLines.vue';
 import Separator from '../../../components/Separator.vue';
+import LevelPreviewImage from '../../../components/LevelPreviewImage.vue';
 
 const props = defineProps<{
   level: LevelItemData
@@ -24,6 +25,8 @@ const json = computed(() => JSON.stringify(props.level, null, 2))
     />
     <Separator />
     <pre class="props-json">{{ json }}</pre>
+    <Separator />
+    <LevelPreviewImage :level="level" />
   </div>
 </template>
 

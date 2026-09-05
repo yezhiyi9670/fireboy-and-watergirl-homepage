@@ -1,4 +1,4 @@
-import { computed, inject, type ComputedRef } from "vue"
+import { computed, inject, type ComputedRef, type Ref } from "vue"
 import type LevelItemData from "./LevelItemData"
 import TempleItemData from "./TempleItemData"
 
@@ -21,14 +21,16 @@ export default class EdgeItemData {
    * Required injections:
    * - TempleItemData.injectionKey
    */
-  useEndpointLevels(): [ ComputedRef<LevelItemData | null>, ComputedRef<LevelItemData | null> ] {
+  static useEndpointLevels(
+    self: Ref<EdgeItemData>
+  ): [ ComputedRef<LevelItemData | null>, ComputedRef<LevelItemData | null> ] {
     const temple = inject(TempleItemData.injectionKey)
 
     const sourceLevel = computed(() => {
-      return temple?.value.getLevelByIid(this.source) ?? null
+      return temple?.value.getLevelByIid(self.value.source) ?? null
     })
     const targetLevel = computed(() => {
-      return temple?.value.getLevelByIid(this.target) ?? null
+      return temple?.value.getLevelByIid(self.value.target) ?? null
     })
     return [ sourceLevel, targetLevel ]
   }

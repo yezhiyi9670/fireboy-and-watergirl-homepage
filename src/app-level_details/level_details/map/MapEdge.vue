@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, type CSSProperties } from 'vue';
-import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
+import { computed, inject, toRef, type CSSProperties } from 'vue';
+import EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 
@@ -11,7 +11,7 @@ const props = defineProps<{
 const templeKey = inject(TempleItemData.kInjectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
 
-const [ sourceLevel, targetLevel ] = props.edge.useEndpointLevels()
+const [ sourceLevel, targetLevel ] = EdgeItemData.useEndpointLevels(toRef(props, 'edge'))
 
 const selected = computed(() => {
   return selectionState?.isEdgeSelected(templeKey?.value ?? '', props.edge) ?? false
