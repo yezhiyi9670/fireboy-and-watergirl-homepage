@@ -1,30 +1,25 @@
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { computed, inject } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import LevelSelectionState from './LevelSelectionState.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 
-const open = ref(false)
-watch(() => selectionState?.selection.value, (selection) => {
-  if(selection != null) {
-    open.value = true
-  } else {
-    open.value = false
-  }
+const propertiesActive = computed(() => {
+  return selectionState?.propertiesActive.value ?? false
 })
-function close() {
-  open.value = false
+function dismissProperties() {
+  selectionState?.closeProperties()
 }
 </script>
 
 <template>
   <div
     class="props-scrim"
-    :class="{ open: open }"
-    @click="close"
+    :class="{ active: propertiesActive }"
+    @click="dismissProperties"
   ></div>
-  <aside class="props-sidebar" :class="{ open: open }">
+  <aside class="props-sidebar" :class="{ active: propertiesActive }">
     <header class="props-header">
       <FancyButton theme="tertiary" not-button class="props-title">属性</FancyButton>
       <FancyButton
@@ -32,7 +27,7 @@ function close() {
         theme="none"
         smaller
         aria-label="关闭属性栏"
-        @click="close"
+        @click="dismissProperties"
       >
         <v-icon name="la-times-solid" />
       </FancyButton>
@@ -88,7 +83,7 @@ function close() {
   .props-close {
     display: block;
   }
-  .props-scrim.open {
+  .props-scrim.active {
     display: block;
     position: fixed;
     inset: 0;
@@ -105,7 +100,7 @@ function close() {
     transform: translateX(100%);
     transition: transform .18s ease;
   }
-  .props-sidebar.open {
+  .props-sidebar.active {
     transform: translateX(0);
   }
 }

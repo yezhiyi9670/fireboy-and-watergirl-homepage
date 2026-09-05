@@ -35,7 +35,16 @@ const game = inject(GameItemData.injectionKey)
 const progress = inject(LsGameProgressData.injectionKey)
 
 provide(TempleExpandState.injectionKey, new TempleExpandState())
-provide(LevelSelectionState.injectionKey, new LevelSelectionState())
+const selectionState = new LevelSelectionState()
+provide(LevelSelectionState.injectionKey, selectionState)
+
+function onContentBlankClick(evt: MouseEvent) {
+  const target = evt.target as HTMLElement
+  if(target.closest('.map-level, .map-edge, .gallery-level, .temple-title')) {
+    return
+  }
+  selectionState.clearSelection()
+}
 
 const repairTreatment = computed(() => {
   if(props.progressError) {
@@ -75,10 +84,18 @@ const repairTreatment = computed(() => {
           {{ props.gameName }}
         </FancyButton>
       </div>
-      <div class="container" :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}">
+      <div
+        class="container"
+        :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}"
+        @click="onContentBlankClick"
+      >
         <TemplesGalleryView :data="templesData" />
       </div>
-      <div class="container" :style="{display: currentTab == 'map' ? 'flex' : 'none'}">
+      <div
+        class="container"
+        :style="{display: currentTab == 'map' ? 'flex' : 'none'}"
+        @click="onContentBlankClick"
+      >
         <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
       </div>
       <div v-if="progressError" class="error">

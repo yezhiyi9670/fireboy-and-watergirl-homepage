@@ -13,23 +13,29 @@ export default class LevelSelectionState {
   static injectionKey: InjectionKey<LevelSelectionState> = Symbol('LevelSelectionState')
 
   readonly selection: Ref<LevelSelection | null> = ref(null)
+  readonly propertiesActive: Ref<boolean> = ref(false)
 
   selectLevel(templeKey: string, levelIid: string | number) {
     const cur = this.selection.value
-    if(cur?.kind == 'level' && cur.templeKey == templeKey && sameIid(cur.levelIid, levelIid)) {
-      this.selection.value = null
-    } else {
+    if(!(cur?.kind == 'level' && cur.templeKey == templeKey && sameIid(cur.levelIid, levelIid))) {
       this.selection.value = { kind: 'level', templeKey, levelIid }
     }
+    this.propertiesActive.value = true
   }
   selectEdge(templeKey: string, edge: EdgeItemData) {
     const edgeUniqueId = edge.getUniqueId()
     const cur = this.selection.value
-    if(cur?.kind == 'edge' && cur.templeKey == templeKey && cur.edgeUniqueId === edgeUniqueId) {
-      this.selection.value = null
-    } else {
+    if(!(cur?.kind == 'edge' && cur.templeKey == templeKey && cur.edgeUniqueId === edgeUniqueId)) {
       this.selection.value = { kind: 'edge', templeKey, edgeUniqueId, endpointIids: [edge.source, edge.target] }
     }
+    this.propertiesActive.value = true
+  }
+  clearSelection() {
+    this.selection.value = null
+    this.propertiesActive.value = false
+  }
+  closeProperties() {
+    this.propertiesActive.value = false
   }
 
   isLevelSelected(templeKey: string, levelIid: string | number) {
