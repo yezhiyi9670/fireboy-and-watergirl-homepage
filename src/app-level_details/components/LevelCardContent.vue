@@ -7,6 +7,7 @@ import type LevelProgress from '../../common/data_model/progress/LevelProgress';
 import LevelItemData from '../../common/data_model/temples/LevelItemData';
 import GameItemData from '../../common/data_model/home/GameItemData';
 import ApiTemplesData from '../../common/data_model/temples/ApiTemplesData';
+import LevelTypeIcon from './LevelTypeIcon.vue';
 
 const props = defineProps<{
   level: LevelItemData
