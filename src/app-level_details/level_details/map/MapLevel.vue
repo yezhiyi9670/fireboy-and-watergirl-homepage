@@ -101,14 +101,33 @@ const textShadow = computed<CSSProperties>(() => {
         {{ props.level.getShownNumbering() }}
       </div>
     </div>
+    <div class="map-level-hit"></div>
   </div>
 </template>
 
 <style lang="css" scoped>
 .map-level {
   position: relative;
-  cursor: pointer;
+  pointer-events: none;
   user-select: none;
+}
+/* Only the hit circle catches mouse clicks; the rest of the box lets clicks
+   fall through to nearby edges so they stay selectable. */
+.map-level .icon,
+.map-level .numbering-outer {
+  pointer-events: none;
+}
+.map-level-hit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Tune hit size vs ease of selecting nearby edges. */
+  width: 66%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
 }
 .map-level.selected .icon {
   border-radius: 50%;
