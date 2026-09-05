@@ -7,6 +7,8 @@ import LevelSummaryLines from '../../../components/LevelSummaryLines.vue';
 import Separator from '../../../components/Separator.vue';
 import LevelPreviewImage from '../../../components/LevelPreviewImage.vue';
 import { useLocateView } from '../locate.ts';
+import ApiTemplesData from '../../../../common/data_model/temples/ApiTemplesData.ts';
+import FancyButton from '../../../../common/components/FancyButton.vue';
 
 const props = defineProps<{
   level: LevelItemData
@@ -24,6 +26,8 @@ function handleLocate(kind: 'gallery' | 'map') {
 }
 
 const json = computed(() => JSON.stringify(props.level, null, 2))
+
+const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
 </script>
 
 <template>
@@ -37,6 +41,16 @@ const json = computed(() => JSON.stringify(props.level, null, 2))
     />
     <Separator />
     <pre class="props-json">{{ json }}</pre>
+    <div v-if="isEditingAllowed" class="edit-actions">
+      <FancyButton
+        theme="tertiary"
+        smaller
+      >克隆关卡</FancyButton>
+      <FancyButton
+        theme="caution"
+        smaller
+      >删除关卡</FancyButton>
+    </div>
     <Separator />
     <LevelPreviewImage :level="level" />
   </div>
@@ -47,6 +61,14 @@ const json = computed(() => JSON.stringify(props.level, null, 2))
   display: flex;
   flex-direction: column;
   gap: 1em;
+}
+.edit-actions {
+  display: flex;
+  gap: 12px;
+}
+.edit-actions>* {
+  width: 0;
+  flex: 1;
 }
 .props-json {
   margin: 0;

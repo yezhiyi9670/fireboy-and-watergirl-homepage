@@ -123,4 +123,15 @@ export default class ApiTemplesData {
     }
     return apiTemplesLoader
   }
+
+  /**
+   * Required injection:
+   * - ApiTemplesData.injectionKey
+   */
+  static useIsEditingAllowed() {
+    const temples = inject(ApiTemplesData.injectionKey)
+    return computed(() => {
+      return temples?.value?.editing_allowed ?? false
+    })
+  }
 }
