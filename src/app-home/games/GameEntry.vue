@@ -53,7 +53,7 @@ const urls = computed(() => {
       >
         <v-icon name="la-play-solid" /> 玩游戏
       </FancyButton>
-      <FancyButton :href="'#/level_details/' + gameKey" theme="ambient">
+      <FancyButton :href="'#/level_details/' + gameKey + '/map'" theme="ambient">
         <v-icon name="la-map" /> 关卡明细
       </FancyButton>
       <CheatOptions

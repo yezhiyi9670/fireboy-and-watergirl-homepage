@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, provide, ref } from 'vue';
+import { computed, inject, provide } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
@@ -16,7 +17,17 @@ const props = defineProps<{
   progressError: Error | null,
 }>()
 
-const currentTab = ref<'gallery' | 'map'>('map')
+const route = useRoute()
+const router = useRouter()
+const currentTab = computed<'gallery' | 'map'>(() => {
+  return route.path.endsWith('/gallery') ? 'gallery' : 'map'
+})
+function switchTab(tab: 'gallery' | 'map') {
+  if(currentTab.value != tab) {
+    router.replace('/level_details/' + route.params.game + '/' + tab)
+  }
+}
+
 const game = inject(GameItemData.injectionKey)
 const progress = inject(LsGameProgressData.injectionKey)
 
@@ -42,8 +53,8 @@ const repairTreatment = computed(() => {
       >
         <v-icon style="transform:scale(1.15)" name="la-map" />
       </FancyButton>
-      <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="currentTab = 'gallery'">画廊</FancyButton>
-      <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="currentTab = 'map'">地图</FancyButton>
+      <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="switchTab('gallery')">画廊</FancyButton>
+      <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="switchTab('map')">地图</FancyButton>
       
       <FancyButton
         v-if="game?.url"

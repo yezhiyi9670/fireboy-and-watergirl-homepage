@@ -9,7 +9,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/home' },
   { path: '/home', component: AppHome },
   { path: '/modification_notes', component: AppModificationNotes },
-  { path: '/level_details/:game', component: AppLevelDetails },
+  { path: '/level_details/:game', redirect: to => '/level_details/' + to.params.game + '/map' },
+  { path: '/level_details/:game/map', component: AppLevelDetails },
+  { path: '/level_details/:game/gallery', component: AppLevelDetails },
   { path: '/:pathMatch(.*)*', meta: { title: '找不到页面 – ' + Branding.systemTitle }, component: AppNotFound },
 ]
 
