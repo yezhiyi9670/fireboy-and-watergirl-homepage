@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, provide, ref } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
+import TempleExpandState from './TempleExpandState.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -18,6 +19,8 @@ const props = defineProps<{
 const currentTab = ref<'gallery' | 'map'>('map')
 const game = inject(GameItemData.injectionKey)
 const progress = inject(LsGameProgressData.injectionKey)
+
+provide(TempleExpandState.injectionKey, new TempleExpandState())
 
 const repairTreatment = computed(() => {
   if(props.progressError) {

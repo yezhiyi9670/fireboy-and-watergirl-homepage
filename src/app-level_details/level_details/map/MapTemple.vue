@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, provide, ref, toRef } from 'vue';
+import { computed, inject, provide, toRef } from 'vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import { Api } from '../../../common/api/Api.ts';
@@ -7,6 +7,7 @@ import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
 import MapEdge from './MapEdge.vue';
 import MapLevel from './MapLevel.vue';
+import { useTempleExpanded } from '../TempleExpandState.ts';
 
 const props = defineProps<{
   templeKey: string
@@ -16,7 +17,7 @@ const props = defineProps<{
 
 provide(TempleItemData.kInjectionKey, toRef(props, 'templeKey'))
 provide(TempleItemData.injectionKey, toRef(props, 'temple'))
-const expanded = ref(true)
+const expanded = useTempleExpanded(toRef(props, 'templeKey'))
 
 const gameId = inject(GameItemData.kInjectionKey)
 

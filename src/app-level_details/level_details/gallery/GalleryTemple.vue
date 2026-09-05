@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, provide, ref, toRef } from 'vue';
+import { computed, provide, toRef } from 'vue';
 import GalleryLevel from './GalleryLevel.vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
+import { useTempleExpanded } from '../TempleExpandState.ts';
 
 const props = defineProps<{
   templeKey: string
@@ -13,7 +14,7 @@ const props = defineProps<{
 
 provide(TempleItemData.kInjectionKey, toRef(props, 'templeKey'))
 provide(TempleItemData.injectionKey, toRef(props, 'temple'))
-const expanded = ref(true)
+const expanded = useTempleExpanded(toRef(props, 'templeKey'))
 
 const sortedLevels = computed(() => {
   return props.temple.calculateSortedLevels()
