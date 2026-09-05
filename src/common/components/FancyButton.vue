@@ -2,7 +2,7 @@
 import { computed, useTemplateRef } from 'vue';
 
 const props = defineProps<{
-  theme: 'ambient' | 'primary' | 'caution' | 'tertiary' | 'none',
+  theme: 'ambient' | 'primary' | 'caution' | 'tertiary' | 'separator' | 'none',
   href?: string,
   target?: string,
   smaller?: boolean,

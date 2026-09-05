@@ -12,6 +12,7 @@ import GameItemData from '../../common/data_model/home/GameItemData.ts';
 import LsGameProgressData from '../../common/data_model/progress/LsGameProgressData.ts';
 import ProgressRepair from './progress_manip/ProgressRepair.vue';
 import HomeBackButton from '../components/HomeBackButton.vue';
+import PropertiesSidebar from './PropertiesSidebar.vue';
 
 const props = defineProps<{
   gameName: string,
@@ -49,47 +50,57 @@ const repairTreatment = computed(() => {
 
 <template>
   <div class="toplevel">
-    <div class="tabs">
-      <HomeBackButton />
-      <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="switchTab('gallery')">画廊</FancyButton>
-      <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="switchTab('map')">地图</FancyButton>
-      
-      <FancyButton
-        v-if="game?.url"
-        class="title-line"
-        theme="none"
-        :href="game.url.getUrls().play"
-        target="_blank"
-      >
-        <v-icon name="la-play-solid" />
-        {{ props.gameName }}
-      </FancyButton>
-      <FancyButton
-        v-else
-        class="title-line"
-        theme="none"
-        not-button
-      >
-        {{ props.gameName }}
-      </FancyButton>
+    <div class="level-details-main">
+      <div class="tabs">
+        <HomeBackButton />
+        <FancyButton :theme="currentTab == 'gallery' ? 'primary' : 'ambient'" @click="switchTab('gallery')">画廊</FancyButton>
+        <FancyButton :theme="currentTab == 'map' ? 'primary' : 'ambient'" @click="switchTab('map')">地图</FancyButton>
+
+        <FancyButton
+          v-if="game?.url"
+          class="title-line"
+          theme="none"
+          :href="game.url.getUrls().play"
+          target="_blank"
+        >
+          <v-icon name="la-play-solid" />
+          {{ props.gameName }}
+        </FancyButton>
+        <FancyButton
+          v-else
+          class="title-line"
+          theme="none"
+          not-button
+        >
+          {{ props.gameName }}
+        </FancyButton>
+      </div>
+      <div class="container" :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}">
+        <TemplesGalleryView :data="templesData" />
+      </div>
+      <div class="container" :style="{display: currentTab == 'map' ? 'flex' : 'none'}">
+        <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
+      </div>
+      <div v-if="progressError" class="error">
+        <ProgressError :error="progressError" />
+      </div>
+      <div v-if="repairTreatment" class="repair">
+        <ProgressRepair :treatment="repairTreatment" :templesData="templesData" />
+      </div>
     </div>
-    <div class="container" :style="{display: currentTab == 'gallery' ? 'flex' : 'none'}">
-      <TemplesGalleryView :data="templesData" />
-    </div>
-    <div class="container" :style="{display: currentTab == 'map' ? 'flex' : 'none'}">
-      <TemplesMapView v-if="currentTab == 'map'" :data="templesData" />
-    </div>
-    <div v-if="progressError" class="error">
-      <ProgressError :error="progressError" />
-    </div>
-    <div v-if="repairTreatment" class="repair">
-      <ProgressRepair :treatment="repairTreatment" :templesData="templesData" />
-    </div>
+    <PropertiesSidebar />
   </div>
 </template>
 
 <style lang="css" scoped>
 .toplevel {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+.level-details-main {
+  min-width: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   height: 100%;

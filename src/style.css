@@ -86,6 +86,9 @@ body {
   background: var(--color-tertiary);
   color: var(--color-r0);
 }
+.global-themed.theme-separator {
+  background: var(--color-separator);
+}
 
 a {
   color: var(--color-primary);
