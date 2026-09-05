@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 import LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
-import LevelSelectionState from '../state/LevelSelectionState.ts';
+import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
 import LevelSummaryLines from '../../components/LevelSummaryLines.vue';
 import LevelPreviewImage from '../../components/LevelPreviewImage.vue';
 
@@ -26,10 +26,37 @@ function select() {
     selectionState.selectLevel(templeKey.value, props.level._id)
   }
 }
+
+const rootEl = ref<HTMLElement | null>(null)
+const locateMatches = computed(() => {
+  const req = selectionState?.locateRequest.value
+  return req?.view == 'gallery' && req.kind == 'level'
+    && req.templeKey == (templeKey?.value ?? '')
+    && sameIid(req.levelIid, props.level._id)
+})
+function handleLocate() {
+  const req = selectionState?.locateRequest.value
+  if(req == null) {
+    return
+  }
+  rootEl.value?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+  selectionState?.clearLocateRequest(req)
+}
+watch(locateMatches, matches => {
+  if(matches) {
+    handleLocate()
+  }
+}, { flush: 'post' })
+onMounted(() => {
+  if(locateMatches.value) {
+    handleLocate()
+  }
+})
 </script>
 
 <template>
   <section
+    ref="rootEl"
     tabindex="0"
     class="gallery-level"
     :class="{ selected: selected, 'edge-endpoint': edgeEndpoint }"

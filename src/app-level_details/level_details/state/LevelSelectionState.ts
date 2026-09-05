@@ -9,11 +9,19 @@ export function sameIid(a: string | number, b: string | number) {
   return String(a) === String(b)
 }
 
+export type LocateView = 'gallery' | 'map'
+
+export type LocateTarget =
+  | { view: 'gallery', kind: 'level', templeKey: string, levelIid: string | number }
+  | { view: 'map', kind: 'level', templeKey: string, levelIid: string | number }
+  | { view: 'map', kind: 'edge', templeKey: string, edgeUniqueId: string }
+
 export default class LevelSelectionState {
   static injectionKey: InjectionKey<LevelSelectionState> = Symbol('LevelSelectionState')
 
   readonly selection: Ref<LevelSelection | null> = ref(null)
   readonly propertiesActive: Ref<boolean> = ref(false)
+  readonly locateRequest: Ref<LocateTarget | null> = ref(null)
 
   selectLevel(templeKey: string, levelIid: string | number) {
     const cur = this.selection.value
@@ -39,6 +47,15 @@ export default class LevelSelectionState {
   }
   showProperties() {
     this.propertiesActive.value = true
+  }
+
+  requestLocate(target: LocateTarget) {
+    this.locateRequest.value = target
+  }
+  clearLocateRequest(target: LocateTarget) {
+    if(this.locateRequest.value === target) {
+      this.locateRequest.value = null
+    }
   }
 
   isLevelSelected(templeKey: string, levelIid: string | number) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, toRef, type CSSProperties } from 'vue';
+import { computed, inject, onMounted, ref, toRef, watch, type CSSProperties } from 'vue';
 import EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
@@ -29,6 +29,32 @@ function select() {
     selectionState.selectEdge(templeKey.value, props.edge)
   }
 }
+
+const rootEl = ref<HTMLElement | null>(null)
+const locateMatches = computed(() => {
+  const req = selectionState?.locateRequest.value
+  return req?.view == 'map' && req.kind == 'edge'
+    && req.templeKey == (templeKey?.value ?? '')
+    && req.edgeUniqueId === props.edge.getUniqueId()
+})
+function handleLocate() {
+  const req = selectionState?.locateRequest.value
+  if(req == null) {
+    return
+  }
+  rootEl.value?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+  selectionState?.clearLocateRequest(req)
+}
+watch(locateMatches, matches => {
+  if(matches) {
+    handleLocate()
+  }
+}, { flush: 'post' })
+onMounted(() => {
+  if(locateMatches.value) {
+    handleLocate()
+  }
+})
 const aspectRatio = 10 / 9  // Used to normalize height to canvas-width representation
 const lineWidth = 0.005      // Line width, in canvas-width representation
 const borderWidth = 0.003
@@ -69,6 +95,7 @@ const positioning = computed<CSSProperties | null>(() => {
 <template>
   <div
     v-if="positioning"
+    ref="rootEl"
     class="map-edge"
     role="button"
     tabindex="0"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, inject, type CSSProperties } from 'vue';
+import { computed, inject, onMounted, ref, watch, type CSSProperties } from 'vue';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress';
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
-import LevelSelectionState from '../state/LevelSelectionState.ts';
+import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -24,6 +24,32 @@ function select() {
     selectionState.selectLevel(templeKey.value, props.level._id)
   }
 }
+
+const rootEl = ref<HTMLElement | null>(null)
+const locateMatches = computed(() => {
+  const req = selectionState?.locateRequest.value
+  return req?.view == 'map' && req.kind == 'level'
+    && req.templeKey == (templeKey?.value ?? '')
+    && sameIid(req.levelIid, props.level._id)
+})
+function handleLocate() {
+  const req = selectionState?.locateRequest.value
+  if(req == null) {
+    return
+  }
+  rootEl.value?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+  selectionState?.clearLocateRequest(req)
+}
+watch(locateMatches, matches => {
+  if(matches) {
+    handleLocate()
+  }
+}, { flush: 'post' })
+onMounted(() => {
+  if(locateMatches.value) {
+    handleLocate()
+  }
+})
 
 const clampedStars = computed(() => {
   if(props.progress == null) {
@@ -84,6 +110,7 @@ const textShadow = computed<CSSProperties>(() => {
 
 <template>
   <div
+    ref="rootEl"
     class="map-level"
     role="button"
     tabindex="0"
