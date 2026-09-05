@@ -43,6 +43,7 @@ function handleLocate() {
     return
   }
   rootEl.value?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+  rootEl.value?.focus({ preventScroll: true })
   selectionState?.clearLocateRequest(req)
 }
 watch(locateMatches, matches => {

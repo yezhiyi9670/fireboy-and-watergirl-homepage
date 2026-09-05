@@ -25,7 +25,6 @@ const progress = inject(LsGameProgressData.injectionKey)
       :temple-key="templeKey"
       :progress="progress?.getTempleById(temple.id)"
     />
-    <OmniInputStorybook />
   </div>
 </template>
 
