@@ -4,7 +4,6 @@ import type LevelProgress from '../../../common/data_model/progress/LevelProgres
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
-import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 
 const props = defineProps<{
   level: LevelItemData

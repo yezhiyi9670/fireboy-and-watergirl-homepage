@@ -52,12 +52,23 @@ const positioning = computed<CSSProperties | null>(() => {
 </script>
 
 <template>
-  <div v-if="positioning" class="map-edge" :style="positioning" />
+  <div
+    v-if="positioning"
+    :class="[
+      'map-edge',
+      props.edge.hidden ? 'hidden' : ''
+    ]"
+    :style="positioning"
+  />
 </template>
 
 <style lang="css" scoped>
 .map-edge {
   background-color: var(--color-mapedge-inner);
   border: 0 solid var(--color-mapedge-border);
+}
+.map-edge.hidden {
+  background-color: var(--color-mapedge-hidden-inner);
+  border: 0 dotted var(--color-mapedge-hidden-border);
 }
 </style>

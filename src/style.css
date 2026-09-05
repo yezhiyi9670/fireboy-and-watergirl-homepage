@@ -38,6 +38,8 @@ body {
   
   --color-mapedge-inner: #fcc900;
   --color-mapedge-border: #000;
+  --color-mapedge-hidden-inner: #41CBEC22;
+  --color-mapedge-hidden-border: #FBFBFB99;
   --color-mapnum-inner: #FBFBFB;
   --color-mapnum-border: #000;
 }

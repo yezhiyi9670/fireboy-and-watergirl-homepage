@@ -60,7 +60,7 @@ const sortedLevels = computed(() => {
 .temple-map {
   aspect-ratio: 10 / 9; /* Also change `const aspectRatio` in `MapEdge` if you touch this */
   max-width: calc(var(--container-width) - 48px);
-  max-height: max(100px, min(800px, calc(var(--container-height) - 100px)));
+  max-height: max(100px, min(780px, calc(var(--container-height) - 100px)));
   background: var(--color-surface);
   position: relative;
   container-type: size;
