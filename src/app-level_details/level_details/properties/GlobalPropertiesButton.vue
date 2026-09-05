@@ -18,7 +18,7 @@ function showGlobalProperties() {
     aria-label="全局统计"
     @click="showGlobalProperties"
   >
-    <v-icon style="transform:scale(1.15)" name="la-info-circle-solid" />
+    <v-icon style="transform:scale(1.15)" name="la-chart-bar" />
   </FancyButton>
 </template>
 
