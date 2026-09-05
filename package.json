@@ -4,10 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prepare": "ts-patch install",
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "fuck-the-tsc": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -34,7 +32,6 @@
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
     "less": "^4.6.4",
-    "ts-patch": "^4.0.1",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vue-tsc": "^3.2.8"

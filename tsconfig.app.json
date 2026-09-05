@@ -17,11 +17,6 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "plugins": [
-      {
-        "transform": "typia/lib/transform",
-      },
-    ],
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }
