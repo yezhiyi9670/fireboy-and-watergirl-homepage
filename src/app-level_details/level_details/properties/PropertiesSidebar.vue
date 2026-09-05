@@ -3,9 +3,19 @@ import { computed, inject } from 'vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 import GlobalStats from './global/GlobalStats.vue';
+import LevelPropertiesWrap from './level/LevelPropertiesWrap.vue';
+import EdgePropertiesWrap from './edge/EdgePropertiesWrap.vue';
+import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
+import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
+import type TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import type LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
+import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts';
+import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 import { useEventListener } from '@vueuse/core';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
+const templesData = inject(ApiTemplesData.injectionKey)
+const progressData = inject(LsGameProgressData.injectionKey)
 
 function dismissProperties() {
   selectionState?.closeProperties()
@@ -23,6 +33,47 @@ const propertiesActive = computed(() => {
 })
 const hasSelection = computed(() => {
   return selectionState?.selection.value != null
+})
+const selectedLevel = computed<{
+  templeKey: string
+  temple: TempleItemData
+  level: LevelItemData
+  progress: LevelProgress | null
+} | null>(() => {
+  const selection = selectionState?.selection.value
+  if(selection?.kind != 'level') {
+    return null
+  }
+  const temple = templesData?.value?.temples[selection.templeKey]
+  if(temple == null) {
+    return null
+  }
+  const level = temple.getLevelByIid(selection.levelIid)
+  if(level == null) {
+    return null
+  }
+  const templeProgress = progressData?.value?.getTempleById(temple.id) ?? null
+  const progress = templeProgress?.getLevelByIid(level._id) ?? null
+  return { templeKey: selection.templeKey, temple, level, progress }
+})
+const selectedEdge = computed<{
+  templeKey: string
+  temple: TempleItemData
+  edge: EdgeItemData
+} | null>(() => {
+  const selection = selectionState?.selection.value
+  if(selection?.kind != 'edge') {
+    return null
+  }
+  const temple = templesData?.value?.temples[selection.templeKey]
+  if(temple == null) {
+    return null
+  }
+  const edge = temple.edges.find(edge => edge.getUniqueId() === selection.edgeUniqueId) ?? null
+  if(edge == null) {
+    return null
+  }
+  return { templeKey: selection.templeKey, temple, edge }
 })
 </script>
 
@@ -47,6 +98,19 @@ const hasSelection = computed(() => {
     </header>
     <div class="props-body">
       <GlobalStats v-if="!hasSelection" />
+      <LevelPropertiesWrap
+        v-else-if="selectedLevel != null"
+        :temple-key="selectedLevel.templeKey"
+        :temple="selectedLevel.temple"
+        :level="selectedLevel.level"
+        :progress="selectedLevel.progress"
+      />
+      <EdgePropertiesWrap
+        v-else-if="selectedEdge != null"
+        :temple-key="selectedEdge.templeKey"
+        :temple="selectedEdge.temple"
+        :edge="selectedEdge.edge"
+      />
       <p v-else class="props-hint">
         选中一个关卡或连接线后，这里会显示它的属性。
       </p>
