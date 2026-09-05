@@ -42,6 +42,9 @@ body {
   --color-mapedge-hidden-border: #FBFBFB99;
   --color-mapnum-inner: #FFF;
   --color-mapnum-border: #000;
+
+  --color-mapselect-inner: #FBFBFB;
+  --color-mapselect-border: #000;
 }
 @media (prefers-color-scheme: dark) {
   :root {

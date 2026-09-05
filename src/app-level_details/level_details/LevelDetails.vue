@@ -5,6 +5,7 @@ import FancyButton from '../../common/components/FancyButton.vue';
 import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
 import TempleExpandState from './TempleExpandState.ts';
+import LevelSelectionState from './LevelSelectionState.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -33,6 +34,7 @@ const game = inject(GameItemData.injectionKey)
 const progress = inject(LsGameProgressData.injectionKey)
 
 provide(TempleExpandState.injectionKey, new TempleExpandState())
+provide(LevelSelectionState.injectionKey, new LevelSelectionState())
 
 const repairTreatment = computed(() => {
   if(props.progressError) {

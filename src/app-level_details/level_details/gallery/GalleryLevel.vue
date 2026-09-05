@@ -8,6 +8,7 @@ import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
+import LevelSelectionState from '../LevelSelectionState.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -18,6 +19,19 @@ const progressData = inject(LsGameProgressData.injectionKey)
 
 const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
+
+const selectionState = inject(LevelSelectionState.injectionKey)
+const selected = computed(() => {
+  return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
+})
+const edgeEndpoint = computed(() => {
+  return selectionState?.isLevelAnEdgeEndpoint(templeKey?.value ?? '', props.level._id) ?? false
+})
+function select() {
+  if(selectionState != null && templeKey?.value != null) {
+    selectionState.selectLevel(templeKey.value, props.level._id)
+  }
+}
 
 const gameKey = inject(GameItemData.kInjectionKey)
 
@@ -41,7 +55,14 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
 </script>
 
 <template>
-  <section class="gallery-level">
+  <section
+    tabindex="0"
+    class="gallery-level"
+    :class="{ selected: selected, 'edge-endpoint': edgeEndpoint }"
+    @click="select"
+    @keydown.enter="select"
+    @keydown.space.prevent="select"
+  >
     <img class="level-preview" :srcset="levelPreviewUrl" />
     <div class="level-info-lines">
       <h3 class="level-title">
@@ -115,6 +136,16 @@ const disambiguousNumbering = ApiTemplesData.useDisambiguousNumbering(toRef(prop
   display: flex;
   flex-direction: column;
   gap: 12px;
+  cursor: pointer;
+}
+.gallery-level.selected {
+  outline: 3px solid var(--color-tertiary);
+  outline-offset: 2px;
+}
+.gallery-level.edge-endpoint {
+  outline: 3px dashed var(--color-tertiary);
+  outline-offset: 2px;
+  /* background: color-mix(in srgb, var(--color-surface) 90%, var(--color-tertiary)); */
 }
 .level-info-lines {
   display: flex;

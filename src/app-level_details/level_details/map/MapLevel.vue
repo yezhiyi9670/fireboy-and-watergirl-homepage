@@ -2,8 +2,10 @@
 import { computed, inject, type CSSProperties } from 'vue';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress';
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
+import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
+import LevelSelectionState from '../LevelSelectionState.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -11,6 +13,17 @@ const props = defineProps<{
 }>()
 
 const gameId = inject(GameItemData.kInjectionKey)
+const templeKey = inject(TempleItemData.kInjectionKey)
+const selectionState = inject(LevelSelectionState.injectionKey)
+
+const selected = computed(() => {
+  return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
+})
+function select() {
+  if(selectionState != null && templeKey?.value != null) {
+    selectionState.selectLevel(templeKey.value, props.level._id)
+  }
+}
 
 const clampedStars = computed(() => {
   if(props.progress == null) {
@@ -70,7 +83,18 @@ const textShadow = computed<CSSProperties>(() => {
 </script>
 
 <template>
-  <div class="map-level" :style="positioning">
+  <div
+    class="map-level"
+    role="button"
+    tabindex="0"
+    :class="{ selected: selected }"
+    :style="positioning"
+    :aria-pressed="selected"
+    :aria-label="'关卡 ' + props.level.getShownNumbering()"
+    @click="select"
+    @keydown.enter="select"
+    @keydown.space.prevent="select"
+  >
     <img class="icon" :srcset="iconUrl" @dragstart.prevent />
     <div class="numbering-outer">
       <div class="numbering-inner" :style="textShadow">
@@ -83,6 +107,14 @@ const textShadow = computed<CSSProperties>(() => {
 <style lang="css" scoped>
 .map-level {
   position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+.map-level.selected .icon {
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 calc(0.003 * var(--canvas-width)) var(--color-mapselect-inner),
+    0 0 0 calc(0.006 * var(--canvas-width)) var(--color-mapselect-border);
 }
 .icon {
   position: absolute;

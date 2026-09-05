@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, type CSSProperties } from 'vue';
+import { computed, inject, type CSSProperties } from 'vue';
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
-import type TempleItemData from '../../../common/data_model/temples/TempleItemData';
+import TempleItemData from '../../../common/data_model/temples/TempleItemData';
+import LevelSelectionState from '../LevelSelectionState.ts';
 
 const props = defineProps<{
   temple: TempleItemData
   edge: EdgeItemData
 }>()
+
+const templeKey = inject(TempleItemData.kInjectionKey)
+const selectionState = inject(LevelSelectionState.injectionKey)
 
 const sourceLevel = computed(() => {
   return props.temple.getLevelByIid(props.edge.source)
@@ -14,6 +18,23 @@ const sourceLevel = computed(() => {
 const targetLevel = computed(() => {
   return props.temple.getLevelByIid(props.edge.target)
 })
+
+const selected = computed(() => {
+  return selectionState?.isEdgeSelected(templeKey?.value ?? '', props.edge) ?? false
+})
+const ariaLabel = computed(() => {
+  const src = sourceLevel.value
+  const dst = targetLevel.value
+  if(src != null && dst != null) {
+    return '连接线 ' + src.getShownNumbering() + ' – ' + dst.getShownNumbering()
+  }
+  return '连接线'
+})
+function select() {
+  if(selectionState != null && templeKey?.value != null) {
+    selectionState.selectEdge(templeKey.value, props.edge)
+  }
+}
 const aspectRatio = 10 / 9  // Used to normalize height to canvas-width representation
 const lineWidth = 0.005      // Line width, in canvas-width representation
 const borderWidth = 0.003
@@ -54,11 +75,16 @@ const positioning = computed<CSSProperties | null>(() => {
 <template>
   <div
     v-if="positioning"
-    :class="[
-      'map-edge',
-      props.edge.hidden ? 'hidden' : ''
-    ]"
+    class="map-edge"
+    role="button"
+    tabindex="0"
+    :class="{ hidden: props.edge.hidden, selected: selected }"
     :style="positioning"
+    :aria-pressed="selected"
+    :aria-label="ariaLabel"
+    @click="select"
+    @keydown.enter="select"
+    @keydown.space.prevent="select"
   />
 </template>
 
@@ -66,9 +92,27 @@ const positioning = computed<CSSProperties | null>(() => {
 .map-edge {
   background-color: var(--color-mapedge-inner);
   border: 0 solid var(--color-mapedge-border);
+  cursor: pointer;
+}
+.map-edge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: calc(0.03 * var(--canvas-width));
 }
 .map-edge.hidden {
   background-color: var(--color-mapedge-hidden-inner);
   border: 0 dotted var(--color-mapedge-hidden-border);
+}
+.map-edge.selected {
+  /* background-color: var(--color-);
+  border-color: var(--color-tertiary);
+  border-style: solid; */
+  box-shadow:
+    0 0 0 calc(0.0025 * var(--canvas-width)) var(--color-mapselect-inner),
+    0 0 0 calc(0.005 * var(--canvas-width)) var(--color-mapselect-border);
 }
 </style>
