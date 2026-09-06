@@ -86,6 +86,28 @@ async function focusControl() {
   }
 }
 
+/** Best-effort: natively open a <select> dropdown on supporting browsers. */
+function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
+  if(select == null) {
+    return
+  }
+  const pickable = select as HTMLSelectElement & { showPicker?: () => void }
+  if(typeof pickable.showPicker === 'function') {
+    try {
+      pickable.showPicker()
+    } catch {
+      // Not user-activated or unsupported; fall back to a focused (closed) select.
+    }
+  }
+}
+
+async function focusAndMaybeOpen(form: EditorForm, openChoice: boolean) {
+  await focusControl()
+  if(openChoice && form.form == 'choice') {
+    tryOpenSelect(selectControl.value?.domElement)
+  }
+}
+
 // --- committed-value helpers -----------------------------------------------
 
 function serializeForText(form: EditorForm): string {
@@ -131,7 +153,7 @@ const textModel = computed<string>({
 
 // --- editing lifecycle -----------------------------------------------------
 
-function beginEditingWith(form: EditorForm) {
+function beginEditingWith(form: EditorForm, openChoice = false) {
   editing.value = true
   commitFailed.value = false
   editorForm.value = form
@@ -143,7 +165,7 @@ function beginEditingWith(form: EditorForm) {
       draftText.value = convertTextToForm(valueToEditableText(value.value), form) ?? ''
     }
   }
-  void focusControl()
+  void focusAndMaybeOpen(form, openChoice)
 }
 
 function markInvalid() {
@@ -287,7 +309,8 @@ function handleTypeClick(form: EditorForm) {
     return
   }
   if(!editing.value) {
-    beginEditingWith(form)
+    // Opening a dropdown needs the user gesture from this click.
+    beginEditingWith(form, true)
     return
   }
   const current = editorForm.value
@@ -303,7 +326,7 @@ function handleTypeClick(form: EditorForm) {
   } else {
     editorForm.value = form
   }
-  void focusControl()
+  void focusAndMaybeOpen(form, true)
 }
 
 // --- autofocus (focus only, do not enter editing) --------------------------
@@ -357,6 +380,7 @@ onMounted(() => {
         :smaller="props.smaller"
         :textarea="controlForm.form == 'unknown'"
         :rows="6"
+        :class="{ mismatched: !conforming }"
         @submit="finishTextCommit()"
       />
       <FancySelect
@@ -369,6 +393,7 @@ onMounted(() => {
         :smaller="props.smaller"
         placeholder="—"
         :options="booleanOptions"
+        :class="{ mismatched: !conforming }"
         @focus="beginEditingWith({ form: 'boolean' })"
       />
       <FancySelect
@@ -381,6 +406,7 @@ onMounted(() => {
         :smaller="props.smaller"
         placeholder="—&#x3000;"
         :options="choiceOptions"
+        :class="{ mismatched: !conforming }"
       />
       <FancyInput
         v-else-if="controlForm.form == 'null'"
@@ -391,6 +417,7 @@ onMounted(() => {
         :disabled="props.disabled"
         :smaller="props.smaller"
         placeholder="空"
+        :class="{ mismatched: !conforming }"
         @keydown.space.prevent="onNullSpace"
         @submit="finishTextCommit()"
       />
@@ -430,13 +457,14 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .omni-label {
+  width: 0;
+  flex: 1;
   opacity: .75;
-  white-space: nowrap;
+  white-space: pre-wrap;
 }
 .omni-warn {
   color: var(--color-caution);
   display: inline-flex;
-  margin-left: auto;
   flex-shrink: 0;
 }
 .omni-radio {
@@ -474,6 +502,9 @@ onMounted(() => {
   outline: 2px solid var(--color-caution);
   outline-offset: 2px;
   animation: omni-shake .12s ease-in-out 2;
+}
+.omni-control>.mismatched {
+  box-shadow: inset 0 0 0 2px var(--color-caution);
 }
 @keyframes omni-shake {
   0%, 100% { transform: translateX(0); }
