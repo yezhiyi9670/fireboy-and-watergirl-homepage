@@ -53,7 +53,7 @@ const sortedLevels = computed(() => {
   <div class="temple" @keydown="onContainerKeydown">
     <TempleTitle ref="templeTitleRef" :temple="temple" v-model="expanded" />
     <div class="temple-map-outer" :style="{display: expanded ? 'block' : 'none'}">
-      <div class="temple-map">
+      <div class="temple-map" :tabindex="0">
         <img alt="" class="temple-background" :srcset="backgroundUrl" @dragstart.prevent />
         <MapEdge v-for="edge in temple.edges" :key="edge.getUniqueId()" :edge="edge" />
         <MapLevel
