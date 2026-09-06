@@ -50,7 +50,6 @@ const editing = ref(false)
 const commitFailed = ref(false)
 const editorForm = shallowRef<EditorForm | null>(null)
 const draftText = ref('')
-const emptyText = ref('')
 
 const controlForm = computed<EditorForm>(() => {
   if(editing.value && editorForm.value != null) {
@@ -102,7 +101,7 @@ function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
 
 async function focusAndMaybeOpen(form: EditorForm, openChoice: boolean) {
   await focusControl()
-  if(openChoice && form.form == 'choice') {
+  if(openChoice && (form.form == 'choice' || form.form == 'boolean')) {
     tryOpenSelect(selectControl.value?.domElement)
   }
 }
@@ -262,7 +261,7 @@ function onF2() {
   beginEditingWith(displayForm.value)
 }
 
-function onNullSpace(evt: KeyboardEvent) {
+function toggleNullEdit() {
   if(!canType.value) {
     return
   }
@@ -270,10 +269,11 @@ function onNullSpace(evt: KeyboardEvent) {
   if(form !== 'null' && form !== 'undefined') {
     return
   }
-  evt.preventDefault()
-  if(!editing.value) {
-    beginEditingWith(form === 'null' ? { form: 'null' } : { form: 'undefined' })
+  if(editing.value && editorForm.value?.form === form) {
+    undoEditing()
+    return
   }
+  beginEditingWith(form === 'null' ? { form: 'null' } : { form: 'undefined' })
 }
 
 // --- select commits --------------------------------------------------------
@@ -317,6 +317,14 @@ function isTypeActive(form: EditorForm) {
 }
 function handleTypeClick(form: EditorForm) {
   if(!canType.value) {
+    return
+  }
+  // Switching a value to `undefined` commits immediately so transient fields
+  // disappear right away.
+  if(form.form === 'undefined') {
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', undefined)
     return
   }
   if(!editing.value) {
@@ -396,6 +404,7 @@ defineExpose({ focus: exposeFocus })
         :smaller="props.smaller"
         :textarea="controlForm.form == 'unknown'"
         :rows="6"
+        class="omni-edit"
         :class="{ mismatched: !conforming }"
         @submit="finishTextCommit()"
       />
@@ -407,8 +416,9 @@ defineExpose({ focus: exposeFocus })
         :readonly="controlReadonly"
         :disabled="props.disabled"
         :smaller="props.smaller"
-        placeholder="—"
+        placeholder="—&#x3000;"
         :options="booleanOptions"
+        class="omni-edit"
         :class="{ mismatched: !conforming }"
         @focus="beginEditingWith({ form: 'boolean' })"
       />
@@ -422,21 +432,20 @@ defineExpose({ focus: exposeFocus })
         :smaller="props.smaller"
         placeholder="—&#x3000;"
         :options="choiceOptions"
+        class="omni-edit"
         :class="{ mismatched: !conforming }"
       />
-      <FancyInput
+      <FancyButton
         v-else-if="controlForm.form == 'null' || controlForm.form == 'undefined'"
-        ref="textControl"
-        v-model="emptyText"
         :theme="props.theme"
-        readonly
-        :disabled="props.disabled"
+        :disabled="controlReadonly || props.disabled"
         :smaller="props.smaller"
-        placeholder="空"
+        class="omni-edit"
         :class="{ mismatched: !conforming }"
-        @keydown.space.prevent="onNullSpace"
-        @submit="finishTextCommit()"
-      />
+        @click="toggleNullEdit"
+      >
+        {{ controlForm.form === 'null' ? '空值' : '未定义' }}
+      </FancyButton>
 
       <FancyButton
         tabindex="-1"
@@ -505,8 +514,7 @@ defineExpose({ focus: exposeFocus })
   align-items: start;
   gap: 6px;
 }
-.omni-control :deep(.FancyInput),
-.omni-control :deep(.FancySelect) {
+.omni-control .omni-edit {
   flex: 1 1 auto;
   min-width: 0;
 }

@@ -125,6 +125,7 @@ function submitCreate() {
       class="field-row"
     >
       <OmniInput
+        smaller
         :model-value="getValue(key)"
         :spec="specFor(key)"
         :readonly="!editingAllowed"
@@ -150,7 +151,7 @@ function submitCreate() {
 .fields-editor {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .field-row {
   display: flex;
