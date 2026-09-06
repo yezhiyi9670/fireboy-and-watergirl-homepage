@@ -67,6 +67,7 @@ function onDialogClose(closeType: false | null | true) {
     @close="onDialogClose"
   >
     <DialogProse>
+      <p>输入新的关卡 ID：</p>
       <div class="id-fields">
         <OmniInput
           v-model="idValue"

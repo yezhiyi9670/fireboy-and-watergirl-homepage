@@ -15,6 +15,7 @@ import { useLocateView } from '../locate.ts';
 import LevelSelectionState from '../../state/LevelSelectionState.ts';
 import EdgeCreateState from '../../state/EdgeCreateState.ts';
 import { deselect } from '../../state/deselect.ts';
+import DialogProse from '../../../../common/components/DialogProse.vue';
 
 const props = defineProps<{
   level: LevelItemData
@@ -179,7 +180,7 @@ function toggleLink() {
       title="更改关卡 ID"
       :id-initial="renameIdInit"
       :iid-initial="renameIidInit"
-      warn="通常建议不要修改 _id：否则玩家已有的游戏成绩将不再属于此关卡。"
+      warn="正常情况请避免修改唯一标识符 _id，否则玩家已有的游戏成绩将不再属于此关卡。"
       :on-submit="submitRename"
       @close="renameOpen = false"
     />
@@ -195,15 +196,19 @@ function toggleLink() {
     <Dialog
       :open="deleteOpen"
       title="删除关卡"
+      dismissable
       theme="caution"
       :has-confirm="'删除'"
       :has-cancel="'取消'"
       @close="(v) => { if(v === true) confirmDelete(); else deleteOpen = false }"
     >
-      <ExtraInfo caution>
-        <p>删除可能导致此关卡的关卡文件处于未使用状态。如果保存更改时该关卡文件仍未被任何关卡使用，它将被永久删除。</p>
-        <p>如果该关卡此前已公开发布并有人玩过，之后应避免重新使用该关卡的 _id，否则游戏成绩可能“张冠李戴”。</p>
-      </ExtraInfo>
+      <DialogProse>
+        <p>确定要删除关卡？</p>
+        <ExtraInfo caution>
+          <p>向后端提交更改时，如果某个之前已使用的关卡文件变为未使用状态，它将永久消失。（真的很久！）</p>
+          <p>如果该关卡此前已公开发布并有人玩过，之后新关卡应避免重新使用该关卡的 _id，否则已有游戏成绩可能错误地附到新关卡上。</p>
+        </ExtraInfo>
+      </DialogProse>
     </Dialog>
   </div>
 </template>
