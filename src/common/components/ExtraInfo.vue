@@ -41,6 +41,7 @@ const props = defineProps<{
   color: var(--color-emphasize);
 }
 .extra-info>:deep(p) {
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 </style>

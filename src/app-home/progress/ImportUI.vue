@@ -306,10 +306,10 @@ function executeImport() {
     @close="stage = 'paste'"
   >
     <DialogProse>
-      <div>数据解析失败，无法继续导入。</div>
-      <div>请检查数据是否粘贴完整并重试。</div>
+      <p>数据解析失败，无法继续导入。</p>
+      <p>请检查数据是否粘贴完整并重试。</p>
       <ExtraInfo>
-        <div>{{ errorText }}</div>
+        <p>{{ errorText }}</p>
       </ExtraInfo>
     </DialogProse>
   </Dialog>
@@ -324,11 +324,11 @@ function executeImport() {
     @close="verdict => stage = verdict ? 'select_games' : 'paste'"
   >
     <DialogProse>
-      <div>数据可正常解析，但校验值不匹配，很可能不完整或已损坏。</div>
-      <div>建议先检查数据是否粘贴完整。</div>
-      <div>是否仍希望导入？</div>
+      <p>数据可正常解析，但校验值不匹配，很可能不完整或已损坏。</p>
+      <p>建议先检查数据是否粘贴完整。</p>
+      <p>是否仍希望导入？</p>
       <ExtraInfo caution>
-        <div>导入不完整或格式错误的数据，可能导致游戏异常甚至崩溃。三思而后行！</div>
+        <p>导入不完整或格式错误的数据，可能导致游戏异常甚至崩溃。三思而后行！</p>
       </ExtraInfo>
     </DialogProse>
   </Dialog>
@@ -385,15 +385,15 @@ function executeImport() {
     @close="verdict => verdict ? executeImport() : (stage = 'select_games')"
   >
     <DialogProse>
-      <div>以下游戏已有进程数据：</div>
+      <p>以下游戏已有进程数据：</p>
       <ul style="margin: 0 0; line-height: normal;">
         <li v-for="game of willOverwriteGames" :key="game.storage_namespace">{{ game.name }}</li>
       </ul>
-      <div>继续导入将覆盖它们。仍要继续？</div>
+      <p>继续导入将覆盖它们。仍要继续？</p>
       <ExtraInfo caution>
-        <div>原有游戏成绩将永久丢失！无法撤销！</div>
-        <div>如有必要，请先导出原有数据的备份。</div>
-        <div>覆盖时游戏本身应处于关闭状态。</div>
+        <p>原有游戏成绩将永久丢失！无法撤销！</p>
+        <p>如有必要，请先导出原有数据的备份。</p>
+        <p>覆盖时游戏本身应处于关闭状态。</p>
       </ExtraInfo>
     </DialogProse>
   </Dialog>
@@ -406,8 +406,8 @@ function executeImport() {
     @close="importFailureCount == 0 ? (stage = 'paste', importedText = '') : (stage = 'select_games')"
   >
     <DialogProse>
-      <div>成功导入 {{ importSuccessCount }} 个游戏的数据。</div>
-      <div v-if="importFailureCount > 0">另有 {{ importFailureCount }} 项因包含不安全内容无法导入。</div>
+      <p>成功导入 {{ importSuccessCount }} 个游戏的数据。</p>
+      <p v-if="importFailureCount > 0">另有 {{ importFailureCount }} 项因包含不安全内容无法导入。</p>
     </DialogProse>
   </Dialog>
 </template>

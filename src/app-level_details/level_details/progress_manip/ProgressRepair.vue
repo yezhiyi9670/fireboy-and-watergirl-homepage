@@ -85,15 +85,15 @@ function doRepair() {
     @close="verdict => verdict ? handleConfirm() : handleCancel()"
   >
     <DialogProse>
-      <div>游戏进程数据中包含关卡表中不存在的“幽灵”关卡，可能是因为之前玩过的某关卡现在已经被移除。</div>
-      <div>游戏理论上会隐藏幽灵关卡，因此<strong>不会出现可见异常</strong>。</div>
-      <div>如果游戏确实存在异常，你可能需要清理幽灵关卡。清理后该关卡的游戏成绩将被完全移除，如果今后该关卡又重新出现，成绩也不会恢复。</div>
+      <p>游戏进程数据中包含关卡表中不存在的“幽灵”关卡，可能是因为之前玩过的某关卡现在已经被移除。</p>
+      <p>游戏理论上会隐藏幽灵关卡，因此<strong>不会出现可见异常</strong>。</p>
+      <p>如果游戏确实存在异常，你可能需要清理幽灵关卡。清理后该关卡的游戏成绩将被完全移除，如果今后该关卡又重新出现，成绩也不会恢复。</p>
       <ExtraInfo caution>
-        <div>该操作无法撤销，如有必要请先回主页备份数据。</div>
-        <div>清理时游戏本身应处于关闭状态。</div>
+        <p>该操作无法撤销，如有必要请先回主页备份数据。</p>
+        <p>清理时游戏本身应处于关闭状态。</p>
       </ExtraInfo>
       <ExtraInfo v-if="lastError != null" error>
-        清理失败：{{ lastError }}
+        <p>清理失败：{{ lastError }}</p>
       </ExtraInfo>
     </DialogProse>
   </Dialog>

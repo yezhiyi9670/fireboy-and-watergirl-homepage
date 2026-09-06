@@ -27,10 +27,10 @@ const dialogOpen = ref(false)
     @close="dialogOpen=false"
   >
     <DialogProse>
-      <div>游戏进程数据无法读取，可能已经损坏。</div>
-      <div>请检查游戏内是否也存在异常。如果无异常，这应该只是关卡明细查看器的漏洞。如果有异常，你很可能需要回主页清除游戏数据以使游戏恢复正常。</div>
+      <p>游戏进程数据无法读取，可能已经损坏。</p>
+      <p>请检查游戏内是否也存在异常。如果无异常，这应该只是关卡明细查看器的漏洞。如果有异常，你很可能需要回主页清除游戏数据以使游戏恢复正常。</p>
       <ExtraInfo v-if="error">
-        <div>{{ error.message }}</div>
+        <p>{{ error.message }}</p>
       </ExtraInfo>
     </DialogProse>
   </Dialog>

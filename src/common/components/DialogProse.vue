@@ -11,4 +11,8 @@
   flex-direction: column;
   gap: 0.5em;
 }
+.dialog-prose>:deep(p) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 </style>

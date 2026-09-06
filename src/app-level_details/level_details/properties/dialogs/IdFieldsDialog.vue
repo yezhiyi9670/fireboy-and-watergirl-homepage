@@ -4,6 +4,7 @@ import Dialog from '../../../../common/components/Dialog.vue';
 import ExtraInfo from '../../../../common/components/ExtraInfo.vue';
 import OmniInput from '../../../../common/components/edit/OmniInput.vue';
 import type { FieldSpecifier } from '../../../../common/data_model/field_specifier.ts';
+import DialogProse from '../../../../common/components/DialogProse.vue';
 
 const props = defineProps<{
   open: boolean
@@ -65,23 +66,25 @@ function onDialogClose(closeType: false | null | true) {
     dismissable
     @close="onDialogClose"
   >
-    <div class="id-fields">
-      <OmniInput
-        v-model="idValue"
-        :spec="idSpec"
-        autofocus
-      />
-      <OmniInput
-        v-model="iidValue"
-        :spec="iidSpec"
-      />
-    </div>
-    <ExtraInfo v-if="props.warn != null" caution>
-      <p>{{ props.warn }}</p>
-    </ExtraInfo>
-    <ExtraInfo v-if="error != null" error>
-      <p>{{ error }}</p>
-    </ExtraInfo>
+    <DialogProse>
+      <div class="id-fields">
+        <OmniInput
+          v-model="idValue"
+          :spec="idSpec"
+          autofocus
+        />
+        <OmniInput
+          v-model="iidValue"
+          :spec="iidSpec"
+        />
+      </div>
+      <ExtraInfo v-if="props.warn != null" caution>
+        <p>{{ props.warn }}</p>
+      </ExtraInfo>
+      <ExtraInfo v-if="error != null" error>
+        <p>{{ error }}</p>
+      </ExtraInfo>
+    </DialogProse>
   </Dialog>
 </template>
 
