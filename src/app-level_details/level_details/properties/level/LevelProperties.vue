@@ -29,7 +29,7 @@ const edgeCreate = inject(EdgeCreateState.injectionKey)
 
 const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
 
-const { locateLevel } = useLocateView()
+const { locateLevel, revealCreatedLevel } = useLocateView()
 function handleLocate(kind: 'gallery' | 'map') {
   if(templeKey?.value == null) {
     return
@@ -73,6 +73,7 @@ function submitRename(id: string | number, iid: string | number): string | null 
 const cloneOpen = ref(false)
 const cloneIdInit = ref<string | number>(0)
 const cloneIidInit = ref<string | number>(0)
+const pendingCloneIid = ref<string | number | null>(null)
 
 function openClone() {
   const t = temple?.value
@@ -81,6 +82,7 @@ function openClone() {
   }
   cloneIdInit.value = t.nextFreeLevelId()
   cloneIidInit.value = t.nextFreeLevelIid()
+  pendingCloneIid.value = null
   cloneOpen.value = true
 }
 function submitClone(id: string | number, iid: string | number): string | null {
@@ -91,9 +93,18 @@ function submitClone(id: string | number, iid: string | number): string | null {
   }
   try {
     data.cloneLevel_(key, props.level._id, id, iid)
+    pendingCloneIid.value = iid
     return null
   } catch(e) {
     return (e as Error).message
+  }
+}
+function onCloneDone() {
+  const key = templeKey?.value
+  const iid = pendingCloneIid.value
+  pendingCloneIid.value = null
+  if(key != null && iid != null) {
+    revealCreatedLevel(key, iid)
   }
 }
 
@@ -178,6 +189,7 @@ function toggleLink() {
       :id-initial="cloneIdInit"
       :iid-initial="cloneIidInit"
       :on-submit="submitClone"
+      @done="onCloneDone"
       @close="cloneOpen = false"
     />
     <Dialog
