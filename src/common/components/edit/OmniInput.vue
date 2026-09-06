@@ -441,6 +441,7 @@ onMounted(() => {
             @submit="attemptCommit"
           />
           <FancyButton
+            :tabindex="-1"
             class="omni-discard"
             :theme="props.theme"
             :smaller="props.smaller"
