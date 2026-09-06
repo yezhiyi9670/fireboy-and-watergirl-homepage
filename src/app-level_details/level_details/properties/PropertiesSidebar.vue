@@ -3,6 +3,19 @@ import { computed, inject, nextTick, ref, useTemplateRef, watch } from 'vue';
 import { FocusTrap } from 'focus-trap-vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
+import EdgeCreateState from '../state/EdgeCreateState.ts';
+import { deselect } from '../state/deselect.ts';
+import EditorActionHost from '../editor/EditorActionHost.ts';
+import { useLocateView } from './locate.ts';
+import IdFieldsDialog from './dialogs/IdFieldsDialog.vue';
+import {
+  applyGridMove,
+  gridMovement,
+  isEditingAllowed as isEditingAllowedFor,
+  isTextEntryTarget,
+  toggleEdgeVisibility,
+  toggleLinking,
+} from '../editor/editorHotkeys.ts';
 import GlobalStats from './global/GlobalStats.vue';
 import LevelPropertiesWrap from './level/LevelPropertiesWrap.vue';
 import EdgePropertiesWrap from './edge/EdgePropertiesWrap.vue';
@@ -14,8 +27,11 @@ import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.t
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
 const progressData = inject(LsGameProgressData.injectionKey)
+const actionHost = inject(EditorActionHost.injectionKey)
+const { revealCreatedLevel } = useLocateView()
 
 const propertiesActive = computed(() => {
   return selectionState?.propertiesActive.value ?? false
@@ -107,6 +123,107 @@ const selectedEdge = computed<{
   }
   return { templeKey: selection.templeKey, temple, edge }
 })
+
+// --- editor keyboard shortcuts (only while focus is inside the sidebar) ----
+
+const editingAllowed = computed(() => {
+  return isEditingAllowedFor(templesData?.value)
+})
+
+const newLevelOpen = ref(false)
+const newLevelIdInit = ref<string | number>(0)
+const newLevelIidInit = ref<string | number>(0)
+const pendingNewIid = ref<string | number | null>(null)
+
+function openNewLevelForSelectedTemple() {
+  const key = selectedLevel.value?.templeKey
+  const temple = key == null ? null : templesData?.value?.temples[key]
+  if(temple == null) {
+    return
+  }
+  newLevelIdInit.value = temple.nextFreeLevelId()
+  newLevelIidInit.value = temple.nextFreeLevelIid()
+  pendingNewIid.value = null
+  newLevelOpen.value = true
+}
+function submitNewLevel(id: string | number, iid: string | number): string | null {
+  const key = selectedLevel.value?.templeKey
+  const temple = key == null ? null : templesData?.value?.temples[key]
+  if(temple == null) {
+    return '圣殿数据未就绪'
+  }
+  try {
+    temple.createLevel_(id, iid)
+    pendingNewIid.value = iid
+    return null
+  } catch(e) {
+    return (e as Error).message
+  }
+}
+function onNewLevelDone() {
+  const key = selectedLevel.value?.templeKey
+  const iid = pendingNewIid.value
+  pendingNewIid.value = null
+  if(key != null && iid != null) {
+    revealCreatedLevel(key, iid)
+  }
+}
+
+function onShortcut(evt: KeyboardEvent) {
+  if(isTextEntryTarget(evt) || !editingAllowed.value) {
+    return
+  }
+  const ctrl = evt.ctrlKey || evt.metaKey
+  const shift = evt.shiftKey
+
+  if(evt.key === 'Delete') {
+    if(selectedLevel.value != null) {
+      evt.preventDefault()
+      actionHost?.requestLevelDelete()
+      return
+    }
+    if(selectedEdge.value != null) {
+      evt.preventDefault()
+      selectedEdge.value.temple.deleteEdge_(selectedEdge.value.edge)
+      deselect(selectionState, edgeCreate)
+      return
+    }
+    return
+  }
+  if(ctrl && shift && evt.key.toLowerCase() === 'd') {
+    evt.preventDefault()
+    openNewLevelForSelectedTemple()
+    return
+  }
+  if(ctrl && !shift && evt.key.toLowerCase() === 'd') {
+    evt.preventDefault()
+    if(selectedLevel.value != null) {
+      actionHost?.requestLevelClone()
+    }
+    return
+  }
+  if(ctrl && !shift && evt.key.toLowerCase() === 'h') {
+    if(selectedEdge.value != null) {
+      evt.preventDefault()
+      toggleEdgeVisibility(selectedEdge.value.temple, selectedEdge.value.edge)
+    }
+    return
+  }
+  if(ctrl && !shift && evt.key.toLowerCase() === 'r') {
+    evt.preventDefault()
+    if(selectedLevel.value != null) {
+      toggleLinking(edgeCreate, selectionState, selectedLevel.value.templeKey, selectedLevel.value.level._id)
+    }
+    return
+  }
+  if(!evt.altKey) {
+    const move = gridMovement(evt)
+    if(move != null && selectedLevel.value != null) {
+      applyGridMove(selectedLevel.value.temple, selectedLevel.value.level, move.axis, move.delta)
+      evt.preventDefault()
+    }
+  }
+}
 </script>
 
 <template>
@@ -118,12 +235,12 @@ const selectedEdge = computed<{
   <FocusTrap
     :active="trapActive"
     :initial-focus="sidebarInitialFocus"
-    :return-focus-on-deactivate="false"
+    :return-focus-on-deactivate="true"
     :escape-deactivates="false"
     :click-outside-deactivates="true"
     @deactivate="selectionState?.closeProperties()"
   >
-    <aside ref="sidebarEl" class="props-sidebar" :class="{ active: propertiesActive }" @keydown.esc="onEsc">
+    <aside ref="sidebarEl" class="props-sidebar" :class="{ active: propertiesActive }" @keydown.esc="onEsc" @keydown="onShortcut">
       <header class="props-header">
         <FancyButton theme="tertiary" not-button class="props-title">属性</FancyButton>
         <FancyButton
@@ -157,6 +274,16 @@ const selectedEdge = computed<{
       </div>
     </aside>
   </FocusTrap>
+
+  <IdFieldsDialog
+    :open="newLevelOpen"
+    title="新关卡"
+    :id-initial="newLevelIdInit"
+    :iid-initial="newLevelIidInit"
+    :on-submit="submitNewLevel"
+    @done="onNewLevelDone"
+    @close="newLevelOpen = false"
+  />
 </template>
 
 <style lang="css" scoped>

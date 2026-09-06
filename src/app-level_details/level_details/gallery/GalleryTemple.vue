@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, provide, toRef } from 'vue';
+import { computed, provide, toRef, useTemplateRef } from 'vue';
 import GalleryLevel from './GalleryLevel.vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
 import { useTempleExpanded } from '../state/TempleExpandState.ts';
+import { isTextEntryTarget } from '../editor/editorHotkeys.ts';
 
 const props = defineProps<{
   templeKey: string
@@ -16,6 +18,20 @@ provide(TempleItemData.kInjectionKey, toRef(props, 'templeKey'))
 provide(TempleItemData.injectionKey, toRef(props, 'temple'))
 const expanded = useTempleExpanded(toRef(props, 'templeKey'))
 
+const templeTitleRef = useTemplateRef<{ openNewLevel: () => void }>('templeTitleRef')
+const editingAllowed = ApiTemplesData.useIsEditingAllowed()
+
+function onContainerKeydown(evt: KeyboardEvent) {
+  if(isTextEntryTarget(evt) || !editingAllowed.value) {
+    return
+  }
+  if(!(evt.ctrlKey && evt.shiftKey) || evt.key.toLowerCase() !== 'd') {
+    return
+  }
+  evt.preventDefault()
+  templeTitleRef.value?.openNewLevel()
+}
+
 const sortedLevels = computed(() => {
   return props.temple.calculateSortedLevels()
 })
@@ -23,8 +39,8 @@ const sortedLevels = computed(() => {
 </script>
 
 <template>
-  <div class="temple">
-    <TempleTitle :temple="temple" v-model="expanded" />
+  <div class="temple" @keydown="onContainerKeydown">
+    <TempleTitle ref="templeTitleRef" :temple="temple" v-model="expanded" />
     <div class="gallery-grid" :style="{display: expanded ? 'grid' : 'none'}">
       <GalleryLevel
         v-for="level of sortedLevels"

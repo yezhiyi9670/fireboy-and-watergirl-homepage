@@ -3,10 +3,13 @@ import { computed, inject, onMounted, useTemplateRef, watch, type CSSProperties 
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress';
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
+import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
 import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
+import EdgeCreateState from '../state/EdgeCreateState.ts';
 import { useEdgeLinking } from '../properties/edgeLinking.ts';
+import { applyGridMove, gridMovement, isTextEntryTarget, toggleLinking } from '../editor/editorHotkeys.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -17,6 +20,7 @@ const gameId = inject(GameItemData.kInjectionKey)
 const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
 const edgeLinking = useEdgeLinking()
 
 const selected = computed(() => {
@@ -37,6 +41,32 @@ function select() {
   }
   if(selectionState != null) {
     selectionState.selectLevel(key, props.level._id)
+  }
+}
+
+const editingAllowed = ApiTemplesData.useIsEditingAllowed()
+function onGridKeydown(evt: KeyboardEvent) {
+  if(isTextEntryTarget(evt) || !editingAllowed.value) {
+    return
+  }
+  if((evt.ctrlKey || evt.metaKey) && !evt.shiftKey && evt.key.toLowerCase() === 'r') {
+    const key = templeKey?.value
+    if(key != null) {
+      evt.preventDefault()
+      toggleLinking(edgeCreate, selectionState, key, props.level._id)
+    }
+    return
+  }
+  const move = gridMovement(evt)
+  if(move == null) {
+    return
+  }
+  const t = temple?.value
+  if(t == null) {
+    return
+  }
+  if(applyGridMove(t, props.level, move.axis, move.delta)) {
+    evt.preventDefault()
   }
 }
 
@@ -137,6 +167,7 @@ const textShadow = computed<CSSProperties>(() => {
     @click="select"
     @keydown.enter="select"
     @keydown.space.prevent="select"
+    @keydown="onGridKeydown"
   >
     <img class="icon" :srcset="iconUrl" @dragstart.prevent />
     <div class="numbering-outer">

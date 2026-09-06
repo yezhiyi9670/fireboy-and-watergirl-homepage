@@ -58,6 +58,8 @@ function onNewLevelDone() {
     revealCreatedLevel(key, iid)
   }
 }
+
+defineExpose({ openNewLevel })
 </script>
 
 <template>

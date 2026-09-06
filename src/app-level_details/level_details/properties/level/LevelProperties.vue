@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import type LevelItemData from '../../../../common/data_model/temples/LevelItemData.ts';
 import type LevelProgress from '../../../../common/data_model/progress/LevelProgress.ts';
 import TempleItemData from '../../../../common/data_model/temples/TempleItemData.ts';
@@ -15,6 +15,7 @@ import { useLocateView } from '../locate.ts';
 import LevelSelectionState from '../../state/LevelSelectionState.ts';
 import EdgeCreateState from '../../state/EdgeCreateState.ts';
 import { deselect } from '../../state/deselect.ts';
+import EditorActionHost from '../../editor/EditorActionHost.ts';
 import DialogProse from '../../../../common/components/DialogProse.vue';
 
 const props = defineProps<{
@@ -147,6 +148,19 @@ function toggleLink() {
   edgeCreate?.start(key, props.level._id)
   selectionState?.closeProperties()
 }
+
+const actionHost = inject(EditorActionHost.injectionKey)
+onMounted(() => {
+  actionHost?.registerLevelActions({
+    requestDelete: () => {
+      deleteOpen.value = true
+    },
+    requestClone: openClone,
+  })
+})
+onBeforeUnmount(() => {
+  actionHost?.unregisterLevelActions()
+})
 </script>
 
 <template>

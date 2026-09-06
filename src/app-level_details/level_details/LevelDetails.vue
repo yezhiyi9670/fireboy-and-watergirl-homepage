@@ -8,6 +8,7 @@ import TempleExpandState from './state/TempleExpandState.ts';
 import LevelSelectionState from './state/LevelSelectionState.ts';
 import EdgeCreateState from './state/EdgeCreateState.ts';
 import { deselect } from './state/deselect.ts';
+import EditorActionHost from './editor/EditorActionHost.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -42,6 +43,7 @@ const selectionState = new LevelSelectionState()
 provide(LevelSelectionState.injectionKey, selectionState)
 const edgeCreateState = new EdgeCreateState()
 provide(EdgeCreateState.injectionKey, edgeCreateState)
+provide(EditorActionHost.injectionKey, new EditorActionHost())
 
 function onContentBlankClick(evt: MouseEvent) {
   const target = evt.target as HTMLElement

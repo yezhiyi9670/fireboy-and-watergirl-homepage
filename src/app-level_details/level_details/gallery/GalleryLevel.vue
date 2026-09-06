@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, useTemplateRef, watch } from 'vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
+import EdgeCreateState from '../state/EdgeCreateState.ts';
 import LevelSummaryLines from '../../components/LevelSummaryLines.vue';
 import LevelPreviewImage from '../../components/LevelPreviewImage.vue';
 import { useEdgeLinking } from '../properties/edgeLinking.ts';
+import { isTextEntryTarget, toggleLinking } from '../editor/editorHotkeys.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -17,13 +20,27 @@ const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
 
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
 const edgeLinking = useEdgeLinking()
+const editingAllowed = ApiTemplesData.useIsEditingAllowed()
 const selected = computed(() => {
   return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
 })
 const edgeEndpoint = computed(() => {
   return selectionState?.isLevelAnEdgeEndpoint(templeKey?.value ?? '', props.level._id) ?? false
 })
+function onShortcut(evt: KeyboardEvent) {
+  if(isTextEntryTarget(evt) || !editingAllowed.value) {
+    return
+  }
+  if((evt.ctrlKey || evt.metaKey) && !evt.shiftKey && evt.key.toLowerCase() === 'r') {
+    const key = templeKey?.value
+    if(key != null) {
+      evt.preventDefault()
+      toggleLinking(edgeCreate, selectionState, key, props.level._id)
+    }
+  }
+}
 function select() {
   const key = templeKey?.value
   if(key == null) {
@@ -79,6 +96,7 @@ onMounted(() => {
     @click="select"
     @keydown.enter="select"
     @keydown.space.prevent="select"
+    @keydown="onShortcut"
   >
     <LevelPreviewImage :level="level" />
     <LevelSummaryLines :level="level" :progress="progress" />
