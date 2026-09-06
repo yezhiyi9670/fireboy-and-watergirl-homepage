@@ -39,7 +39,7 @@ const sortedLevels = computed(() => {
 <template>
   <div class="temple" @keydown="onContainerKeydown">
     <TempleTitle ref="templeTitleRef" :temple="temple" v-model="expanded" />
-    <div class="gallery-grid" :style="{display: expanded ? 'grid' : 'none'}">
+    <div class="gallery-grid" :tabindex="0" :style="{display: expanded ? 'grid' : 'none'}">
       <GalleryLevel
         v-for="level of sortedLevels"
         :key="level._id"
