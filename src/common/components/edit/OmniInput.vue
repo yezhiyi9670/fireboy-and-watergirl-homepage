@@ -7,7 +7,6 @@ import FancySelect from '../FancySelect.vue';
 import {
   convertTextToForm,
   firstConformingForm,
-  normalizeValue,
   primitiveToForm,
   typeToForms,
   unionLetters,
@@ -32,7 +31,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: unknown]
 }>()
 
-const value = computed(() => normalizeValue(props.modelValue))
+const value = computed(() => props.modelValue)
 const forms = computed(() => typeToForms(props.spec.type))
 const radios = computed(() => unionLetters(props.spec.type))
 const conforming = computed(() => valueConforms(value.value, props.spec.type))
@@ -349,6 +348,11 @@ onMounted(() => {
   }
   void focusControl()
 })
+
+function exposeFocus() {
+  void focusControl()
+}
+defineExpose({ focus: exposeFocus })
 </script>
 
 <template>

@@ -45,16 +45,14 @@ export function typeToForms(type: FieldType): EditorForm[] {
 }
 
 export function conformsToForm(value: unknown, form: EditorForm): boolean {
-  const v = normalizeValue(value)
   switch(form.form) {
-    case 'number': return typeof v === 'number' && Number.isFinite(v)
-    case 'string': return typeof v === 'string'
-    case 'boolean': return typeof v === 'boolean'
-    case 'unknown': return v !== undefined
-    case 'null':
-    case 'undefined':
-      return v === null
-    case 'choice': return typeof v === 'string' && v in form.mapping
+    case 'number': return typeof value === 'number' && Number.isFinite(value)
+    case 'string': return typeof value === 'string'
+    case 'boolean': return typeof value === 'boolean'
+    case 'unknown': return value !== undefined
+    case 'null': return value === null
+    case 'undefined': return value === undefined
+    case 'choice': return typeof value === 'string' && value in form.mapping
   }
 }
 

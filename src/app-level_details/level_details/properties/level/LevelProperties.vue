@@ -11,6 +11,7 @@ import LevelSummaryLines from '../../../components/LevelSummaryLines.vue';
 import Separator from '../../../components/Separator.vue';
 import LevelPreviewImage from '../../../components/LevelPreviewImage.vue';
 import IdFieldsDialog from '../dialogs/IdFieldsDialog.vue';
+import LevelFieldsEditor from './LevelFieldsEditor.vue';
 import { useLocateView } from '../locate.ts';
 import LevelSelectionState from '../../state/LevelSelectionState.ts';
 import EdgeCreateState from '../../state/EdgeCreateState.ts';
@@ -38,8 +39,6 @@ function handleLocate(kind: 'gallery' | 'map') {
   }
   locateLevel(kind, templeKey.value, props.level._id)
 }
-
-const json = computed(() => JSON.stringify(props.level, null, 2))
 
 // --- 更改 ID ---------------------------------------------------------------
 
@@ -181,7 +180,7 @@ onBeforeUnmount(() => {
         @click="toggleLink"
       >{{ linkActive ? '取消添加连接' : '添加连接' }}</FancyButton>
     </div>
-    <pre class="props-json">{{ json }}</pre>
+    <LevelFieldsEditor :level="level" />
     <div v-if="isEditingAllowed" class="edit-actions">
       <FancyButton theme="tertiary" smaller @click="openClone">克隆关卡</FancyButton>
       <FancyButton theme="caution" smaller @click="deleteOpen = true">删除关卡</FancyButton>
@@ -240,13 +239,5 @@ onBeforeUnmount(() => {
 .edit-actions>* {
   width: 0;
   flex: 1;
-}
-.props-json {
-  margin: 0;
-  padding: 8px;
-  background-color: var(--color-ambient);
-  border-radius: 4px;
-  overflow-x: auto;
-  font-size: .75em;
 }
 </style>
