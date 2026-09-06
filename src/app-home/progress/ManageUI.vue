@@ -10,6 +10,7 @@ import Base64 from 'base64-js'
 import GZip from 'gzip-js'
 import ExtraInfo from '../../common/components/ExtraInfo.vue';
 import type GameItemData from '../../common/data_model/home/GameItemData.ts';
+import DialogProse from '../../common/components/DialogProse.vue';
 
 const progressStore = ':progress'
 const props = defineProps<{
@@ -133,7 +134,7 @@ function handleConfirmClear() {
     has-neutral
     @close="exportedData = ''"
   >
-    <div style="display: flex; flex-direction: column; gap: 0.5em">
+    <DialogProse>
       <div>成功导出 {{ exportSuccessCount }} 个游戏的进程数据。</div>
       <div v-if="exportFailureCount > 0">另有 {{ exportFailureCount }} 项因格式异常无法导出。</div>
       <div>请<strong>完整</strong>复制以下文本并妥善保存：</div>
@@ -149,7 +150,7 @@ function handleConfirmClear() {
       <ExtraInfo>
         <div>文本主体部分由 JSON 格式 GZip 压缩后再 Base64 编码得到。文本头部有其版本信息和 MD5 校验值，可帮助检查数据完整性。</div>
       </ExtraInfo>
-    </div>
+    </DialogProse>
   </Dialog>
   <Dialog
     :open="pendingClearGames.length != 0"
@@ -160,7 +161,7 @@ function handleConfirmClear() {
     :has-confirm="isConfirmClearTextCorrect"
     @close="verdict => verdict ? handleConfirmClear() : pendingClearGames = []"
   >
-    <div style="display: flex; flex-direction: column; gap: 0.5em">
+    <DialogProse>
       <div>将要清除以下游戏的进程数据：</div>
       <ul style="margin: 0 0; line-height: normal;">
         <li v-for="game of pendingClearGames" :key="game.storage_namespace">{{ game.name }}</li>
@@ -178,7 +179,7 @@ function handleConfirmClear() {
         <div>所有游戏成绩将永久丢失！无法撤销！</div>
         <div>如果仅是出于测试目的进行清除，请务必先导出备份。</div>
       </ExtraInfo>
-    </div>
+    </DialogProse>
   </Dialog>
 </template>
 

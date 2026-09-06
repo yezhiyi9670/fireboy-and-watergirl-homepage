@@ -8,6 +8,7 @@ import ExtraInfo from '../../../common/components/ExtraInfo.vue';
 import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 import LsGameProgressData from '../../../common/data_model/progress/LsGameProgressData.ts';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import DialogProse from '../../../common/components/DialogProse.vue';
 
 const game = inject(GameItemData.injectionKey)
 const progressReload = inject(LsGameProgressData.reloadInjectionKey)
@@ -83,7 +84,7 @@ function doRepair() {
     hasConfirm="确认清理"
     @close="verdict => verdict ? handleConfirm() : handleCancel()"
   >
-    <div style="display: flex; flex-direction: column; gap: 0.5em">
+    <DialogProse>
       <div>游戏进程数据中包含关卡表中不存在的“幽灵”关卡，可能是因为之前玩过的某关卡现在已经被移除。</div>
       <div>游戏理论上会隐藏幽灵关卡，因此<strong>不会出现可见异常</strong>。</div>
       <div>如果游戏确实存在异常，你可能需要清理幽灵关卡。清理后该关卡的游戏成绩将被完全移除，如果今后该关卡又重新出现，成绩也不会恢复。</div>
@@ -91,8 +92,10 @@ function doRepair() {
         <div>该操作无法撤销，如有必要请先回主页备份数据。</div>
         <div>清理时游戏本身应处于关闭状态。</div>
       </ExtraInfo>
-      <div class="error" v-if="lastError != null">清理失败：{{ lastError }}</div>
-    </div>
+      <ExtraInfo v-if="lastError != null" error>
+        清理失败：{{ lastError }}
+      </ExtraInfo>
+    </DialogProse>
   </Dialog>
 </template>
 

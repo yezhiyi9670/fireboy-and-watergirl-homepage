@@ -19,8 +19,8 @@ const emit = defineEmits<{
   done: []
 }>()
 
-const idSpec: FieldSpecifier = { label: 'id', type: ['number', 'string'] }
-const iidSpec: FieldSpecifier = { label: '_id', type: ['number', 'string'] }
+const idSpec: FieldSpecifier = { label: 'id（用作一般编号）', type: ['number', 'string'] }
+const iidSpec: FieldSpecifier = { label: '_id（用作唯一标识符）', type: ['number', 'string'] }
 
 const idValue = ref<string | number | null>(props.idInitial)
 const iidValue = ref<string | number | null>(props.iidInitial)
@@ -62,12 +62,9 @@ function onDialogClose(closeType: false | null | true) {
     :has-confirm="'确定'"
     :has-cancel="'取消'"
     :initial-focus="false"
-    :escape-deactivates="false"
+    dismissable
     @close="onDialogClose"
   >
-    <ExtraInfo v-if="props.warn != null" caution>
-      <p>{{ props.warn }}</p>
-    </ExtraInfo>
     <div class="id-fields">
       <OmniInput
         v-model="idValue"
@@ -79,7 +76,10 @@ function onDialogClose(closeType: false | null | true) {
         :spec="iidSpec"
       />
     </div>
-    <ExtraInfo v-if="error != null" caution>
+    <ExtraInfo v-if="props.warn != null" caution>
+      <p>{{ props.warn }}</p>
+    </ExtraInfo>
+    <ExtraInfo v-if="error != null" error>
       <p>{{ error }}</p>
     </ExtraInfo>
   </Dialog>
