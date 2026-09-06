@@ -5,6 +5,7 @@ import FancyButton from '../FancyButton.vue';
 import FancyInput from '../FancyInput.vue';
 import FancySelect from '../FancySelect.vue';
 import {
+  convertTextToForm,
   describeValueForForm,
   firstConformingForm,
   normalizeValue,
@@ -12,6 +13,7 @@ import {
   typeToForms,
   unionLetters,
   valueConforms,
+  valueToEditableText,
   valueToPrimitiveKind,
   type EditorForm,
 } from './omniForm.ts';
@@ -118,13 +120,12 @@ async function focusEditor(form: EditorForm) {
       textControl.value?.domElement?.focus()
       break
     case 'boolean':
-      selectControl.value?.domElement?.focus()
-      break
-    case 'choice':
+    case 'choice': {
       const select = selectControl.value?.domElement
       select?.focus()
       tryOpenSelect(select)
       break
+    }
   }
 }
 
@@ -141,20 +142,6 @@ function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
       // Not user-activated or unsupported; fall back to focused (closed) select.
     }
   }
-}
-
-function valueToEditableText(source: unknown): string {
-  const v = normalizeValue(source)
-  if(v === null) {
-    return ''
-  }
-  if(typeof v === 'boolean') {
-    return v ? 'true' : 'false'
-  }
-  if(typeof v === 'number' || typeof v === 'string') {
-    return String(v)
-  }
-  return JSON.stringify(v)
 }
 
 function applyConvertedText(form: EditorForm, converted: string | null) {
@@ -183,7 +170,7 @@ function beginEditingWith(form: EditorForm) {
   if(initial != null && initial.form === form.form) {
     initDraftFor(form, value.value)
   } else {
-    applyConvertedText(form, tryConvertText(valueToEditableText(value.value), form))
+    applyConvertedText(form, convertTextToForm(valueToEditableText(value.value), form))
   }
   void focusEditor(form)
 }
@@ -309,39 +296,13 @@ function currentDraftText(form: EditorForm): string {
   }
 }
 
-/** Returns converted text for the target form, or null when not convertible. */
-function tryConvertText(text: string, target: EditorForm): string | null {
-  switch(target.form) {
-    case 'number': {
-      const trimmed = text.trim()
-      if(trimmed === '' || !Number.isFinite(Number(trimmed))) {
-        return null
-      }
-      return trimmed
-    }
-    case 'string':
-    case 'unknown':
-      return text
-    case 'boolean': {
-      const low = text.trim().toLowerCase()
-      return (low == 'true' || low == 'false') ? low : null
-    }
-    case 'choice': {
-      const trimmed = text.trim()
-      return (trimmed in target.mapping) ? trimmed : null
-    }
-    case 'null':
-      return null
-  }
-}
-
 function switchEditorForm(target: EditorForm) {
   const current = editorForm.value
   if(current == null || current.form === target.form) {
     return
   }
   const sourceText = currentDraftText(current)
-  applyConvertedText(target, tryConvertText(sourceText, target))
+  applyConvertedText(target, convertTextToForm(sourceText, target))
   editorForm.value = target
   void focusEditor(target)
 }
@@ -439,6 +400,7 @@ onMounted(() => {
             placeholder="—"
             :options="booleanOptions"
             @submit="attemptCommit"
+            @pick="attemptCommit"
           />
           <FancySelect
             v-else-if="editorForm?.form == 'choice'"

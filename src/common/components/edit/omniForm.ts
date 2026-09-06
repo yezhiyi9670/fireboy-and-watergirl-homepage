@@ -136,3 +136,48 @@ export function describeValueForForm(value: unknown, form: EditorForm, _specLabe
       return describeValue(v)
   }
 }
+
+/** Editable-text representation of an arbitrary raw value (pure). */
+export function valueToEditableText(source: unknown): string {
+  const v = normalizeValue(source)
+  if(v === null) {
+    return ''
+  }
+  if(typeof v === 'boolean') {
+    return v ? 'true' : 'false'
+  }
+  if(typeof v === 'number' || typeof v === 'string') {
+    return String(v)
+  }
+  return JSON.stringify(v)
+}
+
+/**
+ * Convert an editable text into the target form.
+ * Returns the text to place in the target form's input, or null when the text
+ * cannot be represented in that form (callers then clear the draft).
+ */
+export function convertTextToForm(text: string, target: EditorForm): string | null {
+  switch(target.form) {
+    case 'number': {
+      const trimmed = text.trim()
+      if(trimmed === '' || !Number.isFinite(Number(trimmed))) {
+        return null
+      }
+      return trimmed
+    }
+    case 'string':
+    case 'unknown':
+      return text
+    case 'boolean': {
+      const low = text.trim().toLowerCase()
+      return (low == 'true' || low == 'false') ? low : null
+    }
+    case 'choice': {
+      const trimmed = text.trim()
+      return (trimmed in target.mapping) ? trimmed : null
+    }
+    case 'null':
+      return null
+  }
+}
