@@ -22,6 +22,9 @@ export default class TempleItemData {
   static kInjectionKey: InjectionKey<Ref<string>> = Symbol('TempleItemData_k')
 
   @Exclude()
+  private dirtyFlag: boolean = false
+
+  @Exclude()
   private init: boolean = false
   @Exclude()
   private levelIidToLevel: Record<string | number, LevelItemData> = Object.create(null)

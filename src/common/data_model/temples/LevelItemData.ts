@@ -18,6 +18,7 @@ export default class LevelItemData {
   @Type(() => LevelMetadata)
   __metadata?: LevelMetadata
 
+  __new_level_created_at?: number
   __cloned_from_iid?: number
   
   // Level type
