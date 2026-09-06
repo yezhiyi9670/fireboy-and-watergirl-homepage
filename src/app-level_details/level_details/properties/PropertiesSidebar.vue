@@ -12,7 +12,6 @@ import type TempleItemData from '../../../common/data_model/temples/TempleItemDa
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
-import { useEventListener, useMediaQuery } from '@vueuse/core';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
@@ -23,9 +22,8 @@ const propertiesActive = computed(() => {
 })
 
 // The sidebar is an overlay only below this width (keep in sync with the CSS).
-const isCompact = useMediaQuery('(max-width: 1049px)')
 const trapActive = computed(() => {
-  return propertiesActive.value && isCompact.value
+  return propertiesActive.value
 })
 
 const bodyEl = useTemplateRef('bodyEl')
@@ -58,13 +56,12 @@ function dismissProperties() {
   // immediately yank focus back into the sidebar.
   void nextTick(restoreLastFocus)
 }
-function onWindowKeydown(evt: KeyboardEvent) {
+function onEsc(evt: KeyboardEvent) {
   if(evt.key !== 'Escape' || evt.isComposing || evt.keyCode === 229) {
     return
   }
   dismissProperties()
 }
-useEventListener('keydown', onWindowKeydown)
 
 const hasSelection = computed(() => {
   return selectionState?.selection.value != null
@@ -123,8 +120,10 @@ const selectedEdge = computed<{
     :initial-focus="sidebarInitialFocus"
     :return-focus-on-deactivate="false"
     :escape-deactivates="false"
+    :click-outside-deactivates="true"
+    @deactivate="selectionState?.closeProperties()"
   >
-    <aside class="props-sidebar" :class="{ active: propertiesActive }">
+    <aside ref="sidebarEl" class="props-sidebar" :class="{ active: propertiesActive }" @keydown.esc="onEsc">
       <header class="props-header">
         <FancyButton theme="tertiary" not-button class="props-title">属性</FancyButton>
         <FancyButton
