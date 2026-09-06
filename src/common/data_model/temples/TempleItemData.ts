@@ -53,6 +53,13 @@ export default class TempleItemData {
     return this.levelIidToLevel[levelIid]
   }
 
+  isDirty() {
+    return this.dirtyFlag
+  }
+  markDirty() {
+    this.dirtyFlag = true
+  }
+
   // --- Read-only queries ---------------------------------------------------
 
   private maxNumeric(values: Iterable<unknown>): number | null {
@@ -124,11 +131,13 @@ export default class TempleItemData {
       filename: this.defaultLevelFilename(id),
       type: 'general',
       initial: false,
+      __new_level_created_at: Date.now(),
     }
     typia.assert<LevelItemData>(raw)
     const level = plainToInstance(LevelItemData, raw)
     this.levels.push(level)
     this.mutation()
+    this.markDirty()
     return level
   }
 
@@ -171,6 +180,7 @@ export default class TempleItemData {
     if(!idsEqual(newIid, oldIid)) {
       this.mutation()
     }
+    this.markDirty()
     return level
   }
 
@@ -194,6 +204,7 @@ export default class TempleItemData {
     }
     this.levels.splice(index, 1)
     this.mutation()
+    this.markDirty()
     return removed
   }
 
@@ -219,6 +230,7 @@ export default class TempleItemData {
     typia.assert<EdgeItemData>(raw)
     const edge = plainToInstance(EdgeItemData, raw)
     this.edges.push(edge)
+    this.markDirty()
     return edge
   }
 
@@ -229,6 +241,18 @@ export default class TempleItemData {
     const index = this.edges.findIndex(candidate => candidate === edge)
     if(index >= 0) {
       this.edges.splice(index, 1)
+      this.markDirty()
+    }
+  }
+
+  /**
+   * Toggle visibility of a specific edge.
+   */
+  setEdgeHidden_(edge: EdgeItemData, hidden: boolean) {
+    const index = this.edges.findIndex(candidate => candidate === edge)
+    if(index >= 0 && this.edges[index].hidden !== hidden) {
+      this.edges[index].hidden = hidden
+      this.markDirty()
     }
   }
 
@@ -238,6 +262,15 @@ export default class TempleItemData {
   calculateSortedLevels() {
     const ret: LevelItemData[] = [ ...this.levels ]
     ret.sort((a, b) => {
+      // Levels created during this session are always sorted last, by creation time.
+      const aNew = a.__new_level_created_at != null
+      const bNew = b.__new_level_created_at != null
+      if(aNew !== bNew) {
+        return aNew ? 1 : -1
+      }
+      if(aNew && bNew) {
+        return (a.__new_level_created_at as number) - (b.__new_level_created_at as number)
+      }
       const na = +a.getShownNumbering()
       const nb = +b.getShownNumbering()
       if(na != na && nb != nb) {

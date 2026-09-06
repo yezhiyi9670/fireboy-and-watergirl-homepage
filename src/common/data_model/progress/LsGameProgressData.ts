@@ -57,8 +57,14 @@ export default class LsGameProgressData {
 
     const commonTemples = thisTempleIds.intersection(thatTempleIds)
     for(const templeId of commonTemples) {
+      const thatTemple = templeIdToThatTemple[templeId]
+      // Temples edited (and not yet saved) in this session are skipped: e.g. a
+      // level deleted here would otherwise look like a phantom level in progress.
+      if(thatTemple.isDirty()) {
+        continue
+      }
       const thisLevelList = this.getTempleById(templeId)!.levels
-      const thatLevelList = templeIdToThatTemple[templeId]!.levels
+      const thatLevelList = thatTemple.levels
       const thisLevelIids = new Set(thisLevelList.map(level => level._id))
       const thatLevelIids = new Set(thatLevelList.map(level => level._id))
       const levelList = new ProgressRepairLevelList()

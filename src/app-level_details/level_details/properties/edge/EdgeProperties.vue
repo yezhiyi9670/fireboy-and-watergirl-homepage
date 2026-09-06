@@ -43,7 +43,7 @@ function handleLocateLevel(level: LevelItemData | null, kind: 'gallery' | 'map')
 const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
 
 function toggleHidden() {
-  props.edge.hidden = !props.edge.hidden
+  temple?.value.setEdgeHidden_(props.edge, !props.edge.hidden)
 }
 function unlinkEdge() {
   temple?.value.deleteEdge_(props.edge)
