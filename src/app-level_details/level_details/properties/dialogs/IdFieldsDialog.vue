@@ -62,7 +62,7 @@ function onDialogClose(closeType: false | null | true) {
     :title="props.title"
     :has-confirm="'确定'"
     :has-cancel="'取消'"
-    :initial-focus="false"
+    :initial-focus="null"
     dismissable
     @close="onDialogClose"
   >

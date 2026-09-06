@@ -11,10 +11,10 @@ const props = defineProps<{
   hasConfirm?: boolean | string,
   theme?: 'primary' | 'caution' | 'tertiary',
   /**
-   * Passed to the inner `<FocusTrap>`; `false` means "do not steal focus on
+   * Passed to the inner `<FocusTrap>`; `null` means "do not steal focus on
    * activation" (the dialog controls its own initial focus instead).
    */
-  initialFocus?: string | (() => Element | null) | false,
+  initialFocus?: string | (() => Element | null) | null,
 }>()
 const emit = defineEmits<{
   close: [ closeType: false | null | true ]
@@ -38,7 +38,7 @@ function tryDismiss() {
     <div class="dialog-cover" @click="tryDismiss">
       <FocusTrap
         :active="props.open"
-        :initial-focus="props.initialFocus !== undefined ? props.initialFocus : (() => $refs.dialogInner)"
+        :initial-focus="props.initialFocus !== undefined ? (props.initialFocus ?? false) : (() => $refs.dialogInner)"
         :escape-deactivates="props.dismissable"
       >
         <div class="dialog-focus-trap">
