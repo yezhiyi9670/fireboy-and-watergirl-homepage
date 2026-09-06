@@ -367,6 +367,7 @@ onMounted(() => {
     <div class="omni-head">
       <div class="omni-types" role="radiogroup" :aria-label="'类型：' + spec.label">
         <button
+          :tabindex="editing ? 0 : -1"
           v-for="radio in radios"
           :key="radio.letter"
           type="button"
