@@ -7,6 +7,7 @@ import TemplesMapView from './map/TemplesMapView.vue';
 import TempleExpandState from './state/TempleExpandState.ts';
 import LevelSelectionState from './state/LevelSelectionState.ts';
 import EdgeCreateState from './state/EdgeCreateState.ts';
+import { deselect } from './state/deselect.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -47,13 +48,14 @@ function onContentBlankClick(evt: MouseEvent) {
   if(target.closest('.map-level, .map-edge, .gallery-level, .temple-title')) {
     return
   }
-  edgeCreateState.cancel()
-  selectionState.clearSelection()
+  if(edgeCreateState.isLinking()) {
+    return
+  }
+  deselect(selectionState, edgeCreateState)
 }
 function onEsc(evt: KeyboardEvent) {
   evt.preventDefault()
-  edgeCreateState.cancel()
-  selectionState.clearSelection()
+  deselect(selectionState, edgeCreateState)
 }
 
 const repairTreatment = computed(() => {

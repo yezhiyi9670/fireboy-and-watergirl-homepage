@@ -6,6 +6,7 @@ import type LevelProgress from '../../../common/data_model/progress/LevelProgres
 import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
 import LevelSummaryLines from '../../components/LevelSummaryLines.vue';
 import LevelPreviewImage from '../../components/LevelPreviewImage.vue';
+import { useEdgeLinking } from '../properties/edgeLinking.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -13,8 +14,10 @@ const props = defineProps<{
 }>()
 
 const templeKey = inject(TempleItemData.kInjectionKey)
+const temple = inject(TempleItemData.injectionKey)
 
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeLinking = useEdgeLinking()
 const selected = computed(() => {
   return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
 })
@@ -22,8 +25,20 @@ const edgeEndpoint = computed(() => {
   return selectionState?.isLevelAnEdgeEndpoint(templeKey?.value ?? '', props.level._id) ?? false
 })
 function select() {
-  if(selectionState != null && templeKey?.value != null) {
-    selectionState.selectLevel(templeKey.value, props.level._id)
+  const key = templeKey?.value
+  if(key == null) {
+    return
+  }
+  if(edgeLinking.isLinking()) {
+    if(temple?.value != null) {
+      edgeLinking.onLevelClick(key, temple.value, props.level._id)
+    } else {
+      edgeLinking.cancel()
+    }
+    return
+  }
+  if(selectionState != null) {
+    selectionState.selectLevel(key, props.level._id)
   }
 }
 

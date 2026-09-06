@@ -6,6 +6,7 @@ import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
 import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
+import { useEdgeLinking } from '../properties/edgeLinking.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -14,14 +15,28 @@ const props = defineProps<{
 
 const gameId = inject(GameItemData.kInjectionKey)
 const templeKey = inject(TempleItemData.kInjectionKey)
+const temple = inject(TempleItemData.injectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeLinking = useEdgeLinking()
 
 const selected = computed(() => {
   return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
 })
 function select() {
-  if(selectionState != null && templeKey?.value != null) {
-    selectionState.selectLevel(templeKey.value, props.level._id)
+  const key = templeKey?.value
+  if(key == null) {
+    return
+  }
+  if(edgeLinking.isLinking()) {
+    if(temple?.value != null) {
+      edgeLinking.onLevelClick(key, temple.value, props.level._id)
+    } else {
+      edgeLinking.cancel()
+    }
+    return
+  }
+  if(selectionState != null) {
+    selectionState.selectLevel(key, props.level._id)
   }
 }
 

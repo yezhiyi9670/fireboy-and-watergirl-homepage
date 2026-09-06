@@ -2,11 +2,14 @@
 import { inject } from 'vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
+import EdgeCreateState from '../state/EdgeCreateState.ts';
+import { deselect } from '../state/deselect.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
 
 function showGlobalProperties() {
-  selectionState?.clearSelection()
+  deselect(selectionState, edgeCreate)
   selectionState?.showProperties()
 }
 </script>

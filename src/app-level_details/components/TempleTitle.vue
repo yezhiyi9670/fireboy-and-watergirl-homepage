@@ -18,14 +18,22 @@ const templeKey = inject(TempleItemDataClass.kInjectionKey)
 const edgeCreate = inject(EdgeCreateState.injectionKey)
 const { revealCreatedLevel } = useLocateView()
 
-const linking = computed(() => {
-  return edgeCreate?.isLinking() ?? false
+const linkingHere = computed(() => {
+  const key = templeKey?.value
+  if(key == null) {
+    return false
+  }
+  return edgeCreate?.isSourceTemple(key) ?? false
 })
 
 const newOpen = ref(false)
 const newIdInit = ref<string | number>(0)
 const newIidInit = ref<string | number>(0)
 const pendingNewIid = ref<string | number | null>(null)
+
+function cancelLinking() {
+  edgeCreate?.cancel()
+}
 
 function openNewLevel() {
   newIdInit.value = props.temple.nextFreeLevelId()
@@ -66,10 +74,10 @@ function onNewLevelDone() {
       <span class="temple-label">{{ temple.label }}</span>
       <span class="temple-badge" :style="{backgroundColor: temple.color}"></span>
     </div>
-    <div v-if="isEditingAllowed && linking" class="actions">
+    <div v-if="isEditingAllowed && linkingHere" class="actions">
       <FancyButton
         theme="caution"
-        not-button
+        @click.stop="cancelLinking"
       >
         点选另一关卡进行连接
       </FancyButton>

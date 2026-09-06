@@ -26,6 +26,10 @@ export default class EdgeCreateState {
       && source.templeKey === templeKey
       && sameIid(source.levelIid, levelIid)
   }
+  isSourceTemple(templeKey: string) {
+    const source = this.source.value
+    return source != null && source.templeKey === templeKey
+  }
   start(templeKey: string, levelIid: string | number) {
     this.source.value = { templeKey, levelIid }
   }

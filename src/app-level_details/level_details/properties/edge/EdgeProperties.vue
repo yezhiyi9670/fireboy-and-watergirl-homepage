@@ -10,6 +10,7 @@ import LevelPreviewImage from '../../../components/LevelPreviewImage.vue';
 import { useLocateView } from '../locate.ts';
 import LevelSelectionState from '../../state/LevelSelectionState.ts';
 import EdgeCreateState from '../../state/EdgeCreateState.ts';
+import { deselect } from '../../state/deselect.ts';
 import ApiTemplesData from '../../../../common/data_model/temples/ApiTemplesData.ts';
 import FancyButton from '../../../../common/components/FancyButton.vue';
 
@@ -46,8 +47,7 @@ function toggleHidden() {
 }
 function unlinkEdge() {
   temple?.value.deleteEdge_(props.edge)
-  edgeCreate?.cancel()
-  selectionState?.clearSelection()
+  deselect(selectionState, edgeCreate)
 }
 </script>
 

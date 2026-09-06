@@ -3,6 +3,7 @@ import { computed, inject, onMounted, ref, toRef, watch, type CSSProperties } fr
 import EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
+import { useEdgeLinking } from '../properties/edgeLinking.ts';
 
 const props = defineProps<{
   edge: EdgeItemData
@@ -10,6 +11,7 @@ const props = defineProps<{
 
 const templeKey = inject(TempleItemData.kInjectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeLinking = useEdgeLinking()
 
 const [ sourceLevel, targetLevel ] = EdgeItemData.useEndpointLevels(toRef(props, 'edge'))
 
@@ -25,6 +27,10 @@ const ariaLabel = computed(() => {
   return '连接线'
 })
 function select() {
+  if(edgeLinking.isLinking()) {
+    // While a link is pending, clicking an edge neither cancels nor selects.
+    return
+  }
   if(selectionState != null && templeKey?.value != null) {
     selectionState.selectEdge(templeKey.value, props.edge)
   }

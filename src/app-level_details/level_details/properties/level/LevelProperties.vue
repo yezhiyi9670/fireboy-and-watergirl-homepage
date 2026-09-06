@@ -14,6 +14,7 @@ import IdFieldsDialog from '../dialogs/IdFieldsDialog.vue';
 import { useLocateView } from '../locate.ts';
 import LevelSelectionState from '../../state/LevelSelectionState.ts';
 import EdgeCreateState from '../../state/EdgeCreateState.ts';
+import { deselect } from '../../state/deselect.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -109,8 +110,7 @@ function confirmDelete() {
       // level is already gone or cannot be found; selection will be cleared below
     }
   }
-  edgeCreate?.cancel()
-  selectionState?.clearSelection()
+  deselect(selectionState, edgeCreate)
   deleteOpen.value = false
 }
 
@@ -153,7 +153,7 @@ function toggleLink() {
         :theme="linkActive ? 'caution' : 'tertiary'"
         smaller
         @click="toggleLink"
-      >{{ linkActive ? '取消' : '添加连接' }}</FancyButton>
+      >{{ linkActive ? '取消添加连接' : '添加连接' }}</FancyButton>
     </div>
     <pre class="props-json">{{ json }}</pre>
     <div v-if="isEditingAllowed" class="edit-actions">
