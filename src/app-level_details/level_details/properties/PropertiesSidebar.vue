@@ -44,22 +44,23 @@ watch(propertiesActive, active => {
   if(active) {
     lastFocus.value = document.activeElement instanceof HTMLElement ? document.activeElement : null
     void nextTick(focusSidebarBody)
+  } else {
+    // Wait for the focus trap to deactivate (it unmanages on a post-flush after
+    // `propertiesActive` becomes false); otherwise the still-active trap would
+    // immediately yank focus back into the sidebar.
+    nextTick(restoreLastFocus)
   }
 })
 
 function restoreLastFocus() {
   const target = lastFocus.value
   lastFocus.value = null
-  if(target != null && target.isConnected) {
+  if(bodyEl?.value?.contains(document.activeElement) && target != null && target.isConnected) {
     target.focus({ preventScroll: true })
   }
 }
 function dismissProperties() {
   selectionState?.closeProperties()
-  // Wait for the focus trap to deactivate (it unmanages on a post-flush after
-  // `propertiesActive` becomes false); otherwise the still-active trap would
-  // immediately yank focus back into the sidebar.
-  void nextTick(restoreLastFocus)
 }
 function onEsc(evt: KeyboardEvent) {
   if(evt.key !== 'Escape' || evt.isComposing || evt.keyCode === 229) {
@@ -183,7 +184,7 @@ function onShortcut(evt: KeyboardEvent) {
   <FocusTrap
     :active="trapActive"
     :initial-focus="sidebarInitialFocus"
-    :return-focus-on-deactivate="true"
+    :return-focus-on-deactivate="false"
     :escape-deactivates="false"
     :click-outside-deactivates="true"
     @deactivate="selectionState?.closeProperties()"
