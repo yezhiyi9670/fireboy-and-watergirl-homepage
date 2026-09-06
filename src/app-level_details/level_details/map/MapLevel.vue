@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch, type CSSProperties } from 'vue';
+import { computed, inject, onMounted, useTemplateRef, watch, type CSSProperties } from 'vue';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress';
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
@@ -40,7 +40,7 @@ function select() {
   }
 }
 
-const rootEl = ref<HTMLElement | null>(null)
+const rootEl = useTemplateRef('rootEl')
 const locateMatches = computed(() => {
   const req = selectionState?.locateRequest.value
   return req?.view == 'map' && req.kind == 'level'

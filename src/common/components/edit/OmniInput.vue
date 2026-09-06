@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, shallowRef } from 'vue';
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from 'vue';
 import type { FieldSpecifier } from '../../data_model/field_specifier.ts';
 import FancyButton from '../FancyButton.vue';
 import FancyInput from '../FancyInput.vue';
@@ -69,9 +69,9 @@ function isSelectKind(form: EditorForm | null) {
 
 // --- element refs ----------------------------------------------------------
 
-const textControl = ref<{ domElement: HTMLElement | null } | null>(null)
-const selectControl = ref<{ domElement: HTMLSelectElement | null } | null>(null)
-const rootEl = ref<HTMLElement | null>(null)
+const textControl = useTemplateRef('textControl')
+const selectControl = useTemplateRef('selectControl')
+const rootEl = useTemplateRef('rootEl')
 
 function isFocusInsideRoot(node: Node | null) {
   return node != null && rootEl.value != null && rootEl.value.contains(node)

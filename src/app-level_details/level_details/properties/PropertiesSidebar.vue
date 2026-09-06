@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, ref, watch } from 'vue';
+import { computed, inject, nextTick, ref, useTemplateRef, watch } from 'vue';
 import { FocusTrap } from 'focus-trap-vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
@@ -28,7 +28,7 @@ const trapActive = computed(() => {
   return propertiesActive.value && isCompact.value
 })
 
-const bodyEl = ref<HTMLElement | null>(null)
+const bodyEl = useTemplateRef('bodyEl')
 const lastFocus = ref<HTMLElement | null>(null)
 
 function sidebarInitialFocus() {

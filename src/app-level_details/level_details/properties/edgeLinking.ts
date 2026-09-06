@@ -32,7 +32,7 @@ export function useEdgeLinking() {
       return
     }
     if(source.templeKey !== templeKey) {
-      edgeCreate.cancel()
+      edgeCreate?.cancel()
       return
     }
     if(sameIid(source.levelIid, levelIid)) {
@@ -41,17 +41,17 @@ export function useEdgeLinking() {
       return
     }
     if(temple.hasEdgeBetween(source.levelIid, levelIid)) {
-      edgeCreate.cancel()
+      edgeCreate?.cancel()
       return
     }
     let edge
     try {
       edge = temple.createEdge_(source.levelIid, levelIid)
     } catch {
-      edgeCreate.cancel()
+      edgeCreate?.cancel()
       return
     }
-    edgeCreate.cancel()
+    edgeCreate?.cancel()
     revealCreatedEdge(source.templeKey, edge)
   }
 

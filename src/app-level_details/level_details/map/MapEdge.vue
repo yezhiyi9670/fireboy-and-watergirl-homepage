@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, toRef, watch, type CSSProperties } from 'vue';
+import { computed, inject, onMounted, toRef, useTemplateRef, watch, type CSSProperties } from 'vue';
 import EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
@@ -36,7 +36,7 @@ function select() {
   }
 }
 
-const rootEl = ref<HTMLElement | null>(null)
+const rootEl = useTemplateRef('rootEl')
 const locateMatches = computed(() => {
   const req = selectionState?.locateRequest.value
   return req?.view == 'map' && req.kind == 'edge'
