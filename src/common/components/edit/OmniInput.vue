@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue';
 import type { FieldSpecifier } from '../../data_model/field_specifier.ts';
 import FancyButton from '../FancyButton.vue';
 import FancyInput from '../FancyInput.vue';
@@ -23,6 +23,7 @@ const props = withDefaults(defineProps<{
   readonly?: boolean
   disabled?: boolean
   smaller?: boolean
+  autofocus?: boolean
 }>(), {
   theme: 'ambient',
 })
@@ -352,6 +353,18 @@ function onFocusOut(evt: FocusEvent) {
     attemptCommit()
   }
 }
+
+defineExpose({ startEditing })
+
+onMounted(() => {
+  if(!props.autofocus || editing.value || !canEdit.value) {
+    return
+  }
+  const initial = firstConformingForm(forms.value, value.value)
+  if(initial != null) {
+    beginEditingWith(initial)
+  }
+})
 </script>
 
 <template>

@@ -9,7 +9,12 @@ const props = defineProps<{
   hasCancel?: boolean | string,
   hasNeutral?: boolean | string,
   hasConfirm?: boolean | string,
-  theme?: 'primary' | 'caution' | 'tertiary'
+  theme?: 'primary' | 'caution' | 'tertiary',
+  /**
+   * Passed to the inner `<FocusTrap>`; `false` means "do not steal focus on
+   * activation" (the dialog controls its own initial focus instead).
+   */
+  initialFocus?: string | (() => Element | null) | false,
 }>()
 const emit = defineEmits<{
   close: [ closeType: false | null | true ]
@@ -31,7 +36,11 @@ function tryDismiss() {
 <template>
   <portal to="dialog-outlet" v-if="props.open">
     <div class="dialog-cover" @click="tryDismiss">
-      <FocusTrap :active="props.open" :initial-focus="() => $refs.dialogInner">
+      <FocusTrap
+        :active="props.open"
+        :initial-focus="props.initialFocus !== undefined ? props.initialFocus : (() => $refs.dialogInner)"
+        :escape-deactivates="props.dismissable"
+      >
         <div class="dialog-focus-trap">
           <div class="dialog" tabindex="-1" @click.stop @keydown.esc="tryDismiss" ref="dialogInner">
             <div class="dialog-title" v-if="props.title != null">

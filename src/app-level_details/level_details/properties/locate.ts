@@ -2,6 +2,7 @@ import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LevelSelectionState, { type LocateTarget, type LocateView } from '../state/LevelSelectionState.ts'
 import TempleExpandState from '../state/TempleExpandState.ts'
+import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts'
 
 export function useLocateView() {
   const selectionState = inject(LevelSelectionState.injectionKey)
@@ -9,15 +10,23 @@ export function useLocateView() {
   const route = useRoute()
   const router = useRouter()
 
+  const gamePath = '/level_details/' + route.params.game
+
+  function expandTemple(templeKey: string) {
+    expandState?.setExpanded(templeKey, true)
+  }
+  function requestLocate(target: LocateTarget) {
+    selectionState?.requestLocate(target)
+  }
+
   function requestTarget(target: LocateTarget) {
     selectionState?.closeProperties()
-    expandState?.setExpanded(target.templeKey, true)
-    const path = '/level_details/' + route.params.game + '/' + target.view
-    const finish = () => selectionState?.requestLocate(target)
+    expandTemple(target.templeKey)
+    const path = gamePath + '/' + target.view
     if(route.path !== path) {
-      router.replace(path).then(finish)
+      router.replace(path).then(() => requestLocate(target))
     } else {
-      finish()
+      requestLocate(target)
     }
   }
 
@@ -31,5 +40,36 @@ export function useLocateView() {
     requestTarget({ view: 'map', kind: 'edge', templeKey, edgeUniqueId })
   }
 
-  return { locateLevel, locateEdge }
+  function currentView(): LocateView {
+    return route.path.endsWith('/gallery') ? 'gallery' : 'map'
+  }
+
+  /**
+   * After creating a level: select it, activate the sidebar, and locate/focus
+   * it in the view the user is currently looking at.
+   */
+  function revealCreatedLevel(templeKey: string, levelIid: string | number) {
+    expandTemple(templeKey)
+    selectionState?.setLevelSelection(templeKey, levelIid)
+    selectionState?.showProperties()
+    requestLocate({ view: currentView(), kind: 'level', templeKey, levelIid })
+  }
+
+  /**
+   * After creating an edge: switch to the map, select the edge (without opening
+   * the sidebar) and locate/focus it.
+   */
+  function revealCreatedEdge(templeKey: string, edge: EdgeItemData) {
+    expandTemple(templeKey)
+    selectionState?.setEdgeSelection(templeKey, edge)
+    const target: LocateTarget = { view: 'map', kind: 'edge', templeKey, edgeUniqueId: edge.getUniqueId() }
+    const path = gamePath + '/map'
+    if(route.path !== path) {
+      router.replace(path).then(() => requestLocate(target))
+    } else {
+      requestLocate(target)
+    }
+  }
+
+  return { locateLevel, locateEdge, revealCreatedLevel, revealCreatedEdge }
 }

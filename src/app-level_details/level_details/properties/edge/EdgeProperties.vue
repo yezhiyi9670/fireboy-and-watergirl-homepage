@@ -8,6 +8,8 @@ import LevelSummaryLines from '../../../components/LevelSummaryLines.vue';
 import Separator from '../../../components/Separator.vue';
 import LevelPreviewImage from '../../../components/LevelPreviewImage.vue';
 import { useLocateView } from '../locate.ts';
+import LevelSelectionState from '../../state/LevelSelectionState.ts';
+import EdgeCreateState from '../../state/EdgeCreateState.ts';
 import ApiTemplesData from '../../../../common/data_model/temples/ApiTemplesData.ts';
 import FancyButton from '../../../../common/components/FancyButton.vue';
 
@@ -16,6 +18,9 @@ const props = defineProps<{
 }>()
 
 const templeKey = inject(TempleItemData.kInjectionKey)
+const temple = inject(TempleItemData.injectionKey)
+const selectionState = inject(LevelSelectionState.injectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
 const { locateEdge, locateLevel } = useLocateView()
 
 const [ sourceLevel, targetLevel ] = EdgeItemData.useEndpointLevels(toRef(props, 'edge'))
@@ -35,6 +40,15 @@ function handleLocateLevel(level: LevelItemData | null, kind: 'gallery' | 'map')
 
 // const json = computed(() => JSON.stringify(props.edge, null, 2))
 const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
+
+function toggleHidden() {
+  props.edge.hidden = !props.edge.hidden
+}
+function unlinkEdge() {
+  temple?.value.deleteEdge_(props.edge)
+  edgeCreate?.cancel()
+  selectionState?.clearSelection()
+}
 </script>
 
 <template>
@@ -51,10 +65,12 @@ const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
         <FancyButton
           theme="tertiary"
           smaller
+          @click="toggleHidden"
         >{{ edge.hidden ? '取消隐藏' : '隐藏' }}</FancyButton>
         <FancyButton
           theme="caution"
           smaller
+          @click="unlinkEdge"
         >解除连接</FancyButton>
       </div>
     </template>

@@ -24,20 +24,40 @@ export default class LevelSelectionState {
   readonly locateRequest: Ref<LocateTarget | null> = ref(null)
 
   selectLevel(templeKey: string, levelIid: string | number) {
+    this.setLevelSelection(templeKey, levelIid)
+    this.propertiesActive.value = true
+  }
+  selectEdge(templeKey: string, edge: EdgeItemData) {
+    this.setEdgeSelection(templeKey, edge)
+    this.propertiesActive.value = true
+  }
+
+  /** Select a level without activating the properties sidebar. */
+  setLevelSelection(templeKey: string, levelIid: string | number) {
     const cur = this.selection.value
     if(!(cur?.kind == 'level' && cur.templeKey == templeKey && sameIid(cur.levelIid, levelIid))) {
       this.selection.value = { kind: 'level', templeKey, levelIid }
     }
-    this.propertiesActive.value = true
   }
-  selectEdge(templeKey: string, edge: EdgeItemData) {
+  /** Select an edge without activating the properties sidebar. */
+  setEdgeSelection(templeKey: string, edge: EdgeItemData) {
     const edgeUniqueId = edge.getUniqueId()
     const cur = this.selection.value
     if(!(cur?.kind == 'edge' && cur.templeKey == templeKey && cur.edgeUniqueId === edgeUniqueId)) {
       this.selection.value = { kind: 'edge', templeKey, edgeUniqueId, endpointIids: [edge.source, edge.target] }
     }
-    this.propertiesActive.value = true
   }
+
+  /**
+   * After renaming a selected level's iid, keep following the same level.
+   */
+  retargetLevelSelection(templeKey: string, oldIid: string | number, newIid: string | number) {
+    const s = this.selection.value
+    if(s?.kind == 'level' && s.templeKey == templeKey && sameIid(s.levelIid, oldIid)) {
+      this.selection.value = { ...s, levelIid: newIid }
+    }
+  }
+
   clearSelection() {
     this.selection.value = null
     this.propertiesActive.value = false

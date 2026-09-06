@@ -74,5 +74,4 @@ useTitle(newPageTitle)
       @reload="templesReload"
     />
   </template>
-  <portal-target name="dialog-outlet" multiple />
 </template>

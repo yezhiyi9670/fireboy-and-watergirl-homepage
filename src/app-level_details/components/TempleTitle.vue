@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { computed, inject, ref } from 'vue';
 import FancyButton from '../../common/components/FancyButton.vue';
 import ApiTemplesData from '../../common/data_model/temples/ApiTemplesData';
 import type TempleItemData from '../../common/data_model/temples/TempleItemData';
+import TempleItemDataClass from '../../common/data_model/temples/TempleItemData';
+import IdFieldsDialog from '../level_details/properties/dialogs/IdFieldsDialog.vue';
+import { useLocateView } from '../level_details/properties/locate.ts';
+import EdgeCreateState from '../level_details/state/EdgeCreateState.ts';
 
 const props = defineProps<{
   temple: TempleItemData
@@ -9,6 +14,42 @@ const props = defineProps<{
 const expanded = defineModel<boolean>()
 
 const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
+const templeKey = inject(TempleItemDataClass.kInjectionKey)
+const edgeCreate = inject(EdgeCreateState.injectionKey)
+const { revealCreatedLevel } = useLocateView()
+
+const linking = computed(() => {
+  return edgeCreate?.isLinking() ?? false
+})
+
+const newOpen = ref(false)
+const newIdInit = ref<string | number>(0)
+const newIidInit = ref<string | number>(0)
+const pendingNewIid = ref<string | number | null>(null)
+
+function openNewLevel() {
+  newIdInit.value = props.temple.nextFreeLevelId()
+  newIidInit.value = props.temple.nextFreeLevelIid()
+  pendingNewIid.value = null
+  newOpen.value = true
+}
+function submitNewLevel(id: string | number, iid: string | number): string | null {
+  try {
+    props.temple.createLevel_(id, iid)
+    pendingNewIid.value = iid
+    return null
+  } catch(e) {
+    return (e as Error).message
+  }
+}
+function onNewLevelDone() {
+  const key = templeKey?.value
+  const iid = pendingNewIid.value
+  pendingNewIid.value = null
+  if(key != null && iid != null) {
+    revealCreatedLevel(key, iid)
+  }
+}
 </script>
 
 <template>
@@ -25,16 +66,7 @@ const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
       <span class="temple-label">{{ temple.label }}</span>
       <span class="temple-badge" :style="{backgroundColor: temple.color}"></span>
     </div>
-    <div class="actions">
-      <FancyButton
-        v-if="isEditingAllowed"
-        theme="tertiary"
-        @click.stop="console.log('TODO new level')"
-      >
-        新关卡
-      </FancyButton>
-    </div>
-    <div v-if="false" class="actions">
+    <div v-if="isEditingAllowed && linking" class="actions">
       <FancyButton
         theme="caution"
         not-button
@@ -42,7 +74,25 @@ const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
         点选另一关卡进行连接
       </FancyButton>
     </div>
+    <div v-else-if="isEditingAllowed" class="actions">
+      <FancyButton
+        theme="tertiary"
+        @click.stop="openNewLevel"
+      >
+        新关卡
+      </FancyButton>
+    </div>
   </h2>
+
+  <IdFieldsDialog
+    :open="newOpen"
+    title="新关卡"
+    :id-initial="newIdInit"
+    :iid-initial="newIidInit"
+    :on-submit="submitNewLevel"
+    @done="onNewLevelDone"
+    @close="newOpen = false"
+  />
 </template>
 
 <style lang="css" scoped>

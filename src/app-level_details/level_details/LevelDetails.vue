@@ -6,6 +6,7 @@ import TemplesGalleryView from './gallery/TemplesGalleryView.vue';
 import TemplesMapView from './map/TemplesMapView.vue';
 import TempleExpandState from './state/TempleExpandState.ts';
 import LevelSelectionState from './state/LevelSelectionState.ts';
+import EdgeCreateState from './state/EdgeCreateState.ts';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -38,16 +39,20 @@ const progress = inject(LsGameProgressData.injectionKey)
 provide(TempleExpandState.injectionKey, new TempleExpandState())
 const selectionState = new LevelSelectionState()
 provide(LevelSelectionState.injectionKey, selectionState)
+const edgeCreateState = new EdgeCreateState()
+provide(EdgeCreateState.injectionKey, edgeCreateState)
 
 function onContentBlankClick(evt: MouseEvent) {
   const target = evt.target as HTMLElement
   if(target.closest('.map-level, .map-edge, .gallery-level, .temple-title')) {
     return
   }
+  edgeCreateState.cancel()
   selectionState.clearSelection()
 }
 function onEsc(evt: KeyboardEvent) {
   evt.preventDefault()
+  edgeCreateState.cancel()
   selectionState.clearSelection()
 }
 
