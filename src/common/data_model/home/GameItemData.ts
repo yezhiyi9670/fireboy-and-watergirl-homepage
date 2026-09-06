@@ -16,7 +16,7 @@ export default class GameItemData {
   @Type(() => GameInfoData) info?: GameInfoData
   accept_legacy_import?: boolean
   
-  level_extra_fields?: FieldSpecifiers
+  level_fields_overlay?: FieldSpecifiers
 
   canBeConsideredNew(date?: Date) {
     if(this.created == null) {

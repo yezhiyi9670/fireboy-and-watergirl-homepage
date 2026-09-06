@@ -1,5 +1,5 @@
 import { Type } from "class-transformer"
-import type { FieldSpecifiers } from "../field_specifier"
+import { persistentField, transientField, type FieldSpecifier, type FieldSpecifiers } from "../field_specifier"
 import LevelMetadata from "./LevelMetadata"
 import { computed, inject, type ComputedRef } from "vue"
 import TempleItemData from "./TempleItemData"
@@ -7,13 +7,13 @@ import GameItemData from "../home/GameItemData"
 
 export default class LevelItemData {
   id!: number | string
+  _id!: number | string
   x!: number
   y!: number
   filename!: string
   time!: number
   mobileTime?: number
   required!: number
-  _id!: number | string
 
   @Type(() => LevelMetadata)
   __metadata?: LevelMetadata
@@ -28,7 +28,7 @@ export default class LevelItemData {
   initial?: boolean
   
   // Rows-type exclusive
-  elements?: string[]
+  elements?: unknown  // string[]
 
   // Fairytales wing exclusive
   wing?: number
@@ -53,23 +53,79 @@ export default class LevelItemData {
   // Other unknown stuff
   [key: string]: unknown
 
-  static globalKnownKeys: FieldSpecifiers = {
-    id: { label: 'ID', type: ['number', 'string'] },
-    x: { label: 'X', type: 'number' },
-    y: { label: 'Y', type: 'number' },
-    filename: { label: '文件名', type: 'string' },
-    time: { label: '多人限时', type: 'number' },
-    mobileTime: { label: '单人限时', type: ['number', 'null'] },
-    type: { label: '类型', type: [{
+  /**
+   * This must be mutually compatible with type declaration
+   * of explicitly defined keys in the class.
+   * 
+   * Persistent/Transient:
+   * - Persistent fields are always shown in the list. They
+   *   should be well-known and almost always meaningful.
+   * - Transient fields are only shown in the list when not
+   *   undefined. Normally unknown fields should be transient.
+   * 
+   * Mandatory/Optional:
+   * - If the type contains `undefined`, it means that the field
+   *   is optional and can be absent.
+   *   (in JSON, undefined and absence are equivalent.
+   *    Undefined fields are gone on JSON.stringify)
+   * - If type contains no `undefined`, value is required to be
+   *   present.
+   * - `null` is an ordinary and existent value, and does not serve
+   *   as indication of optionality.
+   */
+  static allKeys: FieldSpecifiers = {
+    id: persistentField('id', ['number', 'string']),
+    _id: persistentField('_id', ['number', 'string']),
+    x: persistentField('X', 'number'),
+    y: persistentField('Y', 'number'),
+    filename: persistentField('文件名', 'string'),
+    time: persistentField('默认限时', 'number'),
+    mobileTime: persistentField('单人限时', ['undefined', 'number']),
+    required: transientField('required', 'number'),
+
+    type: persistentField('类型', ['undefined', {
       'general': '常规', 'speed': '竞速', 'puzzle': '解密', 'dark': '黑暗'
-    }, 'null'] },
+    }]),
+    initial: transientField('initial', ['undefined', 'boolean']),
+    elements: transientField('elements', ['undefined', 'unknown'], []),
+
+    wing: transientField('wing', ['undefined', 'number']),
+    requirePerfects: transientField('requirePerfects', ['undefined', 'boolean']),
+
+    skippable: transientField('skippable', ['undefined', 'boolean']),
+    shownId: transientField('shownId', ['undefined']),
+
+    rating: transientField('rating', ['undefined', 'number', 'string']),
+    difficulty: transientField('difficulty', ['undefined', 'number', 'string']),
+    puzzleLevel: transientField('puzzleLevel', ['undefined', 'number', 'string']),
+    skillLevel: transientField('skillLevel', ['undefined', 'number', 'string']),
+    diff: transientField('diff', ['undefined', 'number']),
+    quality: transientField('quality', ['undefined', 'number']),
+
+    locked: transientField('locked', ['undefined', 'boolean']),
+    unlock_key: transientField('unlock_key', ['undefined', 'string']),
   }
-  static treeTypeKnownKeys: FieldSpecifiers = {
-    initial: { label: '初始关卡', type: 'boolean' }
+  /**
+   * Spec for other fields not in allKeys.
+   * Must be mutually compatible with the type declaration of the rest-keys entry in the class.
+   */ 
+  static restSpec: FieldSpecifier = transientField('', [ 'undefined', 'null', 'number', 'string', 'boolean', 'unknown' ], null)
+  /**
+   * Specs overlayed onto allKeys when temple has type=='tree'
+   */
+  static treeTypeKeysOverlay: FieldSpecifiers = {
+    initial: persistentField('初始关卡', ['undefined', 'boolean']),
   }
-  static rowsTypeKnownKeys: FieldSpecifiers = { }
+  /**
+   * Specs overlayed onto allKeys when temple has type=='row'
+   */
+  static rowsTypeKeysOverlay: FieldSpecifiers = {
+    elements: transientField('元素', ['undefined', 'unknown'], [])
+  }
 
   /**
+   * Get allKeys specifiers with temple-type and game-specific (defined on backend res) overlays applied.
+   * 
    * Required injections:
    * - TempleItemData.injectionKey
    * - GameItemData.injectionKey
@@ -80,15 +136,15 @@ export default class LevelItemData {
     
     return computed(() => {
       const knownKeyDicts: FieldSpecifiers[] = []
-      knownKeyDicts.push(this.globalKnownKeys)
+      knownKeyDicts.push(this.allKeys)
       if(temple?.value.type == 'rows') {
-        knownKeyDicts.push(this.rowsTypeKnownKeys)
+        knownKeyDicts.push(this.rowsTypeKeysOverlay)
       }
       if(temple?.value.type == 'tree') {
-        knownKeyDicts.push(this.treeTypeKnownKeys)
+        knownKeyDicts.push(this.treeTypeKeysOverlay)
       }
-      if(game?.value.level_extra_fields) {
-        knownKeyDicts.push(game?.value.level_extra_fields)
+      if(game?.value.level_fields_overlay) {
+        knownKeyDicts.push(game?.value.level_fields_overlay)
       }
       return Object.assign({}, ...knownKeyDicts)
     })

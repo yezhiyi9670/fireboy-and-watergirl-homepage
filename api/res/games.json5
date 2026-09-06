@@ -14,7 +14,7 @@
   // extras.level_desc(?): User-friendly description of newly-added levels.
   // extras.modified(?): Last modified date of extra levels. Used to display the "new level" badge.
 
-  // level_extra_fields (?): Game-specific level item data schema.
+  // level_fields_overlay (?): Entries overlayed onto LevelItemData.allKeys in frontend.
 
   // accept_legacy_import(?): Allow legacy unspecified single-game data to be imported into the game.
   //                          Can be safely disabled if the game came out after the legacy exporter got taken down.
@@ -109,9 +109,9 @@
     storage_namespace: "fb-fairytales",
     level_namespace: "6",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
-    level_extra_fields: {
-      wing: { label: "分支编号", type: "number" },
-      requirePerfects: { label: "特殊关卡", type: "boolean" },
+    level_fields_overlay: {
+      wing: { label: "分支编号", type: [ "number", "undefined" ] },
+      requirePerfects: { label: "特殊关卡", type: [ "boolean", "undefined" ] },
     },
     accept_legacy_import: true,
   },
@@ -127,9 +127,9 @@
     storage_namespace: "fb-friends",
     level_namespace: "7",
     cheat_flags: [ "invulnerable", "unlock", "ad_revive" ],
-    level_extra_fields: {
-      skippable: { label: "可跳过", type: "boolean"},
-      shownId: { label: "显示编号", type: [ "number", "string" ]},
+    level_fields_overlay: {
+      skippable: { label: "可跳过", type: [ "boolean", "undefined" ]},
+      shownId: { label: "显示编号", type: [ "number", "string", "undefined" ]},
     },
     created: "2026-06-01 21:36:00+0800",
     accept_legacy_import: true,
