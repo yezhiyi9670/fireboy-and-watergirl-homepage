@@ -8,6 +8,7 @@ export type EditorForm =
   | { form: 'boolean' }
   | { form: 'unknown' }
   | { form: 'null' }
+  | { form: 'undefined' }
   | { form: 'choice', mapping: Record<string, string> }
 
 export function normalizeValue(value: unknown) {
@@ -25,6 +26,7 @@ export function singularToForm(type: FieldTypeSingular): EditorForm {
       case 'string': return { form: 'string' }
       case 'boolean': return { form: 'boolean' }
       case 'null': return { form: 'null' }
+      case 'undefined': return { form: 'undefined' }
       case 'unknown':
       // case 'object':
         return { form: 'unknown' }
@@ -49,7 +51,9 @@ export function conformsToForm(value: unknown, form: EditorForm): boolean {
     case 'string': return typeof v === 'string'
     case 'boolean': return typeof v === 'boolean'
     case 'unknown': return v !== undefined
-    case 'null': return v === null
+    case 'null':
+    case 'undefined':
+      return v === null
     case 'choice': return typeof v === 'string' && v in form.mapping
   }
 }
@@ -108,6 +112,7 @@ export function letterForForm(form: EditorForm): string {
     case 'boolean': return 'B'
     case 'unknown': return 'U'
     case 'null': return 'V'
+    case 'undefined': return '–'
     case 'choice': return 'C'
   }
 }
@@ -178,6 +183,7 @@ export function convertTextToForm(text: string, target: EditorForm): string | nu
       return (trimmed in target.mapping) ? trimmed : null
     }
     case 'null':
+    case 'undefined':
       return null
   }
 }

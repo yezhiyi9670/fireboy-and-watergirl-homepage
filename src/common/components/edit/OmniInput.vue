@@ -184,6 +184,12 @@ function finishTextCommit(): boolean {
     emit('update:modelValue', null)
     return true
   }
+  if(form.form == 'undefined') {
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', undefined)
+    return true
+  }
   if(form.form == 'number') {
     const text = draftText.value.trim()
     if(text === '' || !Number.isFinite(Number(text))) {
@@ -237,7 +243,9 @@ function onFocusOut(evt: FocusEvent) {
   if(related != null && isFocusInsideRoot(related as Node)) {
     return
   }
-  if(isTextKind(editorForm.value) || editorForm.value.form == 'null') {
+  if(isTextKind(editorForm.value)
+    || editorForm.value.form == 'null'
+    || editorForm.value.form == 'undefined') {
     finishTextCommit()
   } else if(isSelectKind(editorForm.value)) {
     // Selects commit immediately on change; closing without a change just ends edit.
@@ -256,12 +264,16 @@ function onF2() {
 }
 
 function onNullSpace(evt: KeyboardEvent) {
-  if(!canType.value || controlForm.value.form != 'null') {
+  if(!canType.value) {
+    return
+  }
+  const form = controlForm.value.form
+  if(form !== 'null' && form !== 'undefined') {
     return
   }
   evt.preventDefault()
   if(!editing.value) {
-    beginEditingWith({ form: 'null' })
+    beginEditingWith(form === 'null' ? { form: 'null' } : { form: 'undefined' })
   }
 }
 
@@ -409,7 +421,7 @@ onMounted(() => {
         :class="{ mismatched: !conforming }"
       />
       <FancyInput
-        v-else-if="controlForm.form == 'null'"
+        v-else-if="controlForm.form == 'null' || controlForm.form == 'undefined'"
         ref="textControl"
         v-model="emptyText"
         :theme="props.theme"

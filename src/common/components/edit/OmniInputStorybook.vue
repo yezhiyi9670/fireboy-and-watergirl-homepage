@@ -29,6 +29,8 @@ const cases = reactive<FieldCase[]>([
   { note: '类型不符 number↔string', spec: { label: '应为数字', type: 'number' }, value: 'not-a-number' },
   { note: '类型不符 string↔object', spec: { label: '应为字符串', type: 'string' }, value: { hello: 'world' } },
   { note: 'null 单值', spec: { label: '空值', type: 'null' }, value: null },
+  { note: 'undefined 单值', spec: { label: '未定义值', type: 'undefined' }, value: undefined },
+  { note: 'Union number|undefined', spec: { label: '可缺省数字', type: ['number', 'undefined'] }, value: undefined },
 ])
 </script>
 
