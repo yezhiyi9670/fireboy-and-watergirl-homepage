@@ -74,8 +74,8 @@ export default class LevelItemData {
    *   as indication of optionality.
    */
   static allKeys: FieldSpecifiers = {
-    id: persistentField('id', ['number', 'string']),
-    _id: persistentField('_id', ['number', 'string']),
+    id: persistentField('id（用作一般编号）', ['number', 'string']),
+    _id: persistentField('_id（用作唯一标识符）', ['number', 'string']),
     x: persistentField('X', 'number'),
     y: persistentField('Y', 'number'),
     filename: persistentField('文件名', 'string'),

@@ -5,6 +5,7 @@ import ExtraInfo from '../../../../common/components/ExtraInfo.vue';
 import OmniInput from '../../../../common/components/edit/OmniInput.vue';
 import type { FieldSpecifier } from '../../../../common/data_model/field_specifier.ts';
 import DialogProse from '../../../../common/components/DialogProse.vue';
+import LevelItemData from '../../../../common/data_model/temples/LevelItemData.ts';
 
 const props = defineProps<{
   open: boolean
@@ -20,8 +21,8 @@ const emit = defineEmits<{
   done: []
 }>()
 
-const idSpec: FieldSpecifier = { label: 'id（用作一般编号）', type: ['number', 'string'] }
-const iidSpec: FieldSpecifier = { label: '_id（用作唯一标识符）', type: ['number', 'string'] }
+const idSpec: FieldSpecifier = LevelItemData.allKeys['id']
+const iidSpec: FieldSpecifier = LevelItemData.allKeys['_id']
 
 const idValue = ref<string | number | null>(props.idInitial)
 const iidValue = ref<string | number | null>(props.iidInitial)
