@@ -3,13 +3,11 @@ import { computed, inject, onMounted, useTemplateRef, watch, type CSSProperties 
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress';
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
-import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData';
 import { Api } from '../../../common/api/Api';
 import GameItemData from '../../../common/data_model/home/GameItemData';
 import LevelSelectionState, { sameIid } from '../state/LevelSelectionState.ts';
-import EdgeCreateState from '../state/EdgeCreateState.ts';
 import { useEdgeLinking } from '../properties/edgeLinking.ts';
-import { applyGridMove, gridMovement, isTextEntryTarget, toggleLinking } from '../editor/editorHotkeys.ts';
+import { useShortcutController, type LevelShortcutContext } from '../editor/shortcutController.ts';
 
 const props = defineProps<{
   level: LevelItemData
@@ -20,8 +18,8 @@ const gameId = inject(GameItemData.kInjectionKey)
 const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
-const edgeCreate = inject(EdgeCreateState.injectionKey)
 const edgeLinking = useEdgeLinking()
+const shortcut = useShortcutController()
 
 const selected = computed(() => {
   return selectionState?.isLevelSelected(templeKey?.value ?? '', props.level._id) ?? false
@@ -44,28 +42,14 @@ function select() {
   }
 }
 
-const editingAllowed = ApiTemplesData.useIsEditingAllowed()
 function onGridKeydown(evt: KeyboardEvent) {
-  if(isTextEntryTarget(evt) || !editingAllowed.value) {
-    return
-  }
-  if((evt.ctrlKey || evt.metaKey) && !evt.shiftKey && evt.key.toLowerCase() === 'r') {
-    const key = templeKey?.value
-    if(key != null) {
-      evt.preventDefault()
-      toggleLinking(edgeCreate, selectionState, key, props.level._id)
-    }
-    return
-  }
-  const move = gridMovement(evt)
-  if(move == null) {
-    return
-  }
+  const key = templeKey?.value
   const t = temple?.value
-  if(t == null) {
+  if(key == null || t == null) {
     return
   }
-  if(applyGridMove(t, props.level, move.axis, move.delta)) {
+  const ctx: LevelShortcutContext = { kind: 'level', templeKey: key, temple: t, level: props.level }
+  if(shortcut(evt, ctx)) {
     evt.preventDefault()
   }
 }

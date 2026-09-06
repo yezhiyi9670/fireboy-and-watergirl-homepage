@@ -2,10 +2,9 @@
 import { computed, inject, onMounted, toRef, useTemplateRef, watch, type CSSProperties } from 'vue';
 import EdgeItemData from '../../../common/data_model/temples/EdgeItemData';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData';
-import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
 import { useEdgeLinking } from '../properties/edgeLinking.ts';
-import { isTextEntryTarget, toggleEdgeVisibility } from '../editor/editorHotkeys.ts';
+import { useShortcutController, type EdgeShortcutContext } from '../editor/shortcutController.ts';
 
 const props = defineProps<{
   edge: EdgeItemData
@@ -15,6 +14,7 @@ const templeKey = inject(TempleItemData.kInjectionKey)
 const temple = inject(TempleItemData.injectionKey)
 const selectionState = inject(LevelSelectionState.injectionKey)
 const edgeLinking = useEdgeLinking()
+const shortcut = useShortcutController()
 
 const [ sourceLevel, targetLevel ] = EdgeItemData.useEndpointLevels(toRef(props, 'edge'))
 
@@ -39,21 +39,14 @@ function select() {
   }
 }
 
-const editingAllowed = ApiTemplesData.useIsEditingAllowed()
 function onShortcut(evt: KeyboardEvent) {
-  if(isTextEntryTarget(evt) || !editingAllowed.value) {
-    return
-  }
-  if(!(evt.ctrlKey || evt.metaKey) || evt.shiftKey || evt.altKey) {
-    return
-  }
-  if(evt.key.toLowerCase() !== 'h') {
-    return
-  }
-  evt.preventDefault()
   const t = temple?.value
-  if(t != null) {
-    toggleEdgeVisibility(t, props.edge)
+  if(t == null) {
+    return
+  }
+  const ctx: EdgeShortcutContext = { kind: 'edge', temple: t, edge: props.edge }
+  if(shortcut(evt, ctx)) {
+    evt.preventDefault()
   }
 }
 

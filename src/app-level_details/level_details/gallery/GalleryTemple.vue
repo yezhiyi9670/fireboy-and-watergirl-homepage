@@ -2,11 +2,10 @@
 import { computed, provide, toRef, useTemplateRef } from 'vue';
 import GalleryLevel from './GalleryLevel.vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
-import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import TempleTitle from '../../components/TempleTitle.vue';
 import { useTempleExpanded } from '../state/TempleExpandState.ts';
-import { isTextEntryTarget } from '../editor/editorHotkeys.ts';
+import { useShortcutController, type TempleShortcutContext } from '../editor/shortcutController.ts';
 
 const props = defineProps<{
   templeKey: string
@@ -19,17 +18,16 @@ provide(TempleItemData.injectionKey, toRef(props, 'temple'))
 const expanded = useTempleExpanded(toRef(props, 'templeKey'))
 
 const templeTitleRef = useTemplateRef<{ openNewLevel: () => void }>('templeTitleRef')
-const editingAllowed = ApiTemplesData.useIsEditingAllowed()
+const shortcut = useShortcutController()
 
 function onContainerKeydown(evt: KeyboardEvent) {
-  if(isTextEntryTarget(evt) || !editingAllowed.value) {
-    return
+  const ctx: TempleShortcutContext = {
+    kind: 'temple',
+    newLevel: () => templeTitleRef.value?.openNewLevel(),
   }
-  if(!(evt.ctrlKey && evt.shiftKey) || evt.key.toLowerCase() !== 'd') {
-    return
+  if(shortcut(evt, ctx)) {
+    evt.preventDefault()
   }
-  evt.preventDefault()
-  templeTitleRef.value?.openNewLevel()
 }
 
 const sortedLevels = computed(() => {

@@ -3,19 +3,9 @@ import { computed, inject, nextTick, ref, useTemplateRef, watch } from 'vue';
 import { FocusTrap } from 'focus-trap-vue';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import LevelSelectionState from '../state/LevelSelectionState.ts';
-import EdgeCreateState from '../state/EdgeCreateState.ts';
-import { deselect } from '../state/deselect.ts';
-import EditorActionHost from '../editor/EditorActionHost.ts';
 import { useLocateView } from './locate.ts';
 import IdFieldsDialog from './dialogs/IdFieldsDialog.vue';
-import {
-  applyGridMove,
-  gridMovement,
-  isEditingAllowed as isEditingAllowedFor,
-  isTextEntryTarget,
-  toggleEdgeVisibility,
-  toggleLinking,
-} from '../editor/editorHotkeys.ts';
+import { useShortcutController, type SidebarShortcutContext } from '../editor/shortcutController.ts';
 import GlobalStats from './global/GlobalStats.vue';
 import LevelPropertiesWrap from './level/LevelPropertiesWrap.vue';
 import EdgePropertiesWrap from './edge/EdgePropertiesWrap.vue';
@@ -27,11 +17,10 @@ import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.t
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
-const edgeCreate = inject(EdgeCreateState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
 const progressData = inject(LsGameProgressData.injectionKey)
-const actionHost = inject(EditorActionHost.injectionKey)
 const { revealCreatedLevel } = useLocateView()
+const shortcut = useShortcutController()
 
 const propertiesActive = computed(() => {
   return selectionState?.propertiesActive.value ?? false
@@ -126,10 +115,6 @@ const selectedEdge = computed<{
 
 // --- editor keyboard shortcuts (only while focus is inside the sidebar) ----
 
-const editingAllowed = computed(() => {
-  return isEditingAllowedFor(templesData?.value)
-})
-
 const newLevelOpen = ref(false)
 const newLevelIdInit = ref<string | number>(0)
 const newLevelIidInit = ref<string | number>(0)
@@ -170,58 +155,21 @@ function onNewLevelDone() {
 }
 
 function onShortcut(evt: KeyboardEvent) {
-  if(isTextEntryTarget(evt) || !editingAllowed.value) {
-    return
+  const ctx: SidebarShortcutContext = {
+    kind: 'sidebar',
+    level: selectedLevel.value != null ? {
+      templeKey: selectedLevel.value.templeKey,
+      temple: selectedLevel.value.temple,
+      level: selectedLevel.value.level,
+    } : null,
+    edge: selectedEdge.value != null ? {
+      temple: selectedEdge.value.temple,
+      edge: selectedEdge.value.edge,
+    } : null,
+    newLevel: openNewLevelForSelectedTemple,
   }
-  const ctrl = evt.ctrlKey || evt.metaKey
-  const shift = evt.shiftKey
-
-  if(evt.key === 'Delete') {
-    if(selectedLevel.value != null) {
-      evt.preventDefault()
-      actionHost?.requestLevelDelete()
-      return
-    }
-    if(selectedEdge.value != null) {
-      evt.preventDefault()
-      selectedEdge.value.temple.deleteEdge_(selectedEdge.value.edge)
-      deselect(selectionState, edgeCreate)
-      return
-    }
-    return
-  }
-  if(ctrl && shift && evt.key.toLowerCase() === 'd') {
+  if(shortcut(evt, ctx)) {
     evt.preventDefault()
-    openNewLevelForSelectedTemple()
-    return
-  }
-  if(ctrl && !shift && evt.key.toLowerCase() === 'd') {
-    evt.preventDefault()
-    if(selectedLevel.value != null) {
-      actionHost?.requestLevelClone()
-    }
-    return
-  }
-  if(ctrl && !shift && evt.key.toLowerCase() === 'h') {
-    if(selectedEdge.value != null) {
-      evt.preventDefault()
-      toggleEdgeVisibility(selectedEdge.value.temple, selectedEdge.value.edge)
-    }
-    return
-  }
-  if(ctrl && !shift && evt.key.toLowerCase() === 'r') {
-    evt.preventDefault()
-    if(selectedLevel.value != null) {
-      toggleLinking(edgeCreate, selectionState, selectedLevel.value.templeKey, selectedLevel.value.level._id)
-    }
-    return
-  }
-  if(!evt.altKey) {
-    const move = gridMovement(evt)
-    if(move != null && selectedLevel.value != null) {
-      applyGridMove(selectedLevel.value.temple, selectedLevel.value.level, move.axis, move.delta)
-      evt.preventDefault()
-    }
   }
 }
 </script>

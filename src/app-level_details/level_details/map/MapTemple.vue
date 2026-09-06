@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, provide, toRef, useTemplateRef } from 'vue';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
-import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import type TempleProgress from '../../../common/data_model/progress/TempleProgress.ts';
 import { Api } from '../../../common/api/Api.ts';
 import GameItemData from '../../../common/data_model/home/GameItemData.ts';
@@ -9,7 +8,7 @@ import TempleTitle from '../../components/TempleTitle.vue';
 import MapEdge from './MapEdge.vue';
 import MapLevel from './MapLevel.vue';
 import { useTempleExpanded } from '../state/TempleExpandState.ts';
-import { isTextEntryTarget } from '../editor/editorHotkeys.ts';
+import { useShortcutController, type TempleShortcutContext } from '../editor/shortcutController.ts';
 
 const props = defineProps<{
   templeKey: string
@@ -24,17 +23,16 @@ const expanded = useTempleExpanded(toRef(props, 'templeKey'))
 const gameId = inject(GameItemData.kInjectionKey)
 
 const templeTitleRef = useTemplateRef<{ openNewLevel: () => void }>('templeTitleRef')
-const editingAllowed = ApiTemplesData.useIsEditingAllowed()
+const shortcut = useShortcutController()
 
 function onContainerKeydown(evt: KeyboardEvent) {
-  if(isTextEntryTarget(evt) || !editingAllowed.value) {
-    return
+  const ctx: TempleShortcutContext = {
+    kind: 'temple',
+    newLevel: () => templeTitleRef.value?.openNewLevel(),
   }
-  if(!(evt.ctrlKey && evt.shiftKey) || evt.key.toLowerCase() !== 'd') {
-    return
+  if(shortcut(evt, ctx)) {
+    evt.preventDefault()
   }
-  evt.preventDefault()
-  templeTitleRef.value?.openNewLevel()
 }
 
 const backgroundUrl = computed(() => {
