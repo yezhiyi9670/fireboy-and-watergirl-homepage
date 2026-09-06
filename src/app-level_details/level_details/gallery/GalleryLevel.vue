@@ -32,7 +32,7 @@ function onShortcut(evt: KeyboardEvent) {
   if(key == null || t == null) {
     return
   }
-  const ctx: LevelShortcutContext = { kind: 'level', templeKey: key, temple: t, level: props.level }
+  const ctx: LevelShortcutContext = { kind: 'level', surface: 'gallery', templeKey: key, temple: t, level: props.level }
   if(shortcut(evt, ctx)) {
     evt.preventDefault()
   }

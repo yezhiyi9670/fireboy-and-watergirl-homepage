@@ -48,7 +48,7 @@ function onGridKeydown(evt: KeyboardEvent) {
   if(key == null || t == null) {
     return
   }
-  const ctx: LevelShortcutContext = { kind: 'level', templeKey: key, temple: t, level: props.level }
+  const ctx: LevelShortcutContext = { kind: 'level', surface: 'map', templeKey: key, temple: t, level: props.level }
   if(shortcut(evt, ctx)) {
     evt.preventDefault()
   }

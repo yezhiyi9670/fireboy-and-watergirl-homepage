@@ -25,6 +25,7 @@ export type SidebarShortcutContext = {
 }
 export type LevelShortcutContext = {
   kind: 'level'
+  surface: 'map' | 'gallery'
   templeKey: string
   temple: TempleItemData
   level: LevelItemData
@@ -136,7 +137,7 @@ export function useShortcutController() {
     if(!evt.altKey) {
       const move = gridMovement(evt)
       if(move != null) {
-        const target = ctx.kind === 'level'
+        const target = ctx.kind === 'level' && ctx.surface === 'map'
           ? { temple: ctx.temple, level: ctx.level }
           : (ctx.kind === 'sidebar' && ctx.level != null
               ? { temple: ctx.level.temple, level: ctx.level.level }
