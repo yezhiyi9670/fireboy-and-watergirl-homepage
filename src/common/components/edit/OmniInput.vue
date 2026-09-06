@@ -206,13 +206,33 @@ function handleTypeClick(form: EditorForm) {
   }
 }
 
+const displayEl = ref<HTMLElement | null>(null)
+
+function focusDisplay() {
+  displayEl.value?.focus({ preventScroll: true })
+}
+
 function discardEditing() {
+  const returnFocus = isFocusInsideRoot(document.activeElement)
   editing.value = false
   commitFailed.value = false
+  if(returnFocus) {
+    void nextTick(focusDisplay)
+  }
 }
 
 function markInvalid() {
   commitFailed.value = true
+}
+
+function finishEditSuccess(value: unknown) {
+  const returnFocus = isFocusInsideRoot(document.activeElement)
+  editing.value = false
+  commitFailed.value = false
+  emit('update:modelValue', value)
+  if(returnFocus) {
+    void nextTick(focusDisplay)
+  }
 }
 
 function attemptCommit() {
@@ -232,18 +252,15 @@ function attemptCommit() {
         markInvalid()
         return
       }
-      editing.value = false
-      emit('update:modelValue', num)
+      finishEditSuccess(num)
       return
     }
     case 'string': {
-      editing.value = false
-      emit('update:modelValue', draftText.value)
+      finishEditSuccess(draftText.value)
       return
     }
     case 'boolean': {
-      editing.value = false
-      emit('update:modelValue', draftBool.value)
+      finishEditSuccess(draftBool.value)
       return
     }
     case 'unknown': {
@@ -259,8 +276,7 @@ function attemptCommit() {
         markInvalid()
         return
       }
-      editing.value = false
-      emit('update:modelValue', parsed)
+      finishEditSuccess(parsed)
       return
     }
     case 'choice': {
@@ -269,13 +285,11 @@ function attemptCommit() {
         markInvalid()
         return
       }
-      editing.value = false
-      emit('update:modelValue', chosen)
+      finishEditSuccess(chosen)
       return
     }
     case 'null': {
-      editing.value = false
-      emit('update:modelValue', null)
+      finishEditSuccess(null)
       return
     }
   }
@@ -441,6 +455,7 @@ onMounted(() => {
 
     <div
       v-else
+      ref="displayEl"
       class="omni-display global-themed"
       :class="[
         'theme-' + props.theme,
@@ -552,8 +567,7 @@ onMounted(() => {
   cursor: not-allowed;
 }
 .omni-display.mismatched {
-  outline: 2px solid var(--color-caution);
-  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px var(--color-caution);
 }
 .omni-display-inner {
   width: 0;
