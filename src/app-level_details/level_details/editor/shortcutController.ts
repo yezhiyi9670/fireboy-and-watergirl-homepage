@@ -66,8 +66,16 @@ export function useShortcutController() {
     const ctrl = evt.ctrlKey || evt.metaKey
     const shift = evt.shiftKey
 
-    // Delete: sidebar context, selected level/edge.
+    // Delete: sidebar context, selected level/edge; or a focused map edge.
     if(evt.key === 'Delete') {
+      if(ctx.kind === 'edge') {
+        ctx.temple.deleteEdge_(ctx.edge)
+        const selected = selectionState?.selection.value
+        if(selected?.kind == 'edge' && selected.edgeUniqueId === ctx.edge.getUniqueId()) {
+          deselect(selectionState, edgeCreate)
+        }
+        return true
+      }
       if(ctx.kind === 'sidebar') {
         if(ctx.level != null) {
           actionHost?.requestLevelDelete()
