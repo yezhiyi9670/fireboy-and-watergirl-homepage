@@ -143,11 +143,48 @@ function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
   }
 }
 
+function valueToEditableText(source: unknown): string {
+  const v = normalizeValue(source)
+  if(v === null) {
+    return ''
+  }
+  if(typeof v === 'boolean') {
+    return v ? 'true' : 'false'
+  }
+  if(typeof v === 'number' || typeof v === 'string') {
+    return String(v)
+  }
+  return JSON.stringify(v)
+}
+
+function applyConvertedText(form: EditorForm, converted: string | null) {
+  switch(form.form) {
+    case 'number':
+    case 'string':
+    case 'unknown':
+      draftText.value = converted ?? ''
+      break
+    case 'boolean':
+      draftBool.value = converted == 'true'
+      break
+    case 'choice':
+      draftChoice.value = converted
+      break
+    case 'null':
+      break
+  }
+}
+
 function beginEditingWith(form: EditorForm) {
   editing.value = true
   commitFailed.value = false
   editorForm.value = form
-  initDraftFor(form, value.value)
+  const initial = firstConformingForm(forms.value, value.value)
+  if(initial != null && initial.form === form.form) {
+    initDraftFor(form, value.value)
+  } else {
+    applyConvertedText(form, tryConvertText(valueToEditableText(value.value), form))
+  }
   void focusEditor(form)
 }
 
@@ -304,24 +341,7 @@ function switchEditorForm(target: EditorForm) {
     return
   }
   const sourceText = currentDraftText(current)
-  const converted = tryConvertText(sourceText, target)
-
-  switch(target.form) {
-    case 'number':
-    case 'string':
-    case 'unknown':
-      draftText.value = converted ?? ''
-      break
-    case 'boolean':
-      draftBool.value = converted == 'true'
-      break
-    case 'choice':
-      draftChoice.value = converted
-      break
-    case 'null':
-      break
-  }
-
+  applyConvertedText(target, tryConvertText(sourceText, target))
   editorForm.value = target
   void focusEditor(target)
 }
