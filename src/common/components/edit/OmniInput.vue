@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, shallowRef } from 'vue';
 import type { FieldSpecifier } from '../../data_model/field_specifier.ts';
 import FancyButton from '../FancyButton.vue';
 import FancyInput from '../FancyInput.vue';
 import FancySelect from '../FancySelect.vue';
 import {
   convertTextToForm,
-  describeValueForForm,
   firstConformingForm,
   normalizeValue,
   primitiveToForm,
@@ -37,17 +36,9 @@ const value = computed(() => normalizeValue(props.modelValue))
 const forms = computed(() => typeToForms(props.spec.type))
 const radios = computed(() => unionLetters(props.spec.type))
 const conforming = computed(() => valueConforms(value.value, props.spec.type))
-const canEdit = computed(() => !props.readonly && !props.disabled && conforming.value)
-
-const editing = ref(false)
-const commitFailed = ref(false)
-const editorForm = shallowRef<EditorForm | null>(null)
-const draftText = ref('')
-const draftBool = ref(false)
-const draftChoice = ref<string | null>(null)
-
-const textControl = ref<{ domElement: HTMLElement | null } | null>(null)
-const selectControl = ref<{ domElement: HTMLSelectElement | null } | null>(null)
+/** Readonly/disabled or a mismatched value must never be editable. */
+const canType = computed(() => !props.readonly && !props.disabled && conforming.value)
+const controlReadonly = computed(() => props.readonly || !conforming.value)
 
 const displayForm = computed<EditorForm>(() => {
   if(conforming.value) {
@@ -55,136 +46,235 @@ const displayForm = computed<EditorForm>(() => {
   }
   return primitiveToForm(valueToPrimitiveKind(value.value))
 })
-const displayText = computed(() => {
-  return describeValueForForm(value.value, displayForm.value)
+
+const editing = ref(false)
+const commitFailed = ref(false)
+const editorForm = shallowRef<EditorForm | null>(null)
+const draftText = ref('')
+const emptyText = ref('')
+
+const controlForm = computed<EditorForm>(() => {
+  if(editing.value && editorForm.value != null) {
+    return editorForm.value
+  }
+  return displayForm.value
 })
-const choiceMapping = computed<Record<string, string>>(() => {
-  const form = editorForm.value
-  return form?.form == 'choice' ? form.mapping : {}
-})
-const choiceOptions = computed(() => {
-  return Object.entries(choiceMapping.value).map(([ value, label ]) => ({ value, label }))
-})
-const booleanOptions = [
-  { value: true, label: '是' },
-  { value: false, label: '否' },
-] as const
-const booleanSelectValue = computed<boolean | null>({
-  get: () => draftBool.value,
-  set: (value) => {
-    if(value != null) {
-      draftBool.value = value
+
+function isTextKind(form: EditorForm | null) {
+  return form?.form == 'number' || form?.form == 'string' || form?.form == 'unknown'
+}
+function isSelectKind(form: EditorForm | null) {
+  return form?.form == 'boolean' || form?.form == 'choice'
+}
+
+// --- element refs ----------------------------------------------------------
+
+const textControl = ref<{ domElement: HTMLElement | null } | null>(null)
+const selectControl = ref<{ domElement: HTMLSelectElement | null } | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
+
+function isFocusInsideRoot(node: Node | null) {
+  return node != null && rootEl.value != null && rootEl.value.contains(node)
+}
+
+async function focusControl() {
+  await nextTick()
+  if(isSelectKind(controlForm.value)) {
+    selectControl.value?.domElement?.focus()
+  } else {
+    textControl.value?.domElement?.focus()
+  }
+}
+
+// --- committed-value helpers -----------------------------------------------
+
+function serializeForText(form: EditorForm): string {
+  const v = value.value
+  switch(form.form) {
+    case 'number':
+      return typeof v === 'number' ? String(v) : ''
+    case 'string':
+      return typeof v === 'string' ? v : ''
+    case 'unknown':
+      if(v === null) {
+        return 'null'
+      }
+      if(typeof v === 'string') {
+        return JSON.stringify(v)
+      }
+      return JSON.stringify(v, null, 2)
+    default:
+      return ''
+  }
+}
+
+const textModel = computed<string>({
+  get: () => {
+    if(editing.value && isTextKind(editorForm.value)) {
+      return draftText.value
+    }
+    return serializeForText(controlForm.value)
+  },
+  set: (text: string) => {
+    if(!canType.value) {
+      return
+    }
+    if(!editing.value) {
+      beginEditingWith(controlForm.value)
+    }
+    if(isTextKind(editorForm.value)) {
+      draftText.value = text
+      commitFailed.value = false
     }
   },
 })
-const nullText = ref('')
 
-watch([ draftText, draftBool, draftChoice ], () => {
-  commitFailed.value = false
-})
-
-function isTextForm(form: EditorForm | null) {
-  return form?.form == 'number' || form?.form == 'string' || form?.form == 'unknown'
-}
-
-function initDraftFor(form: EditorForm, source: unknown) {
-  const v = normalizeValue(source)
-  switch(form.form) {
-    case 'number':
-      draftText.value = typeof v === 'number' ? String(v) : ''
-      break
-    case 'string':
-      draftText.value = typeof v === 'string' ? v : ''
-      break
-    case 'unknown':
-      draftText.value = v === null ? 'null' : JSON.stringify(v, null, 2)
-      break
-    case 'boolean':
-      draftBool.value = v === true
-      break
-    case 'choice':
-      draftChoice.value = (typeof v === 'string' && v in form.mapping) ? v : null
-      break
-    case 'null':
-      break
-  }
-}
-
-async function focusEditor(form: EditorForm) {
-  await nextTick()
-  switch(form.form) {
-    case 'number':
-    case 'string':
-    case 'unknown':
-    case 'null':
-      textControl.value?.domElement?.focus()
-      break
-    case 'boolean':
-    case 'choice': {
-      const select = selectControl.value?.domElement
-      select?.focus()
-      tryOpenSelect(select)
-      break
-    }
-  }
-}
-
-/** Best-effort: natively open the <select> dropdown on supporting browsers. */
-function tryOpenSelect(select: HTMLSelectElement | null | undefined) {
-  if(select == null) {
-    return
-  }
-  const pickable = select as HTMLSelectElement & { showPicker?: () => void }
-  if(typeof pickable.showPicker === 'function') {
-    try {
-      pickable.showPicker()
-    } catch {
-      // Not user-activated or unsupported; fall back to focused (closed) select.
-    }
-  }
-}
-
-function applyConvertedText(form: EditorForm, converted: string | null) {
-  switch(form.form) {
-    case 'number':
-    case 'string':
-    case 'unknown':
-      draftText.value = converted ?? ''
-      break
-    case 'boolean':
-      draftBool.value = converted == 'true'
-      break
-    case 'choice':
-      draftChoice.value = converted
-      break
-    case 'null':
-      break
-  }
-}
+// --- editing lifecycle -----------------------------------------------------
 
 function beginEditingWith(form: EditorForm) {
   editing.value = true
   commitFailed.value = false
   editorForm.value = form
-  const initial = firstConformingForm(forms.value, value.value)
-  if(initial != null && initial.form === form.form) {
-    initDraftFor(form, value.value)
-  } else {
-    applyConvertedText(form, convertTextToForm(valueToEditableText(value.value), form))
+  if(isTextKind(form)) {
+    const initial = firstConformingForm(forms.value, value.value)
+    if(initial != null && initial.form === form.form) {
+      draftText.value = serializeForText(form)
+    } else {
+      draftText.value = convertTextToForm(valueToEditableText(value.value), form) ?? ''
+    }
   }
-  void focusEditor(form)
+  void focusControl()
 }
 
-function startEditing() {
-  if(!canEdit.value || editing.value) {
-    return
-  }
-  const initial = firstConformingForm(forms.value, value.value)
-  if(initial == null) {
-    return
-  }
-  beginEditingWith(initial)
+function markInvalid() {
+  commitFailed.value = true
 }
+
+/** Commit a text/null edit. Returns true when it left edit mode. */
+function finishTextCommit(): boolean {
+  const form = editorForm.value
+  if(form == null) {
+    return true
+  }
+  if(form.form == 'null') {
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', null)
+    return true
+  }
+  if(form.form == 'number') {
+    const text = draftText.value.trim()
+    if(text === '' || !Number.isFinite(Number(text))) {
+      markInvalid()
+      return false
+    }
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', Number(text))
+    return true
+  }
+  if(form.form == 'string') {
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', draftText.value)
+    return true
+  }
+  if(form.form == 'unknown') {
+    const text = draftText.value
+    if(text.trim() === '') {
+      markInvalid()
+      return false
+    }
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(text)
+    } catch {
+      markInvalid()
+      return false
+    }
+    editing.value = false
+    commitFailed.value = false
+    emit('update:modelValue', parsed)
+    return true
+  }
+  return true
+}
+
+function undoEditing() {
+  editing.value = false
+  commitFailed.value = false
+  draftText.value = ''
+  editorForm.value = null
+}
+
+function onFocusOut(evt: FocusEvent) {
+  if(!editing.value || editorForm.value == null) {
+    return
+  }
+  const related = evt.relatedTarget
+  if(related != null && isFocusInsideRoot(related as Node)) {
+    return
+  }
+  if(isTextKind(editorForm.value) || editorForm.value.form == 'null') {
+    finishTextCommit()
+  } else if(isSelectKind(editorForm.value)) {
+    // Selects commit immediately on change; closing without a change just ends edit.
+    editing.value = false
+    commitFailed.value = false
+  }
+}
+
+// --- manual entry ----------------------------------------------------------
+
+function onF2() {
+  if(!canType.value || editing.value) {
+    return
+  }
+  beginEditingWith(displayForm.value)
+}
+
+function onNullSpace(evt: KeyboardEvent) {
+  if(!canType.value || controlForm.value.form != 'null') {
+    return
+  }
+  evt.preventDefault()
+  if(!editing.value) {
+    beginEditingWith({ form: 'null' })
+  }
+}
+
+// --- select commits --------------------------------------------------------
+
+function commitSelectValue(newValue: string | number | boolean | null) {
+  if(!canType.value) {
+    return
+  }
+  editing.value = false
+  commitFailed.value = false
+  emit('update:modelValue', newValue)
+}
+
+const booleanSelectValue = computed<boolean | null>({
+  get: () => (typeof value.value === 'boolean' ? value.value : null),
+  set: (v) => commitSelectValue(v),
+})
+const choiceSelectValue = computed<string | null>({
+  get: () => (typeof value.value === 'string' ? value.value : null),
+  set: (v) => commitSelectValue(v),
+})
+const booleanOptions = [
+  { value: true, label: '是' },
+  { value: false, label: '否' },
+]
+const choiceOptions = computed(() => {
+  const choice = forms.value.find(form => form.form == 'choice')
+  if(choice == null || choice.form != 'choice') {
+    return []
+  }
+  return Object.entries(choice.mapping).map(([ value, label ]) => ({ value, label }))
+})
+
+// --- type switch (always allowed to enter editing) -------------------------
 
 function isTypeActive(form: EditorForm) {
   if(editing.value && editorForm.value != null) {
@@ -192,187 +282,51 @@ function isTypeActive(form: EditorForm) {
   }
   return displayForm.value.form === form.form
 }
-
 function handleTypeClick(form: EditorForm) {
-  if(!canEdit.value) {
+  if(!canType.value) {
     return
   }
-  if(editing.value) {
-    if(editorForm.value != null) {
-      switchEditorForm(form)
-    }
-  } else {
+  if(!editing.value) {
     beginEditingWith(form)
-  }
-}
-
-const displayEl = ref<HTMLElement | null>(null)
-
-function focusDisplay() {
-  displayEl.value?.focus({ preventScroll: true })
-}
-
-function discardEditing() {
-  const returnFocus = isFocusInsideRoot(document.activeElement)
-  editing.value = false
-  commitFailed.value = false
-  if(returnFocus) {
-    void nextTick(focusDisplay)
-  }
-}
-
-function markInvalid() {
-  commitFailed.value = true
-}
-
-function finishEditSuccess(value: unknown) {
-  const returnFocus = isFocusInsideRoot(document.activeElement)
-  editing.value = false
-  commitFailed.value = false
-  emit('update:modelValue', value)
-  if(returnFocus) {
-    void nextTick(focusDisplay)
-  }
-}
-
-function attemptCommit() {
-  const form = editorForm.value
-  if(form == null) {
     return
   }
-  switch(form.form) {
-    case 'number': {
-      const text = draftText.value.trim()
-      if(text === '') {
-        markInvalid()
-        return
-      }
-      const num = Number(text)
-      if(!Number.isFinite(num)) {
-        markInvalid()
-        return
-      }
-      finishEditSuccess(num)
-      return
-    }
-    case 'string': {
-      finishEditSuccess(draftText.value)
-      return
-    }
-    case 'boolean': {
-      finishEditSuccess(draftBool.value)
-      return
-    }
-    case 'unknown': {
-      const text = draftText.value
-      if(text.trim() === '') {
-        markInvalid()
-        return
-      }
-      let parsed: unknown
-      try {
-        parsed = JSON.parse(text)
-      } catch {
-        markInvalid()
-        return
-      }
-      finishEditSuccess(parsed)
-      return
-    }
-    case 'choice': {
-      const chosen = draftChoice.value
-      if(chosen == null || !(chosen in form.mapping)) {
-        markInvalid()
-        return
-      }
-      finishEditSuccess(chosen)
-      return
-    }
-    case 'null': {
-      finishEditSuccess(null)
-      return
-    }
-  }
-}
-
-function currentDraftText(form: EditorForm): string {
-  switch(form.form) {
-    case 'number':
-    case 'string':
-    case 'unknown':
-      return draftText.value
-    case 'boolean':
-      return draftBool.value ? 'true' : 'false'
-    case 'choice':
-      return draftChoice.value ?? ''
-    case 'null':
-      return ''
-  }
-}
-
-function switchEditorForm(target: EditorForm) {
   const current = editorForm.value
-  if(current == null || current.form === target.form) {
+  if(current == null || current.form === form.form) {
     return
   }
-  const sourceText = currentDraftText(current)
-  applyConvertedText(target, convertTextToForm(sourceText, target))
-  editorForm.value = target
-  void focusEditor(target)
-}
-
-const rootEl = ref<HTMLElement | null>(null)
-
-function isFocusInsideRoot(node: Node | null) {
-  return node != null && rootEl.value != null && rootEl.value.contains(node)
-}
-function scheduleCommitOnIdleFocus() {
-  requestAnimationFrame(() => {
-    if(!editing.value || isFocusInsideRoot(document.activeElement)) {
-      return
-    }
-    attemptCommit()
-  })
-}
-function onFocusOut(evt: FocusEvent) {
-  if(!editing.value || editorForm.value == null) {
-    return
+  if(isTextKind(form)) {
+    const sourceText = isTextKind(current)
+      ? draftText.value
+      : valueToEditableText(value.value)
+    draftText.value = convertTextToForm(sourceText, form) ?? ''
+    editorForm.value = form
+  } else {
+    editorForm.value = form
   }
-  const related = evt.relatedTarget
-  if(related == null) {
-    // Caused either by removing the focused element (e.g. just entered edit mode)
-    // or by tabbing/clicking to a non-focusable spot; wait a frame to see where
-    // focus actually settled before deciding to commit.
-    scheduleCommitOnIdleFocus()
-  } else if(!isFocusInsideRoot(related as Node)) {
-    attemptCommit()
-  }
+  void focusControl()
 }
 
-defineExpose({ startEditing })
+// --- autofocus (focus only, do not enter editing) --------------------------
 
 onMounted(() => {
-  if(!props.autofocus || editing.value || !canEdit.value) {
+  if(!props.autofocus || props.readonly || props.disabled || !conforming.value) {
     return
   }
-  const initial = firstConformingForm(forms.value, value.value)
-  if(initial != null) {
-    beginEditingWith(initial)
-  }
+  void focusControl()
 })
 </script>
 
 <template>
-  <div class="omni-input" ref="rootEl" @keydown.esc.prevent="discardEditing" @focusout="onFocusOut">
+  <div class="omni-input" ref="rootEl" @keydown.esc.prevent="undoEditing" @keydown.f2.prevent="onF2" @focusout="onFocusOut">
     <div class="omni-head">
       <div class="omni-types" role="radiogroup" :aria-label="'类型：' + spec.label">
         <button
-          :tabindex="editing ? 0 : -1"
           v-for="radio in radios"
+          :tabindex="editing ? 0 : -1"
           :key="radio.letter"
           type="button"
           role="radio"
-          :disabled="!canEdit"
+          :disabled="!canType"
           :aria-checked="isTypeActive(radio.form)"
           :class="[ 'omni-radio', { active: isTypeActive(radio.form) } ]"
           :title="radio.form.form"
@@ -391,87 +345,68 @@ onMounted(() => {
       </span>
     </div>
 
-    <template v-if="editing && editorForm != null">
-      <div class="omni-edit">
-        <div class="omni-control" :class="{ 'omni-invalid': commitFailed }">
-          <FancyInput
-            v-if="isTextForm(editorForm)"
-            ref="textControl"
-            v-model="draftText"
-            :theme="props.theme"
-            :disabled="props.disabled"
-            :smaller="props.smaller"
-            :textarea="editorForm?.form == 'unknown'"
-            :rows="6"
-            @submit="attemptCommit"
-          />
-          <FancySelect
-            v-else-if="editorForm?.form == 'boolean'"
-            ref="selectControl"
-            v-model="booleanSelectValue"
-            :theme="props.theme"
-            :disabled="props.disabled"
-            :smaller="props.smaller"
-            placeholder="—"
-            :options="booleanOptions"
-            @submit="attemptCommit"
-            @pick="attemptCommit"
-          />
-          <FancySelect
-            v-else-if="editorForm?.form == 'choice'"
-            ref="selectControl"
-            v-model="draftChoice"
-            :theme="props.theme"
-            :disabled="props.disabled"
-            :smaller="props.smaller"
-            placeholder="—"
-            :options="choiceOptions"
-            @submit="attemptCommit"
-            @pick="attemptCommit"
-          />
-          <FancyInput
-            v-else-if="editorForm?.form == 'null'"
-            ref="textControl"
-            v-model="nullText"
-            :theme="props.theme"
-            :disabled="props.disabled"
-            :smaller="props.smaller"
-            readonly
-            placeholder="空"
-            @submit="attemptCommit"
-          />
-          <FancyButton
-            :tabindex="-1"
-            class="omni-discard"
-            :theme="props.theme"
-            :smaller="props.smaller"
-            aria-label="放弃编辑"
-            title="放弃编辑"
-            @click="discardEditing"
-          >
-            <v-icon name="la-undo-alt-solid" />
-          </FancyButton>
-        </div>
-      </div>
-    </template>
+    <div class="omni-control" :class="{ 'omni-invalid': commitFailed }">
+      <FancyInput
+        v-if="isTextKind(controlForm)"
+        ref="textControl"
+        :model-value="textModel"
+        @update:model-value="v => textModel = v"
+        :theme="props.theme"
+        :readonly="controlReadonly"
+        :disabled="props.disabled"
+        :smaller="props.smaller"
+        :textarea="controlForm.form == 'unknown'"
+        :rows="6"
+        @submit="finishTextCommit()"
+      />
+      <FancySelect
+        v-else-if="controlForm.form == 'boolean'"
+        ref="selectControl"
+        v-model="booleanSelectValue"
+        :theme="props.theme"
+        :readonly="controlReadonly"
+        :disabled="props.disabled"
+        :smaller="props.smaller"
+        placeholder="—"
+        :options="booleanOptions"
+        @focus="beginEditingWith({ form: 'boolean' })"
+      />
+      <FancySelect
+        v-else-if="controlForm.form == 'choice'"
+        ref="selectControl"
+        v-model="choiceSelectValue"
+        :theme="props.theme"
+        :readonly="controlReadonly"
+        :disabled="props.disabled"
+        :smaller="props.smaller"
+        placeholder="—&#x3000;"
+        :options="choiceOptions"
+      />
+      <FancyInput
+        v-else-if="controlForm.form == 'null'"
+        ref="textControl"
+        v-model="emptyText"
+        :theme="props.theme"
+        readonly
+        :disabled="props.disabled"
+        :smaller="props.smaller"
+        placeholder="空"
+        @keydown.space.prevent="onNullSpace"
+        @submit="finishTextCommit()"
+      />
 
-    <div
-      v-else
-      ref="displayEl"
-      class="omni-display global-themed"
-      :class="[
-        'theme-' + props.theme,
-        { editable: canEdit, mismatched: !conforming, smaller: props.smaller, disabled: props.disabled }
-      ]"
-      role="button"
-      tabindex="0"
-      :aria-disabled="!canEdit"
-      @click="startEditing"
-      @keydown.enter.prevent="startEditing"
-      @keydown.space.prevent="startEditing"
-    >
-      <div class="omni-display-inner">{{ displayText }}</div>
-      <span v-if="!conforming" class="omni-actual-kind">{{ displayForm.form }}</span>
+      <FancyButton
+        tabindex="-1"
+        :disabled="!editing"
+        class="omni-discard"
+        :theme="theme"
+        :smaller="smaller"
+        aria-label="撤销"
+        title="撤销"
+        @click="undoEditing"
+      >
+        <v-icon name="la-undo-alt-solid" />
+      </FancyButton>
     </div>
   </div>
 </template>
@@ -504,11 +439,6 @@ onMounted(() => {
   margin-left: auto;
   flex-shrink: 0;
 }
-.omni-edit {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 .omni-radio {
   border: none;
   padding: 2px 6px;
@@ -535,7 +465,6 @@ onMounted(() => {
 .omni-control :deep(.FancySelect) {
   flex: 1 1 auto;
   min-width: 0;
-  resize: vertical;
 }
 .omni-discard {
   flex-shrink: 0;
@@ -545,51 +474,6 @@ onMounted(() => {
   outline: 2px solid var(--color-caution);
   outline-offset: 2px;
   animation: omni-shake .12s ease-in-out 2;
-}
-.omni-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  min-height: 1.4em;
-  cursor: default;
-  user-select: text;
-  box-sizing: border-box;
-  font: inherit;
-  line-height: 1.4;
-}
-.omni-display.smaller {
-  padding: 6px 8px;
-}
-.omni-display.editable {
-  cursor: pointer;
-}
-.omni-display.disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-.omni-display.mismatched {
-  box-shadow: inset 0 0 0 2px var(--color-caution);
-}
-.omni-display-inner {
-  width: 0;
-  flex: 1;
-  /* min-width: 0; */
-  min-height: 1.4em;
-  white-space: pre;
-  /* white-space: pre-wrap; */
-  /* word-break: break-word; */
-  max-height: 12em;
-  overflow: auto;
-  scrollbar-width: none;
-}
-.omni-actual-kind {
-  align-self: flex-start;
-  flex-shrink: 0;
-  font-size: .7em;
-  padding: 1px 6px;
-  background: var(--color-caution);
-  color: var(--color-r0);
 }
 @keyframes omni-shake {
   0%, 100% { transform: translateX(0); }
