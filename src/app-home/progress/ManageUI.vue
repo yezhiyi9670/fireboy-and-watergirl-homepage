@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watchEffect } from 'vue';
+import { computed, ref, useTemplateRef, watchEffect, nextTick } from 'vue';
 import { useIntervalFn } from '@vueuse/core';
 import MultiSelectList, { type Option } from '../../common/components/MultiSelectList.vue';
 import FancyButton from '../../common/components/FancyButton.vue';
@@ -85,9 +85,9 @@ function handleExport() {
   const baseData = 'v1,gzipb64,' + Base64.fromByteArray(compressedJson)
   const hash = md5(baseData).toLowerCase()
   exportedData.value = hash + ';' + baseData
-  setTimeout(() => {
+  nextTick(() => {
     exportResults.value?.domElement?.select()
-  }, 50)
+  })
 }
 
 const pendingClearGames = ref<GameItemData[]>([])
@@ -133,6 +133,7 @@ function handleConfirmClear() {
     dismissable
     has-neutral
     @close="exportedData = ''"
+    :initial-focus="null"
   >
     <DialogProse>
       <div>成功导出 {{ exportSuccessCount }} 个游戏的进程数据。</div>
