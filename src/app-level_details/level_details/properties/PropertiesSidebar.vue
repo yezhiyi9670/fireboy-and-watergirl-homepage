@@ -52,6 +52,25 @@ watch(propertiesActive, active => {
   }
 })
 
+// When a reveal (locate) selects a newly created/cloned level, that level is
+// focused inside the content. Remember it as the focus to return to on ESC.
+watch(() => selectionState?.selection.value, (newSelection) => {
+  if(newSelection == null || !propertiesActive.value) {
+    return
+  }
+  if(selectionState?.locateRequest.value == null) {
+    return
+  }
+  void nextTick(() => {
+    requestAnimationFrame(() => {
+      const el = document.activeElement
+      if(el instanceof HTMLElement && !bodyEl.value?.contains(el)) {
+        lastFocus.value = el
+      }
+    })
+  })
+})
+
 function restoreLastFocus() {
   const target = lastFocus.value
   lastFocus.value = null
