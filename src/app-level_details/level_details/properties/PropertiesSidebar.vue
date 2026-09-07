@@ -143,12 +143,12 @@ function openNewLevelForSelectedTemple() {
 }
 function submitNewLevel(id: string | number, iid: string | number): string | null {
   const key = selectedLevel.value?.templeKey
-  const temple = key == null ? null : templesData?.value?.temples[key]
-  if(temple == null) {
+  const data = key == null ? null : templesData?.value
+  if(data == null || key == null) {
     return '圣殿数据未就绪'
   }
   try {
-    temple.createLevel_(id, iid)
+    data.createLevel_(key, id, iid)
     pendingNewIid.value = iid
     return null
   } catch(e) {

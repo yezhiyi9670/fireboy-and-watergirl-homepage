@@ -14,6 +14,7 @@ const props = defineProps<{
 const expanded = defineModel<boolean>()
 
 const isEditingAllowed = ApiTemplesData.useIsEditingAllowed()
+const apiTemplesData = inject(ApiTemplesData.injectionKey)
 const templeKey = inject(TempleItemDataClass.kInjectionKey)
 const edgeCreate = inject(EdgeCreateState.injectionKey)
 const { revealCreatedLevel } = useLocateView()
@@ -42,8 +43,13 @@ function openNewLevel() {
   newOpen.value = true
 }
 function submitNewLevel(id: string | number, iid: string | number): string | null {
+  const data = apiTemplesData?.value
+  const key = templeKey?.value
+  if(data == null || key == null) {
+    return '圣殿数据未就绪'
+  }
   try {
-    props.temple.createLevel_(id, iid)
+    data.createLevel_(key, id, iid)
     pendingNewIid.value = iid
     return null
   } catch(e) {

@@ -105,6 +105,52 @@ export default class ApiTemplesData {
     return stem + '_' + n + '.json'
   }
 
+  private uniqueLevelFilename(baseFilename: string) {
+    if(!this.hasLevelFilename(baseFilename)) {
+      return baseFilename
+    }
+    return this.nextCloneFilename(baseFilename)
+  }
+
+  /**
+   * Append a brand-new level with the standard default fields.
+   * The default filename is `${templeKey}/levels/${temple.id}_${id}.json`; when
+   * it is already taken, a game-wide unique `_<n>` suffix is appended instead.
+   */
+  createLevel_(templeKey: string, id: string | number, iid: string | number): LevelItemData {
+    const temple = this.temples[templeKey]
+    if(temple == null) {
+      throw new Error('未找到圣殿')
+    }
+    if(temple.isLevelIdOccupied(id)) {
+      throw new Error('id ' + id + ' 已被占用')
+    }
+    if(temple.isLevelIidOccupied(iid)) {
+      throw new Error('_id ' + iid + ' 已被占用')
+    }
+    const baseFilename = templeKey + '/levels/' + temple.id + '_' + id + '.json'
+    const raw: Partial<LevelItemData> = {
+      id,
+      _id: iid,
+      x: 0.5,
+      y: 0.5,
+      time: 1,
+      mobileTime: 1,
+      required: 0,
+      filename: this.uniqueLevelFilename(baseFilename),
+      type: 'general',
+      initial: false,
+    }
+    typia.assert<LevelItemData>(raw)
+    const level = plainToInstance(LevelItemData, raw)
+    level.__new_level_created_at = Date.now()
+    level.__source_filename = false
+    temple.levels.push(level)
+    temple.mutation()
+    temple.markDirty()
+    return level
+  }
+
   /**
    * Append a deep clone of `sourceIid`, with new ids and a game-wide-unique
    * clone filename, to the given temple.

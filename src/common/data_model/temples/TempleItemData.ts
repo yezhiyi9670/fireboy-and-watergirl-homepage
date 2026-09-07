@@ -111,42 +111,6 @@ export default class TempleItemData {
   // --- Mutations (trailing underscore: these alter real data) --------------
 
   /**
-   * Append a brand-new level with the standard default fields.
-   */
-  createLevel_(id: string | number, iid: string | number): LevelItemData {
-    if(this.isLevelIdOccupied(id)) {
-      throw new Error('id ' + id + ' 已被占用')
-    }
-    if(this.isLevelIidOccupied(iid)) {
-      throw new Error('_id ' + iid + ' 已被占用')
-    }
-    const raw: Partial<LevelItemData> = {
-      id,
-      _id: iid,
-      x: 0.5,
-      y: 0.5,
-      time: 1,
-      mobileTime: 1,
-      required: 0,
-      filename: this.defaultLevelFilename(id),
-      type: 'general',
-      initial: false,
-    }
-    typia.assert<LevelItemData>(raw)
-    const level = plainToInstance(LevelItemData, raw)
-    level.__new_level_created_at = Date.now()
-    level.__source_filename = false
-    this.levels.push(level)
-    this.mutation()
-    this.markDirty()
-    return level
-  }
-
-  defaultLevelFilename(levelId: string | number) {
-    return this.id + '/levels/' + this.id + '_' + levelId + '.json'
-  }
-
-  /**
    * Rename `id` and/or `_id` of one level, updating edges.
    */
   renameLevelIds_(oldIid: string | number, newId: string | number, newIid: string | number): LevelItemData {
