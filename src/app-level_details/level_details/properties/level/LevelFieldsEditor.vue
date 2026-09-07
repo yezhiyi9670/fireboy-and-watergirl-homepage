@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, ref } from 'vue';
+import { computed, inject, nextTick, ref, toRef } from 'vue';
 import LevelItemData from '../../../../common/data_model/temples/LevelItemData.ts';
 import TempleItemData from '../../../../common/data_model/temples/TempleItemData.ts';
 import ApiTemplesData from '../../../../common/data_model/temples/ApiTemplesData.ts';
@@ -30,7 +30,7 @@ function registerField(key: string, handle: FieldHandle | null) {
 function isExcluded(key: string) {
   return key === 'id' || key === '_id' || key.startsWith('__')
 }
-const levelRecord = computed<Record<string, unknown>>(() => props.level as unknown as Record<string, unknown>)
+const level = toRef(props, 'level')
 
 const persistentKeys = computed(() => {
   return Object.keys(knownKeys.value).filter(key =>
@@ -40,11 +40,11 @@ const persistentKeys = computed(() => {
 const rows = computed(() => {
   const persistentSet = new Set(persistentKeys.value)
   const extra: string[] = []
-  for(const key of Object.keys(levelRecord.value)) {
+  for(const key of Object.keys(level.value)) {
     if(isExcluded(key) || persistentSet.has(key)) {
       continue
     }
-    if(levelRecord.value[key] !== undefined) {
+    if(level.value[key] !== undefined) {
       extra.push(key)
     }
   }
@@ -59,10 +59,13 @@ function specFor(key: string): FieldSpecifier {
   return { ...LevelItemData.restSpec, label: key }
 }
 function getValue(key: string): unknown {
-  return levelRecord.value[key]
+  return level.value[key]
 }
 function updateValue(key: string, value: unknown) {
-  levelRecord.value[key] = value
+  if(key == 'filename') {
+    level.value['__source_filename'] ??= level.value.filename
+  }
+  level.value[key] = value
   temple?.value.markDirty()
 }
 function focusField(key: string) {
@@ -91,15 +94,15 @@ function submitCreate() {
     return
   }
   const persistentSet = new Set(persistentKeys.value)
-  if(persistentSet.has(key) || levelRecord.value[key] !== undefined) {
+  if(persistentSet.has(key) || level.value[key] !== undefined) {
     addError.value = '字段已存在'
     void nextTick(() => focusField(key))
     return
   }
   // Delete any own (possibly non-enumerable / undefined) property first so the
   // newly created field always sorts last.
-  if(Object.prototype.hasOwnProperty.call(levelRecord.value, key)) {
-    delete levelRecord.value[key]
+  if(Object.prototype.hasOwnProperty.call(level.value, key)) {
+    delete level.value[key]
   }
   const spec = specFor(key)
   let value = spec.initial
@@ -110,7 +113,7 @@ function submitCreate() {
     addError.value = '无法为该字段确定默认值'
     return
   }
-  levelRecord.value[key] = value
+  level.value[key] = value
   temple?.value.markDirty()
   newKeyName.value = ''
   void nextTick(() => focusField(key))

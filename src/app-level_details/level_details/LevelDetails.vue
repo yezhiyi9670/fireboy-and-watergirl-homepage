@@ -49,8 +49,8 @@ provide(EditorActionHost.injectionKey, new EditorActionHost())
 provide(EditSessionState.injectionKey, new EditSessionState())
 
 function onContentBlankClick(evt: MouseEvent) {
-  const target = evt.target as HTMLElement
-  if(target.closest('.map-level, .map-edge, .gallery-level, .temple-title')) {
+  const target = evt.target as HTMLElement | null
+  if(target?.closest('.map-level, .map-edge, .gallery-level, .temple-title')) {
     return
   }
   if(edgeCreateState.isLinking()) {

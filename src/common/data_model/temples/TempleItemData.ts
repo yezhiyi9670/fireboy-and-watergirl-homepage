@@ -135,6 +135,7 @@ export default class TempleItemData {
     typia.assert<LevelItemData>(raw)
     const level = plainToInstance(LevelItemData, raw)
     level.__new_level_created_at = Date.now()
+    level.__source_filename = false
     this.levels.push(level)
     this.mutation()
     this.markDirty()
@@ -146,8 +147,7 @@ export default class TempleItemData {
   }
 
   /**
-   * Rename `id` and/or `_id` of one level, updating edges and other levels'
-   * `__cloned_from` pointers that referenced the old iid.
+   * Rename `id` and/or `_id` of one level, updating edges.
    */
   renameLevelIds_(oldIid: string | number, newId: string | number, newIid: string | number): LevelItemData {
     const level = this.getLevelByIid(oldIid)
@@ -167,11 +167,6 @@ export default class TempleItemData {
         }
         if(idsEqual(edge.target, oldIid)) {
           edge.target = newIid
-        }
-      }
-      for(const other of this.levels) {
-        if(idsEqual((other as unknown as Record<string, unknown>).__cloned_from, oldIid)) {
-          (other as unknown as Record<string, unknown>).__cloned_from = newIid
         }
       }
       level._id = newIid
@@ -196,12 +191,6 @@ export default class TempleItemData {
     this.edges = this.edges.filter(edge =>
       !idsEqual(edge.source, iid) && !idsEqual(edge.target, iid)
     )
-    for(const other of this.levels) {
-      const record = other as unknown as Record<string, unknown>
-      if(idsEqual(record.__cloned_from, iid)) {
-        delete record.__cloned_from
-      }
-    }
     this.levels.splice(index, 1)
     this.mutation()
     this.markDirty()

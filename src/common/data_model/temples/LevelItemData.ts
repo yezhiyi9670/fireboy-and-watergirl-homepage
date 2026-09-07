@@ -18,10 +18,23 @@ export default class LevelItemData {
   @Type(() => LevelMetadata)
   __metadata?: LevelMetadata       // Do not exclude, since must hydrate from API data
 
+  /**
+   * UNIX millisecond timestamp of newly-created levels in this edit session.
+   * 
+   * Used to sort levels.
+   * Should not appear in submission or survive cloning.
+   */
   @Exclude()
-  __new_level_created_at?: number  // Should not appear in submission or survive cloning
+  __new_level_created_at?: number
+  
+  /**
+   * Source filename of file-renamed and cloned levels.
+   * 
+   * `false` indicates that this is a brand-new level with no existing level to copy from
+   * Should not appear in submission or survive cloning.
+   */
   @Exclude()
-  __cloned_from_iid?: number       // Should not appear in submission or survive cloning
+  __source_filename?: string | false
 
   // Level type
   type?: 'general' | 'speed' | 'puzzle' | 'dark'
@@ -168,6 +181,9 @@ export default class LevelItemData {
       return this.__metadata.title
     }
     return '关卡 ' + this.getShownNumbering()
+  }
+  getOriginalFilename() {
+    return this.__source_filename ?? this.filename
   }
   static formatWalkthroughDuration(seconds?: number) {
     if(seconds == null) {

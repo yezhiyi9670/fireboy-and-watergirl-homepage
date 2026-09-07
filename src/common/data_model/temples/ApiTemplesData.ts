@@ -130,8 +130,8 @@ export default class ApiTemplesData {
     plain.filename = this.nextCloneFilename(source.filename)
     typia.assert<LevelItemData>(plain)
     const clone = plainToInstance(LevelItemData, plain)
-    clone.__cloned_from = sourceIid
     clone.__new_level_created_at = Date.now()
+    clone.__source_filename = source.getOriginalFilename()
     temple.levels.push(clone)
     temple.mutation()
     temple.markDirty()
