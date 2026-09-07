@@ -44,6 +44,25 @@ function onBeforeUnload(evt: BeforeUnloadEvent) {
 }
 useEventListener('beforeunload', onBeforeUnload)
 
+// Global shortcuts while editing: Ctrl+S submit, Ctrl+Q discard.
+function onGlobalShortcut(evt: KeyboardEvent) {
+  if(!active.value) {
+    return
+  }
+  if(!(evt.ctrlKey || evt.metaKey) || evt.shiftKey || evt.altKey) {
+    return
+  }
+  const key = evt.key.toLowerCase()
+  if(key === 's') {
+    evt.preventDefault()
+    openSubmit()
+  } else if(key === 'q') {
+    evt.preventDefault()
+    discardOrConfirm()
+  }
+}
+useEventListener('keydown', onGlobalShortcut)
+
 // --- discard -----------------------------------------------------------------
 
 const abandonOpen = ref(false)
