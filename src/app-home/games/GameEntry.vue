@@ -81,6 +81,8 @@ const urls = computed(() => {
   width: 420px;
   max-width: 100%;
   display: block;
+  aspect-ratio: 860 / 270;
+  object-fit: contain;
 }
 .game-name {
   font-weight: bold;
