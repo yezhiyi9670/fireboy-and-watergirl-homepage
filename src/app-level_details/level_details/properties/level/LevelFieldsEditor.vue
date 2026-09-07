@@ -147,6 +147,21 @@ function submitCreate() {
       <FancyButton theme="primary" smaller @click="submitCreate">创建</FancyButton>
     </div>
     <p v-if="addError" class="add-error">{{ addError }}</p>
+    <div class="empty-spacer" />
+    <div
+      v-for="key in ['id', '_id']"
+      :key="key"
+      class="field-row"
+    >
+      <OmniInput
+        smaller
+        :model-value="getValue(key)"
+        :spec="specFor(key)"
+        disabled
+        :ref="el => registerField(key, el as FieldHandle | null)"
+        @update:model-value="value => updateValue(key, value)"
+      />
+    </div>
   </div>
 </template>
 
