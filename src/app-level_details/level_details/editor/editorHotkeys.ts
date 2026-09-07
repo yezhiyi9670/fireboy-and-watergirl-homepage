@@ -26,7 +26,7 @@ export type GridAxis = 'x' | 'y'
 
 /** Arrow movement (Shift = 0.005, Ctrl+Shift = 0.05). Returns null otherwise. */
 export function gridMovement(evt: KeyboardEvent): { axis: GridAxis, delta: number } | null {
-  if(!evt.shiftKey) {
+  if(!evt.shiftKey && !evt.ctrlKey && !evt.metaKey) {
     return null
   }
   const step = (evt.ctrlKey || evt.metaKey) ? 0.05 : 0.005
