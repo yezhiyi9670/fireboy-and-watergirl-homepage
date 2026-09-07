@@ -165,6 +165,7 @@ const repairTreatment = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-right: auto;
 }
 .container {
   container-type: size;

@@ -28,7 +28,6 @@ function showGlobalProperties() {
 <style lang="css" scoped>
 .global-props-button {
   display: none;
-  margin-left: auto;
   flex-shrink: 0;
 }
 @media (max-width: 1049px) {
