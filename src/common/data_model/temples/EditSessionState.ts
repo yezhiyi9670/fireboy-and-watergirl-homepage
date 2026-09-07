@@ -1,14 +1,6 @@
 import { inject, ref, type InjectionKey, type Ref } from 'vue'
 import { instanceToInstance } from 'class-transformer'
-
-/**
- * Structural view of the temples data that is subject to editing sessions.
- */
-export type EditableTemplesData = {
-  editing_allowed: boolean
-  temples: Record<string, unknown>
-  mutation: () => void
-}
+import type ApiTemplesData from './ApiTemplesData'
 
 /**
  * Manages the "editing session": while active, data mutations are allowed and
@@ -18,14 +10,14 @@ export default class EditSessionState {
   static injectionKey: InjectionKey<EditSessionState> = Symbol('EditSessionState')
 
   readonly active: Ref<boolean> = ref(false)
-  private current: EditableTemplesData | null = null
-  private baseline: EditableTemplesData | null = null
+  private current: ApiTemplesData | null = null
+  private baseline: ApiTemplesData | null = null
 
   isActive() {
     return this.active.value
   }
 
-  start(data: EditableTemplesData) {
+  start(data: ApiTemplesData) {
     if(this.active.value) {
       return
     }
@@ -46,15 +38,15 @@ export default class EditSessionState {
     this.reset()
   }
 
-  /** 
+  /**
    * Editing was committed.
-   * Keep a deep-cloned (to eliminate temporary editing flags) of edited copy as new baseline.
+   * Deep-clone the edited copy (dropping temporary editing flags) as new baseline.
    */
   commitDone() {
     const current = this.current
     if(current != null) {
       current.temples = Object.fromEntries(
-        Object.entries(current.temples).map(([key, value]) => {
+        Object.entries(current.temples).map(([ key, value ]) => {
           return [ key, instanceToInstance(value) ]
         })
       )
@@ -63,7 +55,7 @@ export default class EditSessionState {
     this.reset()
   }
 
-  baselineData(): EditableTemplesData | null {
+  baselineData(): ApiTemplesData | null {
     return this.baseline
   }
 

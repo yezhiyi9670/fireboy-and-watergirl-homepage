@@ -8,7 +8,7 @@ import ExtraInfo from '../../../common/components/ExtraInfo.vue';
 import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts';
 import EditSessionState from '../../../common/data_model/temples/EditSessionState.ts';
 import { Api } from '../../../common/api/Api.ts';
-import { computeSubmitPlan, type SubmitPlan } from './submitPlan.ts';
+import SubmissionPlan from '../../../common/data_model/submission/SubmissionPlan.ts';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 
 const session = inject(EditSessionState.injectionKey)
@@ -56,14 +56,16 @@ function onAbandonClose(closeType: false | null | true) {
 const submitOpen = ref(false)
 const pending = ref(false)
 const submitError = ref<string | null>(null)
-const submitPlan = ref<SubmitPlan | null>(null)
+const submitPlan = ref<SubmissionPlan | null>(null)
 
 const dirtyTempleNames = computed(() => {
   const plan = submitPlan.value
   if(plan == null) {
     return []
   }
-  return plan.dirtyTemples.map(({ templeKey, temple }) => templeKey + '（' + temple.label + '）')
+  return Object.entries(plan.temples).map(([ templeKey, temple ]) => {
+    return templeKey + '（' + temple.label + '）'
+  })
 })
 
 function openSubmit() {
@@ -75,7 +77,7 @@ function openSubmit() {
   if(after == null || baseline == null) {
     return
   }
-  submitPlan.value = computeSubmitPlan(after, baseline as unknown as ApiTemplesData)
+  submitPlan.value = SubmissionPlan.compute(after, baseline)
   submitError.value = null
   submitOpen.value = true
 }
@@ -106,7 +108,7 @@ async function runSubmit() {
     }
 
     const temples: Record<string, unknown> = {}
-    for(const { templeKey, temple } of plan.dirtyTemples) {
+    for(const [ templeKey, temple ] of Object.entries(plan.temples)) {
       const plainData = instanceToPlain(temple)
       TempleItemData.typiaAssert(plainData)  // Safety check: Re-verify type compliance
       temples[templeKey] = plainData
@@ -115,9 +117,9 @@ async function runSubmit() {
     const payload = {
       temples,
       files: {
-        delete: plan.deleteFiles,
         new: plan.newFiles,
         sources: plan.sources,
+        delete: plan.deleteFiles,
       },
     }
     const controller = new AbortController()
@@ -135,7 +137,7 @@ async function runSubmit() {
       window.clearTimeout(timer)
     }
     
-    if(true || result?.success) {
+    if(result?.success) {
       submitOpen.value = false
       session?.commitDone()
       return
@@ -210,16 +212,21 @@ async function runSubmit() {
         <ul>
           <li v-for="name in dirtyTempleNames" :key="name">{{ name }}</li>
         </ul>
+        <template v-if="submitPlan.newFiles.length">
+          <p>以下关卡文件将被新建：</p>
+          <ul>
+            <li v-for="file in submitPlan.newFiles" :key="file">
+              {{ file }}
+              <template v-if="file in submitPlan.sources">
+                <br />（复制自 {{ submitPlan.sources[file] }}）
+              </template>
+            </li>
+          </ul>
+        </template>
         <template v-if="submitPlan.deleteFiles.length">
           <p>以下关卡文件将被删除：</p>
           <ul>
             <li v-for="file in submitPlan.deleteFiles" :key="file">{{ file }}</li>
-          </ul>
-        </template>
-        <template v-if="submitPlan.newFiles.length">
-          <p>以下关卡文件将被新建：</p>
-          <ul>
-            <li v-for="file in submitPlan.newFiles" :key="file">{{ file }}</li>
           </ul>
         </template>
       </template>
