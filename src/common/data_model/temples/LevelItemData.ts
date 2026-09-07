@@ -135,7 +135,7 @@ export default class LevelItemData {
    * Specs overlayed onto allKeys when temple has type=='row'
    */
   static rowsTypeKeysOverlay: FieldSpecifiers = {
-    elements: transientField('元素', ['undefined', 'unknown'], [])
+    elements: persistentField('元素', ['undefined', 'unknown'], [])
   }
 
   /**
