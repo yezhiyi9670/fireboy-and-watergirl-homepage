@@ -140,6 +140,7 @@ export default class ApiTemplesData {
       filename: this.uniqueLevelFilename(baseFilename),
       type: 'general',
       initial: false,
+      unlock_key: 'free',
     }
     typia.assert<LevelItemData>(raw)
     const level = plainToInstance(LevelItemData, raw)
