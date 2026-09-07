@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 import { instanceToPlain } from 'class-transformer';
 import FancyButton from '../../../common/components/FancyButton.vue';
 import Dialog from '../../../common/components/Dialog.vue';
@@ -31,6 +32,15 @@ function startEdit() {
   }
   session?.start(data)
 }
+
+// Ask for confirmation when the tab is closed/reloaded with uncommitted edits.
+function onBeforeUnload(evt: BeforeUnloadEvent) {
+  if(anyDirty.value) {
+    evt.preventDefault()
+    evt.returnValue = ''
+  }
+}
+useEventListener('beforeunload', onBeforeUnload)
 
 // --- discard -----------------------------------------------------------------
 
