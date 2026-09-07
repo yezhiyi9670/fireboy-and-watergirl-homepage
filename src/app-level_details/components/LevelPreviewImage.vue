@@ -11,21 +11,24 @@ const props = defineProps<{
 const templeKey = inject(TempleItemData.kInjectionKey)
 const gameKey = inject(GameItemData.kInjectionKey)
 
+const absentLevelUrl = 'assets/absent_level.png'
 const levelPreviewUrl = computed(() => {
+  const originalFilename = props.level.getOriginalFilename()
+  if(originalFilename === false) {
+    return absentLevelUrl
+  }
   return Api.getUrl('level_preview', {
     game: gameKey?.value,
     temple: templeKey?.value,
     level_filter: {
-      ...(('id' in props.level) ? { id: props.level.id } : { }),
-      ...(('_id' in props.level) ? { _id: props.level._id } : { }),
-      ...(('filename' in props.level) ? { filename: props.level.filename } : { }),
+      filename: originalFilename
     }
   })
 })
 </script>
 
 <template>
-  <img class="level-preview" :srcset="levelPreviewUrl" />
+  <img class="level-preview" :srcset="levelPreviewUrl + ', ' + absentLevelUrl" />
 </template>
 
 <style lang="css" scoped>
