@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
     />
     <Separator />
     <div v-if="isEditingAllowed" class="edit-actions">
-      <FancyButton theme="tertiary" smaller @click="openRename">更改 ID</FancyButton>
+      <FancyButton theme="tertiary" smaller @click="openClone">克隆关卡</FancyButton>
       <FancyButton
         :theme="linkActive ? 'caution' : 'tertiary'"
         smaller
@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
     </div>
     <LevelFieldsEditor :level="level" />
     <div v-if="isEditingAllowed" class="edit-actions">
-      <FancyButton theme="tertiary" smaller @click="openClone">克隆关卡</FancyButton>
+      <FancyButton theme="tertiary" smaller @click="openRename">更改 ID</FancyButton>
       <FancyButton theme="caution" smaller @click="deleteOpen = true">删除关卡</FancyButton>
     </div>
     <Separator />

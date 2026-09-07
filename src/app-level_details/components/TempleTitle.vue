@@ -91,14 +91,14 @@ defineExpose({ openNewLevel })
         @click.stop="openNewLevel"
         smaller
       >
-        新关卡
+        新建关卡
       </FancyButton>
     </div>
   </h2>
 
   <IdFieldsDialog
     :open="newOpen"
-    title="新关卡"
+    title="新建关卡"
     :id-initial="newIdInit"
     :iid-initial="newIidInit"
     :on-submit="submitNewLevel"
