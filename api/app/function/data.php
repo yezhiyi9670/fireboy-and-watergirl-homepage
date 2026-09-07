@@ -245,3 +245,61 @@ function cache_touch($cache_name, $cache_mtime) {
     $cache_path = CACHE_PATH . $cache_name;
     touch($cache_path, $cache_mtime);
 }
+
+/**
+ * Whether the file can be created/written at $path: parent dir must exist and be writable,
+ * and an existing file must itself be writable.
+ */
+function can_write_file_where__(string $path) {
+    $dir = dirname($path);
+    if(!is_dir($dir) || !is_writable($dir)) {
+        return false;
+    }
+    if(file_exists($path) && !is_writable($path)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Whether $path can be deleted (i.e., the file is absent or its parent dir is writable).
+ */
+function can_delete_file_where__(string $path) {
+    if(!file_exists($path)) {
+        return true;
+    }
+    return is_writable(dirname($path));
+}
+
+/**
+ * Acquire the shared/exclusive lock guarding apply_changes vs temples reads.
+ */
+function apply_lock_acquire__(bool $exclusive) {
+    $lock_path = CACHE_PATH . 'apply_changes.lock';
+    $lock_dir = dirname($lock_path);
+    if(!file_exists($lock_dir)) {
+        mkdir($lock_dir, 0777, true);
+    }
+    $h = fopen($lock_path, 'c');
+    if($h === false) {
+        return_failure(
+            500,
+            'lock_open_failed', [],
+            'Failed to open the lock file.'
+        );
+    }
+    if(!flock($h, $exclusive ? LOCK_EX : LOCK_SH)) {
+        return_failure(
+            500,
+            'lock_failed', [],
+            'Failed to acquire the lock.'
+        );
+    }
+    return $h;
+}
+function apply_lock_shared__() {
+    return apply_lock_acquire__(false);
+}
+function apply_lock_exclusive__() {
+    return apply_lock_acquire__(true);
+}

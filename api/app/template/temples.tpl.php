@@ -2,6 +2,9 @@
 
 $req = get_request_json__(true);
 
+// Wait until any in-flight apply_changes finishes before reading temple data.
+$lock = apply_lock_shared__();
+
 $game_id = $req->game ?? '';
 $game_info = get_validated_game_info_of__($game_id);
 $game_path = BASE_PATH . $game_info->path;
