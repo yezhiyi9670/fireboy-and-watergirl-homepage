@@ -11,9 +11,11 @@ import EditSessionState from '../../../common/data_model/temples/EditSessionStat
 import { Api } from '../../../common/api/Api.ts';
 import SubmissionPlan from '../../../common/data_model/submission/SubmissionPlan.ts';
 import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
+import GameItemData from '../../../common/data_model/home/GameItemData.ts';
 
 const session = inject(EditSessionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
+const gameId = inject(GameItemData.kInjectionKey)
 
 const active = computed(() => session?.isActive() ?? false)
 const serverAllowed = computed(() => templesData?.value?.editing_allowed ?? false)
@@ -125,6 +127,7 @@ async function runSubmit() {
     }
 
     const payload = {
+      game: gameId?.value ?? '',
       temples,
       files: {
         new: plan.newFiles,
