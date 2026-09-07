@@ -124,14 +124,14 @@ export default class ApiTemplesData {
     if(source == null) {
       throw new Error('未找到要克隆的关卡')
     }
-    const plain: Record<string, unknown> = instanceToPlain(source)
+    const plain: Partial<LevelItemData> = instanceToPlain(source)
     plain.id = newId
     plain._id = newIid
     plain.filename = this.nextCloneFilename(source.filename)
-    plain.__cloned_from = sourceIid
-    plain.__new_level_created_at = Date.now()
     typia.assert<LevelItemData>(plain)
     const clone = plainToInstance(LevelItemData, plain)
+    clone.__cloned_from = sourceIid
+    clone.__new_level_created_at = Date.now()
     temple.levels.push(clone)
     temple.mutation()
     temple.markDirty()

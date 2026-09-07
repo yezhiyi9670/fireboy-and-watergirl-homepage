@@ -120,7 +120,7 @@ export default class TempleItemData {
     if(this.isLevelIidOccupied(iid)) {
       throw new Error('_id ' + iid + ' 已被占用')
     }
-    const raw: Record<string, unknown> = {
+    const raw: Partial<LevelItemData> = {
       id,
       _id: iid,
       x: 0.5,
@@ -131,10 +131,10 @@ export default class TempleItemData {
       filename: this.defaultLevelFilename(id),
       type: 'general',
       initial: false,
-      __new_level_created_at: Date.now(),
     }
     typia.assert<LevelItemData>(raw)
     const level = plainToInstance(LevelItemData, raw)
+    level.__new_level_created_at = Date.now()
     this.levels.push(level)
     this.mutation()
     this.markDirty()
@@ -285,5 +285,13 @@ export default class TempleItemData {
       return na - nb
     })
     return ret
+  }
+
+  /**
+   * Run typia.assert on this type.
+   * Use in environments not capable of Typia transpilation (e.g. Vue SFC)
+   */
+  static typiaAssert(rawData: unknown) {
+    typia.assert<TempleItemData>(rawData)
   }
 }

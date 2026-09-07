@@ -46,8 +46,20 @@ export default class EditSessionState {
     this.reset()
   }
 
-  /** Editing was committed; keep the edited data as the new baseline. */
+  /** 
+   * Editing was committed.
+   * Keep a deep-cloned (to eliminate temporary editing flags) of edited copy as new baseline.
+   */
   commitDone() {
+    const current = this.current
+    if(current != null) {
+      current.temples = Object.fromEntries(
+        Object.entries(current.temples).map(([key, value]) => {
+          return [ key, instanceToInstance(value) ]
+        })
+      )
+      current.mutation()
+    }
     this.reset()
   }
 

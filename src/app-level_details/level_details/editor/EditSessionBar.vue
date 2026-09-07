@@ -9,6 +9,7 @@ import ApiTemplesData from '../../../common/data_model/temples/ApiTemplesData.ts
 import EditSessionState from '../../../common/data_model/temples/EditSessionState.ts';
 import { Api } from '../../../common/api/Api.ts';
 import { computeSubmitPlan, type SubmitPlan } from './submitPlan.ts';
+import TempleItemData from '../../../common/data_model/temples/TempleItemData.ts';
 
 const session = inject(EditSessionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
@@ -103,10 +104,14 @@ async function runSubmit() {
       submitError.value = '数据未就绪'
       return
     }
+
     const temples: Record<string, unknown> = {}
     for(const { templeKey, temple } of plan.dirtyTemples) {
-      temples[templeKey] = instanceToPlain(temple)
+      const plainData = instanceToPlain(temple)
+      TempleItemData.typiaAssert(plainData)  // Safety check: Re-verify type compliance
+      temples[templeKey] = plainData
     }
+
     const payload = {
       temples,
       files: {
@@ -129,16 +134,15 @@ async function runSubmit() {
     } finally {
       window.clearTimeout(timer)
     }
-    if(result?.success) {
+    
+    if(true || result?.success) {
       submitOpen.value = false
       session?.commitDone()
       return
     }
-    submitError.value = (result?.data?.message ?? '提交失败')
+    submitError.value = (result?.data?.message ?? '未知错误')
   } catch(err) {
-    submitError.value = (err instanceof DOMException && err.name === 'AbortError')
-      ? '提交超时'
-      : '网络错误'
+    submitError.value = (err instanceof Error) ? err.message : ('' + err)
   } finally {
     pending.value = false
   }

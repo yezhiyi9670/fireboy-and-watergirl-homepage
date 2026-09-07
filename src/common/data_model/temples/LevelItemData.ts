@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Exclude, Type } from "class-transformer"
 import { persistentField, transientField, type FieldSpecifier, type FieldSpecifiers } from "../field_specifier"
 import LevelMetadata from "./LevelMetadata"
 import { computed, inject, type ComputedRef } from "vue"
@@ -16,11 +16,13 @@ export default class LevelItemData {
   required!: number
 
   @Type(() => LevelMetadata)
-  __metadata?: LevelMetadata
+  __metadata?: LevelMetadata       // Do not exclude, since must hydrate from API data
 
-  __new_level_created_at?: number
-  __cloned_from_iid?: number
-  
+  @Exclude()
+  __new_level_created_at?: number  // Should not appear in submission or survive cloning
+  @Exclude()
+  __cloned_from_iid?: number       // Should not appear in submission or survive cloning
+
   // Level type
   type?: 'general' | 'speed' | 'puzzle' | 'dark'
   
