@@ -1,5 +1,6 @@
 import { Exclude, instanceToPlain, plainToInstance } from "class-transformer"
 import TempleItemData from "./TempleItemData"
+import EditSessionState from "./EditSessionState"
 import { computed, inject, type InjectionKey, type Ref } from "vue"
 import { Api } from "../../api/Api"
 import ApiError from "../ApiError"
@@ -187,8 +188,9 @@ export default class ApiTemplesData {
    */
   static useIsEditingAllowed() {
     const temples = inject(ApiTemplesData.injectionKey)
+    const session = inject(EditSessionState.injectionKey)
     return computed(() => {
-      return temples?.value?.editing_allowed ?? false
+      return (temples?.value?.editing_allowed ?? false) && (session?.isActive() ?? false)
     })
   }
 }

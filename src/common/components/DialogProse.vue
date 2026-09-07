@@ -15,4 +15,8 @@
   margin-top: 0;
   margin-bottom: 0;
 }
+.dialog-prose :deep(ul) {
+  margin: 0 0;
+  line-height: normal;
+}
 </style>

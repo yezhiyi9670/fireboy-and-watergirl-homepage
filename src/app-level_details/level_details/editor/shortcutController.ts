@@ -7,6 +7,7 @@ import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.t
 import LevelSelectionState from '../state/LevelSelectionState.ts'
 import EdgeCreateState from '../state/EdgeCreateState.ts'
 import EditorActionHost from './EditorActionHost.ts'
+import EditSessionState from '../../../common/data_model/temples/EditSessionState.ts'
 import {
   applyGridMove,
   gridMovement,
@@ -56,12 +57,13 @@ export function useShortcutController() {
   const edgeCreate = inject(EdgeCreateState.injectionKey)
   const actionHost = inject(EditorActionHost.injectionKey)
   const templesData = inject<Ref<ApiTemplesData | null>>(ApiTemplesData.injectionKey)
+  const session = inject(EditSessionState.injectionKey)
 
   function handle(evt: KeyboardEvent, ctx: ShortcutContext): boolean {
     if(isTextEntryTarget(evt)) {
       return false
     }
-    if(!isEditingAllowed(templesData?.value)) {
+    if(!isEditingAllowed(templesData?.value) || !session?.isActive()) {
       return false
     }
     const ctrl = evt.ctrlKey || evt.metaKey

@@ -9,6 +9,8 @@ import LevelSelectionState from './state/LevelSelectionState.ts';
 import EdgeCreateState from './state/EdgeCreateState.ts';
 import { deselect } from './state/deselect.ts';
 import EditorActionHost from './editor/EditorActionHost.ts';
+import EditSessionState from '../../common/data_model/temples/EditSessionState.ts';
+import EditSessionBar from './editor/EditSessionBar.vue';
 import type ApiTemplesData from '../../common/data_model/temples/ApiTemplesData.ts';
 import ProgressError from './progress_manip/ProgressError.vue';
 import GameItemData from '../../common/data_model/home/GameItemData.ts';
@@ -44,6 +46,7 @@ provide(LevelSelectionState.injectionKey, selectionState)
 const edgeCreateState = new EdgeCreateState()
 provide(EdgeCreateState.injectionKey, edgeCreateState)
 provide(EditorActionHost.injectionKey, new EditorActionHost())
+provide(EditSessionState.injectionKey, new EditSessionState())
 
 function onContentBlankClick(evt: MouseEvent) {
   const target = evt.target as HTMLElement
@@ -98,6 +101,7 @@ const repairTreatment = computed(() => {
           {{ props.gameName }}
         </FancyButton>
         <GlobalPropertiesButton />
+        <EditSessionBar />
       </div>
       <div
         class="container"

@@ -80,6 +80,7 @@ defineExpose({ openNewLevel })
       <FancyButton
         theme="caution"
         @click.stop="cancelLinking"
+        smaller
       >
         点选另一关卡进行连接
       </FancyButton>
@@ -88,6 +89,7 @@ defineExpose({ openNewLevel })
       <FancyButton
         theme="tertiary"
         @click.stop="openNewLevel"
+        smaller
       >
         新关卡
       </FancyButton>
@@ -114,6 +116,7 @@ defineExpose({ openNewLevel })
   align-items: center;
   user-select: none;
   flex-wrap: wrap;
+  min-height: 1.4em;
 }
 .title-part {
   display: flex;
