@@ -70,7 +70,7 @@ foreach(get_object_vars($temples) as $temple_key => $temple_value) {
             "The temple.json file for `$temple_key` is missing."
         );
     }
-    if(!can_write_file_where__($temple_json_path)) {
+    if(!can_write_file_where($temple_json_path)) {
         return_failure(
             500,
             'temple_json_not_writable', [],
@@ -155,7 +155,7 @@ foreach(array_merge($new_files, $delete_files) as $filename) {
 }
 foreach($new_files as $filename) {
     $level_path = $game_path . '/data/' . $filename;
-    if(!can_write_file_where__($level_path)) {
+    if(!can_write_file_where($level_path)) {
         return_failure(
             500,
             'level_not_writable', [],
@@ -165,7 +165,7 @@ foreach($new_files as $filename) {
 }
 foreach($delete_files as $filename) {
     $level_path = $game_path . '/data/' . $filename;
-    if(!can_delete_file_where__($level_path)) {
+    if(!can_delete_file_where($level_path)) {
         return_failure(
             500,
             'level_not_deletable', [],

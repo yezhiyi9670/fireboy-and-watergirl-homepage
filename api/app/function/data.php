@@ -250,7 +250,7 @@ function cache_touch($cache_name, $cache_mtime) {
  * Whether the file can be created/written at $path: parent dir must exist and be writable,
  * and an existing file must itself be writable.
  */
-function can_write_file_where__(string $path) {
+function can_write_file_where(string $path) {
     $dir = dirname($path);
     if(!is_dir($dir) || !is_writable($dir)) {
         return false;
@@ -264,7 +264,7 @@ function can_write_file_where__(string $path) {
 /**
  * Whether $path can be deleted (i.e., the file is absent or its parent dir is writable).
  */
-function can_delete_file_where__(string $path) {
+function can_delete_file_where(string $path) {
     if(!file_exists($path)) {
         return true;
     }
