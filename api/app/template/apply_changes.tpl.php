@@ -32,7 +32,7 @@ $game_path = BASE_PATH . $game_info->path;
 $lock = apply_lock_exclusive__();
 
 // State check: default level must be readable.
-$default_level_path = $game_path . '/assets/atlasses/default_level.json';
+$default_level_path = $game_path . '/assets/tilemaps/tilesets/default_level.json';
 if(!is_file($default_level_path) || !is_readable($default_level_path)) {
     return_failure(
         500,
