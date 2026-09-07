@@ -24,6 +24,8 @@ const urls = computed(() => {
   return props.game.url?.getUrls()
 })
 
+const sendAnalyticsEvent = window.sendAnalyticsEvent
+
 </script>
 
 <template>
@@ -50,10 +52,15 @@ const urls = computed(() => {
         :href="urls?.play"
         target="_blank"
         theme="primary"
+        @click="sendAnalyticsEvent('play-' + gameKey.toLowerCase())"
       >
         <v-icon name="la-play-solid" /> 玩游戏
       </FancyButton>
-      <FancyButton :href="'#/level_details/' + gameKey + '/map'" theme="ambient">
+      <FancyButton
+        :href="'#/level_details/' + gameKey + '/map'"
+        theme="ambient"
+        @click="sendAnalyticsEvent('details-' + gameKey.toLowerCase())"
+      >
         <v-icon name="la-map" /> 关卡明细
       </FancyButton>
       <CheatOptions
