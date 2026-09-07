@@ -55,8 +55,17 @@ watch(propertiesActive, active => {
 function restoreLastFocus() {
   const target = lastFocus.value
   lastFocus.value = null
-  if(bodyEl?.value?.contains(document.activeElement) && target != null && target.isConnected) {
+  if(
+    bodyEl?.value?.contains(document.activeElement) &&
+    target != null &&
+    target.isConnected
+  ) {
     target.focus({ preventScroll: true })
+    setTimeout(() => {
+      if(document.activeElement != target) {
+        target.focus({ preventScroll: true })
+      }
+    }, 1)
   }
 }
 function dismissProperties() {
