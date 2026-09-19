@@ -3,7 +3,9 @@ import { computed, inject } from 'vue';
 import ApiTemplesData from '../../../../common/data_model/temples/ApiTemplesData.ts';
 import LsGameProgressData from '../../../../common/data_model/progress/LsGameProgressData.ts';
 import LevelItemData from '../../../../common/data_model/temples/LevelItemData.ts';
+import GameItemData from '../../../../common/data_model/home/GameItemData.ts';
 
+const gameData = inject(GameItemData.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
 const progressData = inject(LsGameProgressData.injectionKey)
 
@@ -60,7 +62,7 @@ const globalStats = computed(() => {
 
 <template>
   <template v-if="globalStats != null">
-    <h3 class="props-section-title">全局统计</h3>
+    <h3 class="props-section-title">{{ gameData?.name ?? '全局统计' }}</h3>
     <dl class="props-stats">
       <div class="props-stat">
         <dt>圣殿</dt>
