@@ -3,10 +3,13 @@ import { provide } from 'vue';
 import ErrorScreen from './common/components/ErrorScreen.vue';
 import { useLoadData } from './common/hooks/DataLoading';
 import ApiHomeData from './common/data_model/home/ApiHomeData.ts';
+import { provideHistoryTrapContext } from './common/hooks/history_trap.ts';
 
 const [homeLastState, homeLastValue, homeLastError, homeReload] = useLoadData(ApiHomeData.loader, true)
 
 provide(ApiHomeData.injectionKey, homeLastValue)
+
+provideHistoryTrapContext()
 </script>
 
 <template>

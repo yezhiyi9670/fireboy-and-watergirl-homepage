@@ -15,6 +15,7 @@ import type TempleItemData from '../../../common/data_model/temples/TempleItemDa
 import type LevelItemData from '../../../common/data_model/temples/LevelItemData.ts';
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts';
 import type LevelProgress from '../../../common/data_model/progress/LevelProgress.ts';
+import { useHistoryTrap } from '../../../common/hooks/history_trap.ts';
 
 const selectionState = inject(LevelSelectionState.injectionKey)
 const templesData = inject(ApiTemplesData.injectionKey)
@@ -96,6 +97,10 @@ function onEsc(evt: KeyboardEvent) {
   }
   dismissProperties()
 }
+useHistoryTrap(trapActive, _evt => {
+  dismissProperties()
+  return false
+}, { idDescriptor: 'PropertiesSidebar' })
 
 const hasSelection = computed(() => {
   return selectionState?.selection.value != null

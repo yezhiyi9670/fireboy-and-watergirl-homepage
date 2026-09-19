@@ -3,12 +3,14 @@ import { useRoute, useRouter } from 'vue-router'
 import LevelSelectionState, { type LocateTarget, type LocateView } from '../state/LevelSelectionState.ts'
 import TempleExpandState from '../state/TempleExpandState.ts'
 import type EdgeItemData from '../../../common/data_model/temples/EdgeItemData.ts'
+import { useWithHistoryTrapStashed } from '../../../common/hooks/history_trap.ts'
 
 export function useLocateView() {
   const selectionState = inject(LevelSelectionState.injectionKey)
   const expandState = inject(TempleExpandState.injectionKey)
   const route = useRoute()
   const router = useRouter()
+  const withTrapStashed = useWithHistoryTrapStashed()
 
   const gamePath = '/level_details/' + route.params.game
 
@@ -24,7 +26,7 @@ export function useLocateView() {
     expandTemple(target.templeKey)
     const path = gamePath + '/' + target.view
     if(route.path !== path) {
-      router.replace(path).then(() => requestLocate(target))
+      withTrapStashed(() => router.replace(path)).then(() => requestLocate(target))
     } else {
       requestLocate(target)
     }
@@ -65,7 +67,7 @@ export function useLocateView() {
     const target: LocateTarget = { view: 'map', kind: 'edge', templeKey, edgeUniqueId: edge.getUniqueId() }
     const path = gamePath + '/map'
     if(route.path !== path) {
-      router.replace(path).then(() => requestLocate(target))
+      withTrapStashed(() => router.replace(path)).then(() => requestLocate(target))
     } else {
       requestLocate(target)
     }

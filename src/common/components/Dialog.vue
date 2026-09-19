@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toRef } from 'vue';
+import { useHistoryTrap } from '../hooks/history_trap.ts';
 import FancyButton from './FancyButton.vue';
 import { FocusTrap } from 'focus-trap-vue';
 
@@ -30,6 +32,11 @@ function tryDismiss() {
   }
   emitClose(false)
 }
+
+useHistoryTrap(toRef(props, 'open'), _evt => {
+  tryDismiss()
+  return false
+}, { idDescriptor: 'Dialog' })
 
 </script>
 
