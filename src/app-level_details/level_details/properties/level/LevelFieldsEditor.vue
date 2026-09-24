@@ -184,7 +184,7 @@ function submitCreate() {
 }
 .add-field .FancyInput {
   flex: 1 1 auto;
-  min-width: 0;
+  width: 0;
 }
 .add-error {
   margin: 0;
