@@ -20,5 +20,5 @@ export function TransformNPDict<T>(classType: new () => T) {
       result[key] = plainToInstance(classType, rawValue);
     }
     return result;
-  });
+  }, { toClassOnly: true });
 }
