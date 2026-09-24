@@ -88,6 +88,16 @@ foreach(get_object_vars($temples) as $temple_key => $temple_value) {
     $temple_json_paths[$temple_key] = $temple_json_path;
 }
 
+// --- strip derived metadata -------------------------------------------------
+
+foreach(get_object_vars($temples) as $temple_key => &$v_temple) {
+    foreach($v_temple->levels as &$v_level) {
+        if(isset($v_level->__metadata)) {
+            unset($v_level->__metadata);
+        }
+    }
+}
+
 // --- compute file add/remove lists ------------------------------------------
 
 $before_files = [];
