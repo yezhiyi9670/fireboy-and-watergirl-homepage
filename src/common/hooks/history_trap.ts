@@ -131,7 +131,14 @@ class HistoryTrapContext {
         ...history.state,
         ...{ __history_pre_trap: this.contextId } satisfies PreTrapStateRecord
       }, '')
-      history.pushState({ __history_trap: this.contextId } satisfies TrapStateRecord, '')
+      history.pushState({
+        // Add a seemingly valid Vue router frame here, so the state does not get
+        // overwritten on page reload.
+        current: history.state.current,
+        replaced: true,
+        // And our trap frame record
+        ...{ __history_trap: this.contextId } satisfies TrapStateRecord
+      }, '')
     }
   }
   private cancelScheduledActuateUpdate() {
@@ -275,6 +282,9 @@ class HistoryTrapContext {
       window.removeEventListener('popstate', popstateHandler)
     }
   }
+  postLoadSetup() {
+    this.actuateUpdate()
+  }
   private async stash() {
     const current = this.isOnMyTrapFrame()
     if(!current) {
@@ -296,10 +306,15 @@ class HistoryTrapContext {
 }
 
 export function provideHistoryTrapContext() {
+  const parentContext = inject(HistoryTrapContext.injectionKey, null)
   const router = useRouter()
   const context = new HistoryTrapContext(router)
   provide(HistoryTrapContext.injectionKey, context)
   context.init()
+  if(parentContext == null) {
+    // Do post-load setup once
+    context.postLoadSetup()
+  }
   onUnmounted(() => {
     context.dispose()
   })
@@ -309,7 +324,8 @@ export function provideHistoryTrapContext() {
  * Provides context required for history trap.
  * 
  * Ideally, an application should have only one persistent history trap context,
- * provided at top level; The teardown of the context will currently cause
+ * provided at top level; Many things won't work perfectly with multiple trap
+ * contexts, and the teardown of contexts will currently cause
  * memory leak, due to `router` not supporting removing event handlers.
  * 
  * Under such context, a history replaceState (or router.replace) MUST be called
