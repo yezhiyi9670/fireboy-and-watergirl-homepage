@@ -7,7 +7,7 @@
       <slot />
     </article>
   </div>
-  <div v-html="'<style>#app {height: unset}</style>'" />
+  <div v-html="'<style>body, #app {height: unset}</style>'" />
 </template>
 
 <style scoped lang="less">

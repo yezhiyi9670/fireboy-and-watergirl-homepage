@@ -1,8 +1,8 @@
 :root {
-  overflow: hidden;
+  overflow: auto;
 }
 body {
-  overflow: auto;
+  overflow: hidden;
 }
 :root, body, #app {
   margin: 0;
